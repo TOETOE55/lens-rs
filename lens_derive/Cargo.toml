@@ -1,11 +1,14 @@
 [package]
-name = "lens"
+name = "lens_derive"
 version = "0.1.0"
 authors = ["Xyzt Toe <584605539@qq.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
+[lib]
+proc-macro = true
 
 [dependencies]
-lens_derive = { path = "lens_derive/"}
+syn = "1.0"
+quote = "1.0"
+proc-macro2 = "1.0"
