@@ -1,5 +1,3 @@
-
-
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::*;
@@ -95,7 +93,6 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     };
     TokenStream::from(reviews)
 }
-
 
 #[proc_macro_derive(Prism)]
 pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -198,9 +195,6 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     TokenStream::from(prisms)
 }
-
-
-
 
 #[proc_macro_derive(Lens)]
 pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
