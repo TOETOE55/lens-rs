@@ -3,23 +3,22 @@ use lens::*;
 use lens_derive::*;
 
 #[derive(Optic, Review, Prism, Debug)]
-enum AnEnum {
-    A(Foo, i32),
-    B(String),
-}
-
-
-#[derive(Optic, Lens, Debug)]
-struct AStruct {
-    a: i32,
-    b: String,
+enum AnEnum<T> {
+    A(T, i32),
+    #[optic] B(T),
 }
 
 #[derive(Optic, Lens, Debug)]
-struct Foo(i32, i32);
+struct Foo {
+    #[optic] a: i32,
+    #[optic] b: i32,
+}
+
 
 fn main() {
-    let x = optics!(_Some._A).review((Foo(3,1), 2));
-
-    println!("{:?}", optics!(_Some._A._0).pm(x));
+    let x = optics!(_Some._B).review(Foo {
+        a: 3,
+        b: 2,
+    });
+    println!("{:?}", optics!(_Some._B._b).pm(x));
 }

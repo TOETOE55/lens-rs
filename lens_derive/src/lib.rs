@@ -4,14 +4,21 @@ use quote::*;
 use syn::punctuated::Punctuated;
 use syn::Token;
 use syn::{parse_macro_input, Data, DeriveInput};
+use proc_macro2::Span;
 
-#[proc_macro_derive(Optic)]
+#[proc_macro_derive(Optic, attributes(optic))]
 pub fn derive_optic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
     let optics = match derive_input.data {
         Data::Enum(e) => e
             .variants
             .iter()
+            .filter(|var| {
+                var
+                    .attrs
+                    .iter()
+                    .any(|attr| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+            })
             .flat_map(|x| {
                 let optic_name = format_ident!("_{}", x.ident);
                 quote! {
@@ -23,6 +30,12 @@ pub fn derive_optic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         Data::Struct(st) => st
             .fields
             .iter()
+            .filter(|var| {
+                var
+                    .attrs
+                    .iter()
+                    .any(|attr| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+            })
             .flat_map(|x| {
                 let optic_name = format_ident!("_{}", x.ident.as_ref()?);
                 Some(quote! {
@@ -36,7 +49,7 @@ pub fn derive_optic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     TokenStream::from(optics)
 }
 
-#[proc_macro_derive(Review)]
+#[proc_macro_derive(Review, attributes(optic))]
 pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
 
@@ -44,6 +57,12 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
         Data::Enum(e) => e
             .variants
             .iter()
+            .filter(|var| {
+                var
+                    .attrs
+                    .iter()
+                    .any(|attr| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+            })
             .flat_map(|var| {
                 let data = derive_input.clone();
                 let data_name = data.ident;
@@ -57,33 +76,35 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 
                 let var_name = &var.ident;
                 let optic_name = format_ident!("_{}", var.ident);
-                let tys = var
+                let ty = var
                     .fields
                     .iter()
+                    .take(1)
                     .map(|field| field.ty.clone())
                     .collect::<Punctuated<_, Token![,]>>();
 
-                let fields = var
-                    .fields
-                    .iter()
-                    .enumerate()
-                    .flat_map(|(i, _)| {
-                        let i = syn::Index::from(i);
-                        quote! { #i }
-                    })
-                    .collect::<Vec<_>>();
+                // let fields = var
+                //     .fields
+                //     .iter()
+                //     .enumerate()
+                //     .flat_map(|(i, _)| {
+                //         let i = syn::Index::from(i);
+                //         quote! { #i }
+                //     })
+                //     .collect::<Vec<_>>();
 
                 quote! {
                     impl<Rv, #data_gen_param> lens::Review<#data_name #data_gen> for #optic_name<Rv>
                     where
-                        Rv: lens::Review<(#tys,)>,
+                        Rv: lens::Review<#ty>,
                         #data_gen_where
                     {
                         type From = Rv::From;
 
                         fn review(&self, from: Self::From) -> #data_name #data_gen {
-                            let tuple = self.0.review(from);
-                            <#data_name>::#var_name(#(tuple . #fields,)*)
+                            // let tuple = self.0.review(from);
+                            // <#data_name #data_gen>::#var_name(#(tuple . #fields,)*)
+                            <#data_name #data_gen>::#var_name(self.0.review(from))
                         }
                     }
                 }
@@ -94,7 +115,7 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
     TokenStream::from(reviews)
 }
 
-#[proc_macro_derive(Prism)]
+#[proc_macro_derive(Prism, attributes(optic))]
 pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
 
@@ -102,6 +123,12 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         Data::Enum(e) => e
             .variants
             .iter()
+            .filter(|var| {
+                var
+                    .attrs
+                    .iter()
+                    .any(|attr| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+            })
             .flat_map(|var| {
                 let data = derive_input.clone();
                 let data_name = data.ident;
@@ -196,7 +223,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     TokenStream::from(prisms)
 }
 
-#[proc_macro_derive(Lens)]
+#[proc_macro_derive(Lens, attributes(optic))]
 pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
 
@@ -204,6 +231,12 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         Data::Struct(syn::DataStruct { fields: syn::Fields::Named(fs), .. }) => fs
             .named
             .iter()
+            .filter(|var| {
+                var
+                    .attrs
+                    .iter()
+                    .any(|attr| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+            })
             .flat_map(|f| {
                 let data = derive_input.clone();
                 let data_name = data.ident;
