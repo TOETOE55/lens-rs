@@ -1,33 +1,36 @@
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct __;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _Ok<Optic>(pub Optic);
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _Err<Optic>(pub Optic);
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _Some<Optic>(pub Optic);
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _None;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _0<Optic>(pub Optic);
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _1<Optic>(pub Optic);
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _2<Optic>(pub Optic);
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _3<Optic>(pub Optic);
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _4<Optic>(pub Optic);
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _5<Optic>(pub Optic);
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _6<Optic>(pub Optic);
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Mapped<Optic>(pub Optic);
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _Box<Optic>(pub Optic);
 
 //impls
 mod impl__ {
@@ -407,4 +410,77 @@ mod impl_iters {
     impl_iter!(<T> Vec<T>);
     impl_iter!(<T> VecDeque<T>);
     impl_iter!(<T> LinkedList<T>);
+}
+
+
+mod impl_box {
+    use crate::*;
+
+    impl<Rv, T> Review<Box<T>> for _Box<Rv>
+    where
+        Rv: Review<T>,
+    {
+        type From = Rv::From;
+
+        fn review(&self, from: Self::From) -> Box<T> {
+            Box::new(self.0.review(from))
+        }
+    }
+
+    impl<Tr, T> Traversal<Box<T>> for _Box<Tr>
+    where
+        Tr: Traversal<T>,
+    {
+        type To = Tr::To;
+
+        fn traverse(&self, source: Box<T>) -> Vec<Self::To> {
+            self.0.traverse(*source)
+        }
+
+        fn traverse_ref<'a>(&self, source: &'a Box<T>) -> Vec<&'a Self::To> {
+            self.0.traverse_ref(source)
+        }
+
+        fn traverse_mut<'a>(&self, source: &'a mut Box<T>) -> Vec<&'a mut Self::To> {
+            self.0.traverse_mut(source)
+        }
+    }
+
+    impl<Pm, T> Prism<Box<T>> for _Box<Pm>
+    where
+        Pm: Prism<T>,
+    {
+        type To = Pm::To;
+
+        fn pm(&self, source: Box<T>) -> Option<Self::To> {
+            self.0.pm(*source)
+        }
+
+        fn pm_ref<'a>(&self, source: &'a Box<T>) -> Option<&'a Self::To> {
+            self.0.pm_ref(source)
+        }
+
+        fn pm_mut<'a>(&self, source: &'a mut Box<T>) -> Option<&'a mut Self::To> {
+            self.0.pm_mut(source)
+        }
+    }
+
+    impl<Ls, T> Lens<Box<T>> for _Box<Ls>
+    where
+        Ls: Lens<T>
+    {
+        type To = Ls::To;
+
+        fn view(&self, source: Box<T>) -> Self::To {
+            self.0.view(*source)
+        }
+
+        fn view_ref<'a>(&self, source: &'a Box<T>) -> &'a Self::To {
+            self.0.view_ref(source)
+        }
+
+        fn view_mut<'a>(&self, source: &'a mut Box<T>) -> &'a mut Self::To {
+            self.0.view_mut(source)
+        }
+    }
 }
