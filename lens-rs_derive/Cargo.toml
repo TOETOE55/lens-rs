@@ -7,7 +7,7 @@ license = "MIT/Apache-2.0"
 readme = "readme.md"
 categories = [ "rust-patterns" ]
 keywords = [ "pattern", "tarevsesing", "lens"]
-repository = "https://github.com/TOETOE55/lens-rs/lens-rs_derive"
+repository = "https://github.com/TOETOE55/lens-rs"
 description = "macro to derive lens for data type"
 
 [lib]

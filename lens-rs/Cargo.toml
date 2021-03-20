@@ -7,7 +7,7 @@ license = "MIT/Apache-2.0"
 readme = "readme.md"
 categories = [ "rust-patterns" ]
 keywords = [ "pattern", "tarevsesing", "lens"]
-repository = "https://github.com/TOETOE55/lens-rs/lens-rs"
+repository = "https://github.com/TOETOE55/lens-rs"
 description = "lens implemented in rust"
 
 
