@@ -12,7 +12,3 @@ description = "lens implemented in rust"
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-
-[dependencies]
-lens-rs_derive = "0.0.5"

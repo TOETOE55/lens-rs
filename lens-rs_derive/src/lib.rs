@@ -22,7 +22,8 @@ pub fn derive_optic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
             .flat_map(|x| {
                 let optic_name = format_ident!("_{}", x.ident);
                 quote! {
-                    #[derive(Copy, Clone)]
+                    #[cfg(#optic_name)]
+                    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
                     pub struct #optic_name<Optic>(pub Optic);
                 }
             })
@@ -40,6 +41,7 @@ pub fn derive_optic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 let optic_name = format_ident!("_{}", x.ident.as_ref()?);
                 Some(quote! {
                     #[derive(Copy, Clone)]
+                    #[cfg(#optic_name)]
                     pub struct #optic_name<Optic>(pub Optic);
                 })
             })
