@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types)]
-use lens::*;
-use lens_derive::*;
+use lens_rs::*;
+use lens_rs_derive::*;
 
 #[derive(Optic, Review, Prism, Debug)]
 enum AnEnum<T> {
