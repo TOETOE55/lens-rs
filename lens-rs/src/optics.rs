@@ -25,6 +25,8 @@ pub struct _4<Optic>(pub Optic);
 pub struct _5<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _6<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct Both<Optic>(pub Optic);
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Mapped<Optic>(pub Optic);
@@ -369,6 +371,103 @@ mod impl_tuples {
     impl_tuple!({A B C D E F G}, 4, _4, E);
     impl_tuple!({A B C D E F G}, 5, _5, F);
     impl_tuple!({A B C D E F G}, 6, _6, G);
+
+    impl<Rv, A> Review<(A,)> for _0<Rv>
+    where
+        Rv: Review<A>
+    {
+        type From = Rv::From;
+
+        fn review(&self, from: Self::From) -> (A,) {
+            (self.0.review(from),)
+        }
+    }
+
+    macro_rules! impl_both {
+        (<$param:ident> $tuple:ty, $($fields:tt),*) => {
+            impl<Tr, $param> Traversal<$tuple> for Both<Tr>
+            where
+                Tr: Traversal<$param>
+            {
+                type To = Tr::To;
+
+                fn traverse(&self, source: $tuple) -> Vec<Self::To> {
+                    let mut vec = vec![];
+                    $(vec.extend(self.0.traverse(source.$fields));)*
+                    vec
+                }
+
+                fn traverse_ref<'a>(&self, source: &'a $tuple) -> Vec<&'a Self::To> {
+                    let mut vec = vec![];
+                    $(vec.extend(self.0.traverse_ref(&source.$fields));)*
+                    vec
+                }
+
+                fn traverse_mut<'a>(&self, source: &'a mut $tuple) -> Vec<&'a mut Self::To> {
+                    let mut vec = vec![];
+                    $(vec.extend(self.0.traverse_mut(&mut source.$fields));)*
+                    vec
+                }
+            }
+        }
+    }
+
+    impl_both!(<A> (A,), 0);
+    impl_both!(<A> (A, A), 0, 1);
+    impl_both!(<A> (A, A, A), 0, 1, 2);
+    impl_both!(<A> (A, A, A, A), 0, 1, 2, 3);
+    impl_both!(<A> (A, A, A, A, A), 0, 1, 2, 3, 4);
+    impl_both!(<A> (A, A, A, A, A, A), 0, 1, 2, 3, 4, 5);
+    impl_both!(<A> (A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6);
+
+    impl<Pm, A> Prism<(A,)> for Both<Pm>
+    where
+        Pm: Prism<A>,
+    {
+        type To = Pm::To;
+
+        fn pm(&self, source: (A,)) -> Option<Self::To> {
+            self.0.pm(source.0)
+        }
+
+        fn pm_ref<'a>(&self, source: &'a (A,)) -> Option<&'a Self::To> {
+            self.0.pm_ref(&source.0)
+        }
+
+        fn pm_mut<'a>(&self, source: &'a mut (A,)) -> Option<&'a mut Self::To> {
+            self.0.pm_mut(&mut source.0)
+        }
+    }
+
+    impl<Ls, A> Lens<(A,)> for Both<Ls>
+    where
+        Ls: Lens<A>
+    {
+        type To = Ls::To;
+
+        fn view(&self, source: (A,)) -> Self::To {
+            self.0.view(source.0)
+        }
+
+        fn view_ref<'a>(&self, source: &'a (A,)) -> &'a Self::To {
+            self.0.view_ref(&source.0)
+        }
+
+        fn view_mut<'a>(&self, source: &'a mut (A,)) -> &'a mut Self::To {
+            self.0.view_mut(&mut source.0)
+        }
+    }
+
+    impl<Rv, A> Review<(A,)> for Both<Rv>
+    where
+        Rv: Review<A>
+    {
+        type From = Rv::From;
+
+        fn review(&self, from: Self::From) -> (A,) {
+            (self.0.review(from),)
+        }
+    }
 }
 
 mod impl_iters {

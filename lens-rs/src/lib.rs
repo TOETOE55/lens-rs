@@ -3,7 +3,7 @@ pub mod traits;
 
 pub use traits::{Lens, Prism, Review, Traversal};
 
-pub use optics::{Mapped, _Err, _None, _Ok, _Some, _0, _1, _2, _3, _4, _5, _6, __, _Box};
+pub use optics::{Mapped, _Err, _None, _Ok, _Some, _0, _1, _2, _3, _4, _5, _6, Both, __, _Box};
 
 #[macro_export]
 macro_rules! optics {
@@ -13,6 +13,16 @@ macro_rules! optics {
         $optic(optics!($($optics)*))
     }
 }
+
+#[macro_export]
+macro_rules! field {
+    [] => { __ };
+    [$optic:ident] => { $optic<__> };
+    [$optic:ident . $($optics:tt)*] => {
+        $optic<field![$($optics)*]>
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::*;
