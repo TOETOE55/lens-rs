@@ -15,4 +15,4 @@ description = "lens implemented in rust"
 
 
 [dependencies]
-lens-rs_derive = { path = "../lens-rs_derive/"}
+lens-rs_derive = "0.0.5"
