@@ -1,0 +1,18 @@
+[package]
+name = "lens-rs"
+version = "0.0.8"
+authors = ["Xyzt Toe <584605539@qq.com>"]
+edition = "2018"
+license = "MIT/Apache-2.0"
+readme = "readme.md"
+categories = [ "rust-patterns" ]
+keywords = [ "pattern matching", "tarevsesing", "lens"]
+repository = "https://github.com/TOETOE55/lens-rs/lens-rs"
+description = "lens implemented in rust"
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+
+[dependencies]
+lens-rs_derive = { path = "../lens-rs_derive/"}

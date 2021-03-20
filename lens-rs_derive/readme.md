@@ -1,4 +1,4 @@
-# lens-rs_derive
+# Overview
 deriving lens for custom data types.
 
 ## Example
