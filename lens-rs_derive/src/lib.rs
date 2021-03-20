@@ -1,10 +1,27 @@
 extern crate proc_macro;
+#[macro_use]
+extern crate lazy_static;
 use proc_macro::TokenStream;
 use quote::*;
 use syn::punctuated::Punctuated;
 use syn::Token;
 use syn::{parse_macro_input, Data, DeriveInput};
 use proc_macro2::Span;
+
+use std::collections::HashSet;
+use std::sync::Mutex;
+
+lazy_static! {
+    static ref OPTIC_NAMES: Mutex<HashSet<String>> = {
+        let mut m = HashSet::new();
+        m.insert("_Ok".to_string());
+        m.insert("_Err".to_string());
+        m.insert("_Some".to_string());
+        m.insert("_None".to_string());
+        Mutex::new(m)
+    };
+}
+
 
 #[proc_macro_derive(Optic, attributes(optic))]
 pub fn derive_optic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -21,8 +38,10 @@ pub fn derive_optic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
             })
             .flat_map(|x| {
                 let optic_name = format_ident!("_{}", x.ident);
+                let mut table = OPTIC_NAMES.lock().unwrap();
+                if table.contains(&optic_name.clone().to_string()) { return quote! {}; }
+                table.insert(optic_name.clone().to_string());
                 quote! {
-                    #[cfg(#optic_name)]
                     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
                     pub struct #optic_name<Optic>(pub Optic);
                 }
@@ -39,9 +58,12 @@ pub fn derive_optic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
             })
             .flat_map(|x| {
                 let optic_name = format_ident!("_{}", x.ident.as_ref()?);
+                let mut table = OPTIC_NAMES.lock().unwrap();
+                if table.contains(&optic_name.clone().to_string()) { return None; }
+                table.insert(optic_name.clone().to_string());
                 Some(quote! {
                     #[derive(Copy, Clone)]
-                    #[cfg(#optic_name)]
+                    #[allow(non_camel_case_types)]
                     pub struct #optic_name<Optic>(pub Optic);
                 })
             })
