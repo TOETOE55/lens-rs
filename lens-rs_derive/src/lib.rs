@@ -216,7 +216,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     {
                         type To = Tr::To;
 
-                        fn traverse_ref<'a>(&self, source: &'a #data_name #data_gen) -> Vec<&'a Self::To> {
+                        fn traverse_ref<'__a98shdai>(&self, source: &'__a98shdai #data_name #data_gen) -> Vec<&'__a98shdai Self::To> {
                             use #data_name::*;
                             match source {
                                 #var_name(x) => self.0.traverse_ref(x),
@@ -231,7 +231,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         #data_gen_where
                     {
                         type To = Pm::To;
-                        fn pm_ref<'a>(&self, source: &'a #data_name #data_gen) -> Option<&'a Self::To> {
+                        fn pm_ref<'__a98shdai>(&self, source: &'__a98shdai #data_name #data_gen) -> Option<&'__a98shdai Self::To> {
                             use #data_name::*;
                             match source {
                                 #var_name(x) => self.0.pm_ref(x),
@@ -247,7 +247,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         Tr: lens_rs::TraversalMut<#ty>,
                         #data_gen_where
                     {
-                        fn traverse_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Vec<&'a mut Self::To> {
+                        fn traverse_mut<'__a98shdai>(&self, source: &'__a98shdai mut #data_name #data_gen) -> Vec<&'__a98shdai mut Self::To> {
                             use #data_name::*;
                             match source {
                                 #var_name(x) => self.0.traverse_mut(x),
@@ -261,7 +261,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         Pm: lens_rs::PrismMut<#ty>,
                         #data_gen_where
                     {
-                        fn pm_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Option<&'a mut Self::To> {
+                        fn pm_mut<'__a98shdai>(&self, source: &'__a98shdai mut #data_name #data_gen) -> Option<&'__a98shdai mut Self::To> {
                             use #data_name::*;
                             match source {
                                 #var_name(x) => self.0.pm_mut(x),
@@ -359,7 +359,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     {
                         type To = Tr::To;
 
-                        fn traverse_ref<'a>(&self, source: &'a #data_name #data_gen) -> Vec<&'a Self::To> {
+                        fn traverse_ref<'__a98shdai>(&self, source: &'__a98shdai #data_name #data_gen) -> Vec<&'__a98shdai Self::To> {
                             self.0.traverse_ref(&source.#field_name)
                         }
                     }
@@ -371,7 +371,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     {
                         type To = Pm::To;
 
-                        fn pm_ref<'a>(&self, source: &'a #data_name #data_gen) -> Option<&'a Self::To> {
+                        fn pm_ref<'__a98shdai>(&self, source: &'__a98shdai #data_name #data_gen) -> Option<&'__a98shdai Self::To> {
                             self.0.pm_ref(&source.#field_name)
                         }
                     }
@@ -383,7 +383,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     {
                         type To = Ls::To;
 
-                        fn view_ref<'a>(&self, source: &'a #data_name #data_gen) -> &'a Self::To {
+                        fn view_ref<'__a98shdai>(&self, source: &'__a98shdai #data_name #data_gen) -> &'__a98shdai Self::To {
                             self.0.view_ref(&source.#field_name)
                         }
                     }
@@ -395,7 +395,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         Tr: lens_rs::Traversal<#to>,
                         #data_gen_where
                     {
-                        fn traverse_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Vec<&'a mut Self::To> {
+                        fn traverse_mut<'__a98shdai>(&self, source: &'__a98shdai mut #data_name #data_gen) -> Vec<&'__a98shdai mut Self::To> {
                             self.0.traverse_mut(&mut source.#field_name)
                         }
                     }
@@ -405,7 +405,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         Pm: lens_rs::PrismMut<#to>,
                         #data_gen_where
                     {
-                        fn pm_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Option<&'a mut Self::To> {
+                        fn pm_mut<'__a98shdai>(&self, source: &'__a98shdai mut #data_name #data_gen) -> Option<&'__a98shdai mut Self::To> {
                             self.0.pm_mut(&mut source.#field_name)
                         }
                     }
@@ -415,7 +415,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         Ls: LensMut<#to>,
                         #data_gen_where
                     {
-                        fn view_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> &'a mut Self::To {
+                        fn view_mut<'__a98shdai>(&self, source: &'__a98shdai mut #data_name #data_gen) -> &'__a98shdai mut Self::To {
                             self.0.view_mut(&mut source.#field_name)
                         }
                     }
@@ -502,7 +502,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     {
                         type To = Tr::To;
 
-                        fn traverse_ref<'a>(&self, source: &'a #data_name #data_gen) -> Vec<&'a Self::To> {
+                        fn traverse_ref<'__a98shdai>(&self, source: &'__a98shdai #data_name #data_gen) -> Vec<&'__a98shdai Self::To> {
                             self.0.traverse_ref(&source.#field_name)
                         }
                     }
@@ -514,7 +514,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     {
                         type To = Pm::To;
 
-                        fn pm_ref<'a>(&self, source: &'a #data_name #data_gen) -> Option<&'a Self::To> {
+                        fn pm_ref<'__a98shdai>(&self, source: &'__a98shdai #data_name #data_gen) -> Option<&'__a98shdai Self::To> {
                             self.0.pm_ref(&source.#field_name)
                         }
                     }
@@ -526,7 +526,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     {
                         type To = Ls::To;
 
-                        fn view_ref<'a>(&self, source: &'a #data_name #data_gen) -> &'a Self::To {
+                        fn view_ref<'__a98shdai>(&self, source: &'__a98shdai #data_name #data_gen) -> &'__a98shdai Self::To {
                             self.0.view_ref(&source.#field_name)
                         }
                     }
@@ -548,7 +548,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         Pm: lens_rs::PrismMut<#to>,
                         #data_gen_where
                     {
-                        fn pm_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Option<&'a mut Self::To> {
+                        fn pm_mut<'__a98shdai>(&self, source: &'__a98shdai mut #data_name #data_gen) -> Option<&'__a98shdai mut Self::To> {
                             self.0.pm_mut(&mut source.#field_name)
                         }
                     }
@@ -558,7 +558,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         Ls: LensMut<#to>,
                         #data_gen_where
                     {
-                        fn view_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> &'a mut Self::To {
+                        fn view_mut<'__a98shdai>(&self, source: &'__a98shdai mut #data_name #data_gen) -> &'__a98shdai mut Self::To {
                             self.0.view_mut(&mut source.#field_name)
                         }
                     }
