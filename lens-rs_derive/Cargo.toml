@@ -1,6 +1,6 @@
 [package]
 name = "lens-rs_derive"
-version = "0.0.88"
+version = "0.0.9"
 authors = ["Xyzt Toe <584605539@qq.com>"]
 edition = "2018"
 license = "MIT/Apache-2.0"
@@ -16,5 +16,5 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"
-syn = "1.0"
+syn = { version = "1.0", features = ["extra-traits","full","visit"] }
 lazy_static = "1.4.0"

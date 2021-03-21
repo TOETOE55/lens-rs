@@ -10,5 +10,6 @@ keywords = [ "pattern", "tarevsesing", "lens"]
 repository = "https://github.com/TOETOE55/lens-rs"
 description = "lens implemented in rust"
 
-
+[build-dependencies]
+inwelling = "0.3"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
