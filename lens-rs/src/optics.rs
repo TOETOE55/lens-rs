@@ -32,15 +32,20 @@ pub struct Both<Optic>(pub Optic);
 pub struct Mapped<Optic>(pub Optic);
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct _Box<Optic>(pub Optic);
+#[allow(non_camel_case_types)]
+pub struct _box<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct _Ref<Optic>(pub Optic);
+#[allow(non_camel_case_types)]
+pub struct _ref<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct _Mut<Optic>(pub Optic);
+#[allow(non_camel_case_types)]
+pub struct _mut<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct _Rc<Optic>(pub Optic);
+#[allow(non_camel_case_types)]
+pub struct _rc<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct _Arc<Optic>(pub Optic);
+#[allow(non_camel_case_types)]
+pub struct _arc<Optic>(pub Optic);
 
 //impls
 mod impl__ {
@@ -65,14 +70,12 @@ mod impl__ {
     }
 
     impl<T> TraversalMut<T> for __ {
-        type To = T;
         fn traverse_mut<'a>(&self, source: &'a mut T) -> Vec<&'a mut Self::To> {
             vec![source]
         }
     }
 
     impl<T> Traversal<T> for __ {
-        type To = T;
         fn traverse(&self, source: T) -> Vec<Self::To> {
             vec![source]
         }
@@ -86,14 +89,12 @@ mod impl__ {
     }
 
     impl<T> PrismMut<T> for __ {
-        type To = T;
         fn pm_mut<'a>(&self, source: &'a mut T) -> Option<&'a mut Self::To> {
             Some(source)
         }
     }
 
     impl<T> Prism<T> for __ {
-        type To = T;
         fn pm(&self, source: T) -> Option<Self::To> {
             Some(source)
         }
@@ -107,14 +108,12 @@ mod impl__ {
     }
 
     impl<T> LensMut<T> for __ {
-        type To = T;
         fn view_mut<'a>(&self, source: &'a mut T) -> &'a mut Self::To {
             source
         }
     }
 
     impl<T> Lens<T> for __ {
-        type To = T;
         fn view(&self, source: T) -> Self::To {
             source
         }
@@ -155,7 +154,6 @@ mod impl_result {
     where
         Tr: TraversalMut<T>,
     {
-        type To = Tr::To;
         fn traverse_mut<'a>(&self, source: &'a mut Result<T, E>) -> Vec<&'a mut Self::To> {
             source
                 .into_iter()
@@ -168,8 +166,6 @@ mod impl_result {
     where
         Tr: Traversal<E>,
     {
-        type To = Tr::To;
-
         fn traverse(&self, source: Result<T, E>) -> Vec<Self::To> {
             source
                 .err()
@@ -198,7 +194,6 @@ mod impl_result {
     where
         Tr: TraversalMut<E>,
     {
-        type To = Tr::To;
         fn traverse_mut<'a>(&self, source: &'a mut Result<T, E>) -> Vec<&'a mut Self::To> {
             source
                 .as_mut()
@@ -224,7 +219,6 @@ mod impl_result {
     where
         Pm: PrismMut<T>,
     {
-        type To = Pm::To;
         fn pm_mut<'a>(&self, source: &'a mut Result<T, E>) -> Option<&'a mut Self::To> {
             source.as_mut().ok().and_then(|t| self.0.pm_mut(t))
         }
@@ -234,8 +228,6 @@ mod impl_result {
     where
         Pm: Prism<T>,
     {
-        type To = Pm::To;
-
         fn pm(&self, source: Result<T, E>) -> Option<Self::To> {
             source.ok().and_then(|t| self.0.pm(t))
         }
@@ -266,8 +258,6 @@ mod impl_result {
     where
         Pm: PrismMut<E>,
     {
-        type To = Pm::To;
-
         fn pm_mut<'a>(&self, source: &'a mut Result<T, E>) -> Option<&'a mut Self::To> {
             source.as_mut().err().and_then(|t| self.0.pm_mut(t))
         }
@@ -277,8 +267,6 @@ mod impl_result {
     where
         Pm: Prism<E>,
     {
-        type To = Pm::To;
-
         fn pm(&self, source: Result<T, E>) -> Option<Self::To> {
             source.err().and_then(|t| self.0.pm(t))
         }
@@ -321,7 +309,6 @@ mod impl_some {
     where
         Tr: TraversalMut<T>,
     {
-        type To = Tr::To;
         fn traverse_mut<'a>(&self, source: &'a mut Option<T>) -> Vec<&'a mut Self::To> {
             source
                 .into_iter()
@@ -334,8 +321,6 @@ mod impl_some {
     where
         Tr: Traversal<T>,
     {
-        type To = Tr::To;
-
         fn traverse(&self, source: Option<T>) -> Vec<Self::To> {
             source
                 .into_iter()
@@ -358,7 +343,6 @@ mod impl_some {
     where
         Pm: PrismMut<T>,
     {
-        type To = Pm::To;
 
         fn pm_mut<'a>(&self, source: &'a mut Option<T>) -> Option<&'a mut Self::To> {
             source.as_mut().and_then(|t| self.0.pm_mut(t))
@@ -369,35 +353,13 @@ mod impl_some {
     where
         Pm: Prism<T>,
     {
-        type To = Pm::To;
 
         fn pm(&self, source: Option<T>) -> Option<Self::To> {
             source.and_then(|t| self.0.pm(t))
         }
     }
 
-    impl<Tr, T> Traversal<Option<T>> for _None<Tr>
-    where
-        Tr: Traversal<()>,
-    {
-        type To = Tr::To;
 
-        fn traverse(&self, source: Option<T>) -> Vec<Self::To> {
-            self.0
-                .traverse(if source.is_none() { () } else { return vec![] })
-        }
-    }
-
-    impl<Pm, T> Prism<Option<T>> for _None<Pm>
-    where
-        Pm: Prism<()>,
-    {
-        type To = Pm::To;
-
-        fn pm(&self, source: Option<T>) -> Option<Self::To> {
-            self.0.pm(if source.is_none() { () } else { return None })
-        }
-    }
 
     impl<Rv, T> Review<Option<T>> for _None<Rv>
     where
@@ -435,8 +397,6 @@ mod impl_tuples {
             where
                 Tr: TraversalMut<$to>,
             {
-                type To = Tr::To;
-
                 fn traverse_mut<'a>(&self, source: &'a mut ($($param,)*)) -> Vec<&'a mut Self::To> {
                     self.0.traverse_mut(&mut source.$field)
                 }
@@ -446,8 +406,6 @@ mod impl_tuples {
             where
                 Tr: Traversal<$to>,
             {
-                type To = Tr::To;
-
                 fn traverse(&self, source: ($($param,)*)) -> Vec<Self::To> {
                     self.0.traverse(source.$field)
                 }
@@ -468,7 +426,7 @@ mod impl_tuples {
             where
                 Pm: PrismMut<$to>,
             {
-                type To = Pm::To;
+                // type To = Pm::To;
 
                 fn pm_mut<'a>(&self, source: &'a mut ($($param,)*)) -> Option<&'a mut Self::To> {
                     self.0.pm_mut(&mut source.$field)
@@ -479,7 +437,7 @@ mod impl_tuples {
             where
                 Pm: Prism<$to>,
             {
-                type To = Pm::To;
+                // type To = Pm::To;
 
                 fn pm(&self, source: ($($param,)*)) -> Option<Self::To> {
                     self.0.pm(source.$field)
@@ -501,8 +459,6 @@ mod impl_tuples {
             where
                 Ls: LensMut<$to>,
             {
-                type To = Ls::To;
-
                 fn view_mut<'a>(&self, source: &'a mut ($($param,)*)) -> &'a mut Self::To {
                     self.0.view_mut(&mut source.$field)
                 }
@@ -512,8 +468,6 @@ mod impl_tuples {
             where
                 Ls: Lens<$to>,
             {
-                type To = Ls::To;
-
                 fn view(&self, source: ($($param,)*)) -> Self::To {
                     self.0.view(source.$field)
                 }
@@ -587,8 +541,6 @@ mod impl_tuples {
             where
                 Tr: TraversalMut<$param>
             {
-                type To = Tr::To;
-
                 fn traverse_mut<'a>(&self, source: &'a mut $tuple) -> Vec<&'a mut Self::To> {
                     let mut vec = vec![];
                     $(vec.extend(self.0.traverse_mut(&mut source.$fields));)*
@@ -600,8 +552,6 @@ mod impl_tuples {
             where
                 Tr: Traversal<$param>
             {
-                type To = Tr::To;
-
                 fn traverse(&self, source: $tuple) -> Vec<Self::To> {
                     let mut vec = vec![];
                     $(vec.extend(self.0.traverse(source.$fields));)*
@@ -634,8 +584,6 @@ mod impl_tuples {
     where
         Pm: PrismMut<A>,
     {
-        type To = Pm::To;
-
         fn pm_mut<'a>(&self, source: &'a mut (A,)) -> Option<&'a mut Self::To> {
             self.0.pm_mut(&mut source.0)
         }
@@ -645,8 +593,6 @@ mod impl_tuples {
     where
         Pm: Prism<A>,
     {
-        type To = Pm::To;
-
         fn pm(&self, source: (A,)) -> Option<Self::To> {
             self.0.pm(source.0)
         }
@@ -667,8 +613,6 @@ mod impl_tuples {
     where
         Ls: LensMut<A>,
     {
-        type To = Ls::To;
-
         fn view_mut<'a>(&self, source: &'a mut (A,)) -> &'a mut Self::To {
             self.0.view_mut(&mut source.0)
         }
@@ -678,8 +622,6 @@ mod impl_tuples {
     where
         Ls: Lens<A>,
     {
-        type To = Ls::To;
-
         fn view(&self, source: (A,)) -> Self::To {
             self.0.view(source.0)
         }
@@ -721,8 +663,6 @@ mod impl_iters {
             where
                 Tr: TraversalMut<<$iter as IntoIterator>::Item>,
             {
-                type To = Tr::To;
-
                 fn traverse_mut<'a>(&self, source: &'a mut $iter) -> Vec<&'a mut Self::To> {
                     source
                         .into_iter()
@@ -735,8 +675,6 @@ mod impl_iters {
             where
                 Tr: Traversal<<$iter as IntoIterator>::Item>,
             {
-                type To = Tr::To;
-
                 fn traverse(&self, source: $iter) -> Vec<Self::To> {
                     source
                         .into_iter()
@@ -800,8 +738,6 @@ mod impl_ptr {
             where
                     Tr: TraversalMut<<$ptr as Deref>::Target>,
             {
-                type To = Tr::To;
-
                 fn traverse_mut<'a>(&self, source: &'a mut $ptr) -> Vec<&'a mut Self::To> {
                     self.0.traverse_mut(source)
                 }
@@ -811,7 +747,6 @@ mod impl_ptr {
                 where
                     Pm: PrismMut<<$ptr as Deref>::Target>,
             {
-                type To = Pm::To;
                 fn pm_mut<'a>(&self, source: &'a mut $ptr) -> Option<&'a mut Self::To> {
                     self.0.pm_mut(source)
                 }
@@ -821,8 +756,6 @@ mod impl_ptr {
                 where
                     Ls: LensMut<<$ptr as Deref>::Target>
             {
-                type To = Ls::To;
-
                 fn view_mut<'a>(&self, source: &'a mut $ptr) -> &'a mut Self::To {
                     self.0.view_mut(source)
                 }
@@ -830,7 +763,7 @@ mod impl_ptr {
         }
     }
 
-    impl<Rv, T> Review<Box<T>> for _Box<Rv>
+    impl<Rv, T> Review<Box<T>> for _box<Rv>
     where
         Rv: Review<T>,
     {
@@ -841,40 +774,34 @@ mod impl_ptr {
         }
     }
 
-    impl<Tr, T> Traversal<Box<T>> for _Box<Tr>
+    impl<Tr, T> Traversal<Box<T>> for _box<Tr>
     where
         Tr: Traversal<T>,
     {
-        type To = Tr::To;
-
         fn traverse(&self, source: Box<T>) -> Vec<Self::To> {
             self.0.traverse(*source)
         }
     }
 
-    impl<Pm, T> Prism<Box<T>> for _Box<Pm>
+    impl<Pm, T> Prism<Box<T>> for _box<Pm>
     where
         Pm: Prism<T>,
     {
-        type To = Pm::To;
-
         fn pm(&self, source: Box<T>) -> Option<Self::To> {
             self.0.pm(*source)
         }
     }
 
-    impl<Ls, T> Lens<Box<T>> for _Box<Ls>
+    impl<Ls, T> Lens<Box<T>> for _box<Ls>
     where
         Ls: Lens<T>,
     {
-        type To = Ls::To;
-
         fn view(&self, source: Box<T>) -> Self::To {
             self.0.view(*source)
         }
     }
 
-    impl<Rv, T> Review<Rc<T>> for _Rc<Rv>
+    impl<Rv, T> Review<Rc<T>> for _rc<Rv>
     where
         Rv: Review<T>,
     {
@@ -885,7 +812,7 @@ mod impl_ptr {
         }
     }
 
-    impl<Rv, T> Review<Arc<T>> for _Arc<Rv>
+    impl<Rv, T> Review<Arc<T>> for _arc<Rv>
     where
         Rv: Review<T>,
     {
@@ -897,11 +824,11 @@ mod impl_ptr {
     }
 
     impl_ref!(<; T> Box<T>, _Box);
-    impl_ref!(<; T> Rc<T>, _Rc);
-    impl_ref!(<; T> Rc<T>, _Arc);
-    impl_ref!(<'t; T> &'t mut T, _Mut);
-    impl_ref!(<'t; T> &'t T, _Ref);
+    impl_ref!(<; T> Rc<T>, _rc);
+    impl_ref!(<; T> Rc<T>, _arc);
+    impl_ref!(<'t; T> &'t mut T, _mut);
+    impl_ref!(<'t; T> &'t T, _ref);
 
     impl_mut!(<; T> Box<T>, _Box);
-    impl_mut!(<'t; T> &'t mut T, _Mut);
+    impl_mut!(<'t; T> &'t mut T, _mut);
 }

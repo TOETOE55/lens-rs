@@ -5,11 +5,12 @@ use proc_macro::TokenStream;
 use quote::*;
 use syn::punctuated::Punctuated;
 use syn::Token;
-use syn::{parse_macro_input, Data, DeriveInput};
+use syn::{parse_macro_input, Data, DeriveInput, parenthesized};
 use proc_macro2::Span;
 
 use std::collections::HashSet;
 use std::sync::Mutex;
+use syn::parse::{Parse, Result, ParseStream};
 
 lazy_static! {
     static ref OPTIC_NAMES: Mutex<HashSet<String>> = {
@@ -20,6 +21,31 @@ lazy_static! {
         m.insert("_None".to_string());
         Mutex::new(m)
     };
+}
+
+enum OpticMutability {
+    Move,
+    Ref(Token![ref]),
+    Mut(Token![mut]),
+}
+
+impl Parse for OpticMutability {
+    fn parse(input: ParseStream) -> Result<Self> {
+        if input.is_empty() { return Ok(Self::Move); }
+
+        let content;
+
+        parenthesized!(content in input);
+        let lookahead = content.lookahead1();
+        println!("{:?}", content);
+        if lookahead.peek(Token![mut]) {
+            Ok(Self::Mut(content.parse()?))
+        } else if lookahead.peek(Token![ref]) {
+            Ok(Self::Ref(content.parse()?))
+        } else  {
+            Err(input.error("only allow #[optic], #[optic(mut)] or #[optic(ref)] here"))
+        }
+    }
 }
 
 
@@ -91,7 +117,7 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
                 let data = derive_input.clone();
                 let data_name = data.ident;
                 let data_gen = data.generics;
-                let data_gen_param = data_gen.params.clone();
+                let data_gen_param = data_gen.params.iter().collect::<Vec<_>>();
                 let data_gen_where = data_gen
                     .where_clause
                     .iter()
@@ -118,7 +144,7 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
                 //     .collect::<Vec<_>>();
 
                 quote! {
-                    impl<Rv, #data_gen_param> lens_rs::Review<#data_name #data_gen> for #optic_name<Rv>
+                    impl<#(#data_gen_param,)* Rv> lens_rs::Review<#data_name #data_gen> for #optic_name<Rv>
                     where
                         Rv: lens_rs::Review<#ty>,
                         #data_gen_where
@@ -157,7 +183,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 let data = derive_input.clone();
                 let data_name = data.ident;
                 let data_gen = data.generics;
-                let data_gen_param = data_gen.params.clone();
+                let data_gen_param = data_gen.params.iter().collect::<Vec<_>>();
                 let data_gen_where = data_gen
                     .where_clause
                     .iter()
@@ -172,73 +198,114 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     .map(|field| field.ty.clone())
                     .take(1)
                     .collect::<Punctuated<_, Token![,]>>();
+                let attr: syn::Attribute = var
+                    .attrs
+                    .clone()
+                    .into_iter()
+                    .find(|attr: &syn::Attribute| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+                    .unwrap();
+                let mutability = syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
 
-                quote! {
-                    impl<Tr, #data_gen_param> lens_rs::Traversal<#data_name #data_gen> for #optic_name<Tr>
+
+
+                let impl_ref = quote! {
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalRef<#data_name #data_gen> for #optic_name<Tr>
                     where
-                        Tr: lens_rs::Traversal<#ty>,
+                        Tr: lens_rs::TraversalRef<#ty>,
                         #data_gen_where
                     {
                         type To = Tr::To;
 
-                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> {
-                            use #data_name::*;
-                            match source {
-                                #var_name(x, ..) => self.0.traverse(x),
-                                _ => vec![],
-                            }
-                        }
-
                         fn traverse_ref<'a>(&self, source: &'a #data_name #data_gen) -> Vec<&'a Self::To> {
                             use #data_name::*;
                             match source {
-                                #var_name(x, ..) => self.0.traverse_ref(x),
-                                _ => vec![],
-                            }
-                        }
-
-                        fn traverse_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Vec<&'a mut Self::To> {
-                            use #data_name::*;
-                            match source {
-                                #var_name(x, ..) => self.0.traverse_mut(x),
+                                #var_name(x) => self.0.traverse_ref(x),
                                 _ => vec![],
                             }
                         }
                     }
 
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismRef<#data_name #data_gen> for #optic_name<Pm>
+                    where
+                        Pm: lens_rs::PrismRef<#ty>,
+                        #data_gen_where
+                    {
+                        type To = Pm::To;
+                        fn pm_ref<'a>(&self, source: &'a #data_name #data_gen) -> Option<&'a Self::To> {
+                            use #data_name::*;
+                            match source {
+                                #var_name(x) => self.0.pm_ref(x),
+                                _ => None,
+                            }
+                        }
+                    }
+                };
 
-                    impl<Pm, #data_gen_param> lens_rs::Prism<#data_name #data_gen> for #optic_name<Pm>
+                let impl_mut = quote! {
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalMut<#data_name #data_gen> for #optic_name<Tr>
+                    where
+                        Tr: lens_rs::TraversalMut<#ty>,
+                        #data_gen_where
+                    {
+                        fn traverse_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Vec<&'a mut Self::To> {
+                            use #data_name::*;
+                            match source {
+                                #var_name(x) => self.0.traverse_mut(x),
+                                _ => vec![],
+                            }
+                        }
+                    }
+
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismMut<#data_name #data_gen> for #optic_name<Pm>
+                    where
+                        Pm: lens_rs::PrismMut<#ty>,
+                        #data_gen_where
+                    {
+                        fn pm_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Option<&'a mut Self::To> {
+                            use #data_name::*;
+                            match source {
+                                #var_name(x) => self.0.pm_mut(x),
+                                _ => None,
+                            }
+                        }
+                    }
+                };
+
+                let impl_mv = quote! {
+                    impl<#(#data_gen_param,)* Tr> lens_rs::Traversal<#data_name #data_gen> for #optic_name<Tr>
+                    where
+                        Tr: lens_rs::Traversal<#ty>,
+                        #data_gen_where
+                    {
+                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> {
+                            use #data_name::*;
+                            match source {
+                                #var_name(x) => self.0.traverse(x),
+                                _ => vec![],
+                            }
+                        }
+                    }
+
+                    impl<#(#data_gen_param,)* Pm> lens_rs::Prism<#data_name #data_gen> for #optic_name<Pm>
                     where
                         Pm: lens_rs::Prism<#ty>,
                         #data_gen_where
                     {
-                        type To = Pm::To;
-
                         fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> {
                             use #data_name::*;
                             match source {
-                                #var_name(x, ..) => self.0.pm(x),
-                                _ => None,
-                            }
-                        }
-
-                        fn pm_ref<'a>(&self, source: &'a #data_name #data_gen) -> Option<&'a Self::To> {
-                            use #data_name::*;
-                            match source {
-                                #var_name(x, ..) => self.0.pm_ref(x),
-                                _ => None,
-                            }
-                        }
-
-                        fn pm_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Option<&'a mut Self::To> {
-                            use #data_name::*;
-                            match source {
-                                #var_name(x, ..) => self.0.pm_mut(x),
+                                #var_name(x) => self.0.pm(x),
                                 _ => None,
                             }
                         }
                     }
-                }
+                };
+
+                match mutability {
+                    OpticMutability::Ref(_) => vec![impl_ref],
+                    OpticMutability::Mut(_) => vec![impl_mut, impl_ref],
+                    OpticMutability::Move   => vec![impl_mv, impl_mut, impl_ref]
+                }.into_iter().flat_map(|x| x)
             })
             .collect(),
         _ => panic!("union and struct can't derive the review"),
@@ -265,7 +332,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 let data = derive_input.clone();
                 let data_name = data.ident;
                 let data_gen = data.generics;
-                let data_gen_param = data_gen.params.clone();
+                let data_gen_param = data_gen.params.iter().collect::<Vec<_>>();
                 let data_gen_where = data_gen
                     .where_clause
                     .iter()
@@ -276,79 +343,139 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 let to = &f.ty;
                 let field_name = f.ident.as_ref().unwrap();
 
-                quote! {
-                    impl<Tr, #data_gen_param> lens_rs::Traversal<#data_name #data_gen> for #optics_name<Tr>
+                let attr: syn::Attribute = f
+                    .attrs
+                    .clone()
+                    .into_iter()
+                    .find(|attr: &syn::Attribute| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+                    .unwrap();
+                let mutability = syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
+
+                let impl_ref = quote! {
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalRef<#data_name #data_gen> for #optics_name<Tr>
                     where
-                        Tr: lens_rs::Traversal<#to>,
+                        Tr: lens_rs::TraversalRef<#to>,
                         #data_gen_where
                     {
                         type To = Tr::To;
 
-                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> {
-                            self.0.traverse(source.#field_name)
-                        }
-
                         fn traverse_ref<'a>(&self, source: &'a #data_name #data_gen) -> Vec<&'a Self::To> {
                             self.0.traverse_ref(&source.#field_name)
                         }
+                    }
 
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismRef<#data_name #data_gen> for #optics_name<Pm>
+                    where
+                        Pm: lens_rs::PrismRef<#to>,
+                        #data_gen_where
+                    {
+                        type To = Pm::To;
+
+                        fn pm_ref<'a>(&self, source: &'a #data_name #data_gen) -> Option<&'a Self::To> {
+                            self.0.pm_ref(&source.#field_name)
+                        }
+                    }
+
+                    impl<#(#data_gen_param,)* Ls> lens_rs::LensRef<#data_name #data_gen> for #optics_name<Ls>
+                    where
+                        Ls: LensRef<#to>,
+                        #data_gen_where
+                    {
+                        type To = Ls::To;
+
+                        fn view_ref<'a>(&self, source: &'a #data_name #data_gen) -> &'a Self::To {
+                            self.0.view_ref(&source.#field_name)
+                        }
+                    }
+                };
+
+                let impl_mut = quote! {
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalMut<#data_name #data_gen> for #optics_name<Tr>
+                    where
+                        Tr: lens_rs::Traversal<#to>,
+                        #data_gen_where
+                    {
                         fn traverse_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Vec<&'a mut Self::To> {
                             self.0.traverse_mut(&mut source.#field_name)
                         }
                     }
 
-                    impl<Pm, #data_gen_param> lens_rs::Prism<#data_name #data_gen> for #optics_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismMut<#data_name #data_gen> for #optics_name<Pm>
                     where
-                        Pm: lens_rs::Prism<#to>,
+                        Pm: lens_rs::PrismMut<#to>,
                         #data_gen_where
                     {
-                        type To = Pm::To;
-
-                        fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> {
-                            self.0.pm(source.#field_name)
-                        }
-
-                        fn pm_ref<'a>(&self, source: &'a #data_name #data_gen) -> Option<&'a Self::To> {
-                            self.0.pm_ref(&source.#field_name)
-                        }
-
                         fn pm_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Option<&'a mut Self::To> {
                             self.0.pm_mut(&mut source.#field_name)
                         }
                     }
 
-                    impl<Ls, #data_gen_param> lens_rs::Lens<#data_name #data_gen> for #optics_name<Ls>
+                    impl<#(#data_gen_param,)* Ls> lens_rs::LensMut<#data_name #data_gen> for #optics_name<Ls>
                     where
-                        Ls: Lens<#to>,
+                        Ls: LensMut<#to>,
                         #data_gen_where
                     {
-                        type To = Ls::To;
-
-                        fn view(&self, source: #data_name #data_gen) -> Self::To {
-                            self.0.view(source.#field_name)
-                        }
-
-                        fn view_ref<'a>(&self, source: &'a #data_name #data_gen) -> &'a Self::To {
-                            self.0.view_ref(&source.#field_name)
-                        }
-
                         fn view_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> &'a mut Self::To {
                             self.0.view_mut(&mut source.#field_name)
                         }
                     }
-                }
+
+                };
+
+                let impl_mv = quote! {
+                    impl<#(#data_gen_param,)* Tr> lens_rs::Traversal<#data_name #data_gen> for #optics_name<Tr>
+                    where
+                        Tr: lens_rs::Traversal<#to>,
+                        #data_gen_where
+                    {
+                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> {
+                            self.0.traverse(source.#field_name)
+                        }
+                    }
+
+                    impl<#(#data_gen_param,)* Pm> lens_rs::Prism<#data_name #data_gen> for #optics_name<Pm>
+                    where
+                        Pm: lens_rs::Prism<#to>,
+                        #data_gen_where
+                    {
+                        fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> {
+                            self.0.pm(source.#field_name)
+                        }
+                    }
+
+                    impl<#(#data_gen_param,)* Ls> lens_rs::Lens<#data_name #data_gen> for #optics_name<Ls>
+                    where
+                        Ls: Lens<#to>,
+                        #data_gen_where
+                    {
+                        fn view(&self, source: #data_name #data_gen) -> Self::To {
+                            self.0.view(source.#field_name)
+                        }
+                    }
+                };
+
+                match mutability {
+                    OpticMutability::Ref(_) => vec![impl_ref],
+                    OpticMutability::Mut(_) => vec![impl_mut, impl_ref],
+                    OpticMutability::Move   => vec![impl_mv, impl_mut, impl_ref]
+                }.into_iter().flat_map(|x| x)
             }).collect(),
         Data::Struct(syn::DataStruct { fields: syn::Fields::Unnamed(fs), .. }) => fs
             .unnamed
             .iter()
             .take(7)
+            .filter(|var| {
+                var
+                    .attrs
+                    .iter()
+                    .any(|attr| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+            })
             .enumerate()
             .flat_map(|(i, f)| {
-
                 let data = derive_input.clone();
                 let data_name = data.ident;
                 let data_gen = data.generics;
-                let data_gen_param = data_gen.params.clone();
+                let data_gen_param = data_gen.params.iter().collect::<Vec<_>>();
                 let data_gen_where = data_gen
                     .where_clause
                     .iter()
@@ -357,69 +484,124 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
                 let optics_name = format_ident!("_{}", i);
                 let to = &f.ty;
-                let i = syn::Index::from(i);
+                let field_name = syn::Index::from(i);
 
-                quote! {
-                    impl<Tr, #data_gen_param> lens_rs::Traversal<#data_name #data_gen> for #optics_name<Tr>
+                let attr: syn::Attribute = f
+                    .attrs
+                    .clone()
+                    .into_iter()
+                    .find(|attr: &syn::Attribute| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+                    .unwrap();
+                let mutability = syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
+
+                let impl_ref = quote! {
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalRef<#data_name #data_gen> for #optics_name<Tr>
                     where
-                        Tr: lens_rs::Traversal<#to>,
+                        Tr: lens_rs::TraversalRef<#to>,
                         #data_gen_where
                     {
                         type To = Tr::To;
 
-                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> {
-                            self.0.traverse(source.#i)
-                        }
-
                         fn traverse_ref<'a>(&self, source: &'a #data_name #data_gen) -> Vec<&'a Self::To> {
-                            self.0.traverse_ref(&source.#i)
-                        }
-
-                        fn traverse_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Vec<&'a mut Self::To> {
-                            self.0.traverse_mut(&mut source.#i)
+                            self.0.traverse_ref(&source.#field_name)
                         }
                     }
 
-                    impl<Pm, #data_gen_param> Prism<#data_name #data_gen> for #optics_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismRef<#data_name #data_gen> for #optics_name<Pm>
                     where
-                        Pm: lens_rs::Prism<#to>,
+                        Pm: lens_rs::PrismRef<#to>,
                         #data_gen_where
                     {
                         type To = Pm::To;
 
-                        fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> {
-                            self.0.pm(source.#i)
-                        }
-
                         fn pm_ref<'a>(&self, source: &'a #data_name #data_gen) -> Option<&'a Self::To> {
-                            self.0.pm_ref(&source.#i)
-                        }
-
-                        fn pm_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Option<&'a mut Self::To> {
-                            self.0.pm_mut(&mut source.#i)
+                            self.0.pm_ref(&source.#field_name)
                         }
                     }
 
-                    impl<Ls, #data_gen_param> Lens<#data_name #data_gen> for #optics_name<Ls>
+                    impl<#(#data_gen_param,)* Ls> lens_rs::LensRef<#data_name #data_gen> for #optics_name<Ls>
                     where
-                        Ls: lens_rs::Lens<#to>,
+                        Ls: LensRef<#to>,
                         #data_gen_where
                     {
                         type To = Ls::To;
 
-                        fn view(&self, source: #data_name #data_gen) -> Self::To {
-                            self.0.view(source.#i)
-                        }
-
                         fn view_ref<'a>(&self, source: &'a #data_name #data_gen) -> &'a Self::To {
-                            self.0.view_ref(&source.#i)
-                        }
-
-                        fn view_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> &'a mut Self::To {
-                            self.0.view_mut(&mut source.#i)
+                            self.0.view_ref(&source.#field_name)
                         }
                     }
-                }
+                };
+
+                let impl_mut = quote! {
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalMut<#data_name #data_gen> for #optics_name<Tr>
+                    where
+                        Tr: lens_rs::Traversal<#to>,
+                        #data_gen_where
+                    {
+                        fn traverse_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Vec<&'a mut Self::To> {
+                            self.0.traverse_mut(&mut source.#field_name)
+                        }
+                    }
+
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismMut<#data_name #data_gen> for #optics_name<Pm>
+                    where
+                        Pm: lens_rs::PrismMut<#to>,
+                        #data_gen_where
+                    {
+                        fn pm_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Option<&'a mut Self::To> {
+                            self.0.pm_mut(&mut source.#field_name)
+                        }
+                    }
+
+                    impl<#(#data_gen_param,)* Ls> lens_rs::LensMut<#data_name #data_gen> for #optics_name<Ls>
+                    where
+                        Ls: LensMut<#to>,
+                        #data_gen_where
+                    {
+                        fn view_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> &'a mut Self::To {
+                            self.0.view_mut(&mut source.#field_name)
+                        }
+                    }
+
+                };
+
+                let impl_mv = quote! {
+                    impl<#(#data_gen_param,)* Tr> lens_rs::Traversal<#data_name #data_gen> for #optics_name<Tr>
+                    where
+                        Tr: lens_rs::Traversal<#to>,
+                        #data_gen_where
+                    {
+                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> {
+                            self.0.traverse(source.#field_name)
+                        }
+                    }
+
+                    impl<#(#data_gen_param,)* Pm> lens_rs::Prism<#data_name #data_gen> for #optics_name<Pm>
+                    where
+                        Pm: lens_rs::Prism<#to>,
+                        #data_gen_where
+                    {
+                        fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> {
+                            self.0.pm(source.#field_name)
+                        }
+                    }
+
+                    impl<#(#data_gen_param,)* Ls> lens_rs::Lens<#data_name #data_gen> for #optics_name<Ls>
+                    where
+                        Ls: Lens<#to>,
+                        #data_gen_where
+                    {
+                        fn view(&self, source: #data_name #data_gen) -> Self::To {
+                            self.0.view(source.#field_name)
+                        }
+                    }
+                };
+
+                match mutability {
+                    OpticMutability::Ref(_) => vec![impl_ref],
+                    OpticMutability::Mut(_) => vec![impl_mut, impl_ref],
+                    OpticMutability::Move   => vec![impl_mv, impl_mut, impl_ref]
+                }.into_iter().flat_map(|x| x)
             }).collect(),
         _ => panic!("union and enum can't derive the lens"),
     };

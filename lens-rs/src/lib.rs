@@ -7,7 +7,7 @@ pub use traits::{
 };
 
 pub use optics::{
-    Both, Mapped, _Arc, _Box, _Err, _Mut, _None, _Ok, _Rc, _Ref, _Some, _0, _1, _2, _3, _4, _5, _6,
+    Both, Mapped, _arc, _box, _Err, _mut, _None, _Ok, _rc, _ref, _Some, _0, _1, _2, _3, _4, _5, _6,
     __,
 };
 

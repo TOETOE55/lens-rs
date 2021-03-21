@@ -31,13 +31,11 @@ pub trait TraversalRef<T> {
     fn traverse_ref<'a>(&self, source: &'a T) -> Vec<&'a Self::To>;
 }
 
-pub trait TraversalMut<T> {
-    type To;
+pub trait TraversalMut<T>: TraversalRef<T> {
     fn traverse_mut<'a>(&self, source: &'a mut T) -> Vec<&'a mut Self::To>;
 }
 
-pub trait Traversal<T> {
-    type To;
+pub trait Traversal<T>: TraversalMut<T> {
     fn traverse(&self, source: T) -> Vec<Self::To>;
 }
 
@@ -55,13 +53,11 @@ pub trait PrismRef<T> {
     fn pm_ref<'a>(&self, source: &'a T) -> Option<&'a Self::To>;
 }
 
-pub trait PrismMut<T> {
-    type To;
+pub trait PrismMut<T>: PrismRef<T> {
     fn pm_mut<'a>(&self, source: &'a mut T) -> Option<&'a mut Self::To>;
 }
 
-pub trait Prism<T> {
-    type To;
+pub trait Prism<T>: PrismMut<T> {
     fn pm(&self, source: T) -> Option<Self::To>;
 }
 
@@ -80,21 +76,10 @@ pub trait LensRef<T> {
     fn view_ref<'a>(&self, source: &'a T) -> &'a Self::To;
 }
 
-pub trait LensMut<T> {
-    type To;
+pub trait LensMut<T>: LensRef<T> {
     fn view_mut<'a>(&self, source: &'a mut T) -> &'a mut Self::To;
 }
 
-pub trait Lens<T> {
-    type To;
+pub trait Lens<T>: LensMut<T> {
     fn view(&self, source: T) -> Self::To;
 }
-
-// pub trait LensH<T> {
-//     type To;
-//     type ToRef<'a>;
-//     type ToMut<'a>;
-//     fn view(&self, source: T) -> Self::To;
-//     fn view_ref<'a>(&self, source: &'a T) -> Self::ToRef<'a>;
-//     fn view_mut<'a>(&self, source: &'a mut T) -> Self::ToMut<'a>;
-// }
