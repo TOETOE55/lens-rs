@@ -823,12 +823,12 @@ mod impl_ptr {
         }
     }
 
-    impl_ref!(<; T> Box<T>, _Box);
+    impl_ref!(<; T> Box<T>, _box);
     impl_ref!(<; T> Rc<T>, _rc);
     impl_ref!(<; T> Rc<T>, _arc);
     impl_ref!(<'t; T> &'t mut T, _mut);
     impl_ref!(<'t; T> &'t T, _ref);
 
-    impl_mut!(<; T> Box<T>, _Box);
+    impl_mut!(<; T> Box<T>, _box);
     impl_mut!(<'t; T> &'t mut T, _mut);
 }
