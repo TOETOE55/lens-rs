@@ -1,12 +1,12 @@
 /**
-A trait representing the optics describes how to construct a single value.
-## Example
-```
-use lens_rs::*;
-let optic = optics!(_Ok._Err._Some);
-let nested: Result<Result<(), _>, ()> = optic.review((1,2,3));
-assert_eq!(nested, Ok(Err(Some((1,2,3)))));
-```
+* A trait representing the optics describes how to construct a single value.
+* ## Example
+* ```
+* use lens_rs::*;
+* let optic = optics!(Ok.Err.Some);
+* let nested: Result<Result<(), _>, ()> = optic.review((1,2,3));
+* assert_eq!(nested, Ok(Err(Some((1,2,3)))));
+* ```
 */
 pub trait Review<T> {
     type From;

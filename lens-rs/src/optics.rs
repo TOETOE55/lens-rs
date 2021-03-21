@@ -2,14 +2,14 @@
 pub struct __;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct _Ok<Optic>(pub Optic);
+pub struct Ok<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct _Err<Optic>(pub Optic);
+pub struct Err<Optic>(pub Optic);
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct _Some<Optic>(pub Optic);
+pub struct Some<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct _None<Optic>(pub Optic);
+pub struct None<Optic>(pub Optic);
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _0<Optic>(pub Optic);
@@ -84,19 +84,19 @@ mod impl__ {
     impl<T> PrismRef<T> for __ {
         type To = T;
         fn pm_ref<'a>(&self, source: &'a T) -> Option<&'a Self::To> {
-            Some(source)
+            Option::Some(source)
         }
     }
 
     impl<T> PrismMut<T> for __ {
         fn pm_mut<'a>(&self, source: &'a mut T) -> Option<&'a mut Self::To> {
-            Some(source)
+            Option::Some(source)
         }
     }
 
     impl<T> Prism<T> for __ {
         fn pm(&self, source: T) -> Option<Self::To> {
-            Some(source)
+            Option::Some(source)
         }
     }
 
@@ -126,18 +126,18 @@ mod impl_result {
      ************************************************************/
     use crate::*;
 
-    impl<Rv, T, E> Review<Result<T, E>> for _Ok<Rv>
+    impl<Rv, T, E> Review<Result<T, E>> for optics::Ok<Rv>
     where
         Rv: Review<T>,
     {
         type From = Rv::From;
 
         fn review(&self, from: Self::From) -> Result<T, E> {
-            Ok(self.0.review(from))
+            Result::Ok(self.0.review(from))
         }
     }
 
-    impl<Tr, T, E> TraversalRef<Result<T, E>> for _Ok<Tr>
+    impl<Tr, T, E> TraversalRef<Result<T, E>> for optics::Ok<Tr>
     where
         Tr: TraversalRef<T>,
     {
@@ -150,7 +150,7 @@ mod impl_result {
         }
     }
 
-    impl<Tr, T, E> TraversalMut<Result<T, E>> for _Ok<Tr>
+    impl<Tr, T, E> TraversalMut<Result<T, E>> for optics::Ok<Tr>
     where
         Tr: TraversalMut<T>,
     {
@@ -162,7 +162,7 @@ mod impl_result {
         }
     }
 
-    impl<Tr, T, E> Traversal<Result<T, E>> for _Err<Tr>
+    impl<Tr, T, E> Traversal<Result<T, E>> for optics::Err<Tr>
     where
         Tr: Traversal<E>,
     {
@@ -175,7 +175,7 @@ mod impl_result {
         }
     }
 
-    impl<Tr, T, E> TraversalRef<Result<T, E>> for _Err<Tr>
+    impl<Tr, T, E> TraversalRef<Result<T, E>> for optics::Err<Tr>
     where
         Tr: TraversalRef<E>,
     {
@@ -190,7 +190,7 @@ mod impl_result {
         }
     }
 
-    impl<Tr, T, E> TraversalMut<Result<T, E>> for _Err<Tr>
+    impl<Tr, T, E> TraversalMut<Result<T, E>> for optics::Err<Tr>
     where
         Tr: TraversalMut<E>,
     {
@@ -204,7 +204,7 @@ mod impl_result {
         }
     }
 
-    impl<Pm, T, E> PrismRef<Result<T, E>> for _Ok<Pm>
+    impl<Pm, T, E> PrismRef<Result<T, E>> for optics::Ok<Pm>
     where
         Pm: PrismRef<T>,
     {
@@ -215,7 +215,7 @@ mod impl_result {
         }
     }
 
-    impl<Pm, T, E> PrismMut<Result<T, E>> for _Ok<Pm>
+    impl<Pm, T, E> PrismMut<Result<T, E>> for optics::Ok<Pm>
     where
         Pm: PrismMut<T>,
     {
@@ -224,7 +224,7 @@ mod impl_result {
         }
     }
 
-    impl<Pm, T, E> Prism<Result<T, E>> for _Ok<Pm>
+    impl<Pm, T, E> Prism<Result<T, E>> for optics::Ok<Pm>
     where
         Pm: Prism<T>,
     {
@@ -233,18 +233,18 @@ mod impl_result {
         }
     }
 
-    impl<Rv, T, E> Review<Result<T, E>> for _Err<Rv>
+    impl<Rv, T, E> Review<Result<T, E>> for optics::Err<Rv>
     where
         Rv: Review<E>,
     {
         type From = Rv::From;
 
         fn review(&self, from: Self::From) -> Result<T, E> {
-            Err(self.0.review(from))
+            Result::Err(self.0.review(from))
         }
     }
 
-    impl<Pm, T, E> PrismRef<Result<T, E>> for _Err<Pm>
+    impl<Pm, T, E> PrismRef<Result<T, E>> for optics::Err<Pm>
     where
         Pm: PrismRef<E>,
     {
@@ -254,7 +254,7 @@ mod impl_result {
         }
     }
 
-    impl<Pm, T, E> PrismMut<Result<T, E>> for _Err<Pm>
+    impl<Pm, T, E> PrismMut<Result<T, E>> for optics::Err<Pm>
     where
         Pm: PrismMut<E>,
     {
@@ -263,7 +263,7 @@ mod impl_result {
         }
     }
 
-    impl<Pm, T, E> Prism<Result<T, E>> for _Err<Pm>
+    impl<Pm, T, E> Prism<Result<T, E>> for optics::Err<Pm>
     where
         Pm: Prism<E>,
     {
@@ -280,18 +280,18 @@ mod impl_some {
 
     use crate::*;
 
-    impl<Rv, T> Review<Option<T>> for _Some<Rv>
+    impl<Rv, T> Review<Option<T>> for optics::Some<Rv>
     where
         Rv: Review<T>,
     {
         type From = Rv::From;
 
         fn review(&self, from: Self::From) -> Option<T> {
-            Some(self.0.review(from))
+            Option::Some(self.0.review(from))
         }
     }
 
-    impl<Tr, T> TraversalRef<Option<T>> for _Some<Tr>
+    impl<Tr, T> TraversalRef<Option<T>> for optics::Some<Tr>
     where
         Tr: TraversalRef<T>,
     {
@@ -305,7 +305,7 @@ mod impl_some {
         }
     }
 
-    impl<Tr, T> TraversalMut<Option<T>> for _Some<Tr>
+    impl<Tr, T> TraversalMut<Option<T>> for optics::Some<Tr>
     where
         Tr: TraversalMut<T>,
     {
@@ -317,7 +317,7 @@ mod impl_some {
         }
     }
 
-    impl<Tr, T> Traversal<Option<T>> for _Some<Tr>
+    impl<Tr, T> Traversal<Option<T>> for optics::Some<Tr>
     where
         Tr: Traversal<T>,
     {
@@ -329,7 +329,7 @@ mod impl_some {
         }
     }
 
-    impl<Pm, T> PrismRef<Option<T>> for _Some<Pm>
+    impl<Pm, T> PrismRef<Option<T>> for optics::Some<Pm>
     where
         Pm: PrismRef<T>,
     {
@@ -339,7 +339,7 @@ mod impl_some {
         }
     }
 
-    impl<Pm, T> PrismMut<Option<T>> for _Some<Pm>
+    impl<Pm, T> PrismMut<Option<T>> for optics::Some<Pm>
     where
         Pm: PrismMut<T>,
     {
@@ -349,7 +349,7 @@ mod impl_some {
         }
     }
 
-    impl<Pm, T> Prism<Option<T>> for _Some<Pm>
+    impl<Pm, T> Prism<Option<T>> for optics::Some<Pm>
     where
         Pm: Prism<T>,
     {
@@ -361,14 +361,14 @@ mod impl_some {
 
 
 
-    impl<Rv, T> Review<Option<T>> for _None<Rv>
+    impl<Rv, T> Review<Option<T>> for optics::None<Rv>
     where
         Rv: Review<()>,
     {
         type From = ();
 
         fn review(&self, _from: Self::From) -> Option<T> {
-            None
+            Option::None
         }
     }
 }
@@ -832,3 +832,5 @@ mod impl_ptr {
     impl_mut!(<; T> Box<T>, _box);
     impl_mut!(<'t; T> &'t mut T, _mut);
 }
+
+include!(concat!(env!("OUT_DIR"), "/optics.rs"));

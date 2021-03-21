@@ -113,7 +113,7 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
                     .collect::<Punctuated<_, Token![,]>>();
 
                 let var_name = &var.ident;
-                let optic_name = format_ident!("_{}", var.ident);
+                let optic_name = format_ident!("{}", var.ident);
                 let ty = var
                     .fields
                     .iter()
@@ -132,7 +132,7 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
                 //     .collect::<Vec<_>>();
 
                 quote! {
-                    impl<#(#data_gen_param,)* Rv> lens_rs::Review<#data_name #data_gen> for #optic_name<Rv>
+                    impl<#(#data_gen_param,)* Rv> lens_rs::Review<#data_name #data_gen> for lens_rs::optics::#optic_name<Rv>
                     where
                         Rv: lens_rs::Review<#ty>,
                         #data_gen_where
@@ -179,7 +179,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     .collect::<Punctuated<_, Token![,]>>();
 
                 let var_name = &var.ident;
-                let optic_name = format_ident!("_{}", var.ident);
+                let optic_name = format_ident!("{}", var.ident);
                 let ty = var
                     .fields
                     .iter()
@@ -197,7 +197,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 
                 let impl_ref = quote! {
-                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalRef<#data_name #data_gen> for #optic_name<Tr>
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalRef<#data_name #data_gen> for lens_rs::optics::#optic_name<Tr>
                     where
                         Tr: lens_rs::TraversalRef<#ty>,
                         #data_gen_where
@@ -213,7 +213,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismRef<#data_name #data_gen> for #optic_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismRef<#data_name #data_gen> for lens_rs::optics::#optic_name<Pm>
                     where
                         Pm: lens_rs::PrismRef<#ty>,
                         #data_gen_where
@@ -223,14 +223,14 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                             use #data_name::*;
                             match source {
                                 #var_name(x) => self.0.pm_ref(x),
-                                _ => None,
+                                _ => Option::None,
                             }
                         }
                     }
                 };
 
                 let impl_mut = quote! {
-                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalMut<#data_name #data_gen> for #optic_name<Tr>
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalMut<#data_name #data_gen> for lens_rs::optics::#optic_name<Tr>
                     where
                         Tr: lens_rs::TraversalMut<#ty>,
                         #data_gen_where
@@ -244,7 +244,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismMut<#data_name #data_gen> for #optic_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismMut<#data_name #data_gen> for lens_rs::optics::#optic_name<Pm>
                     where
                         Pm: lens_rs::PrismMut<#ty>,
                         #data_gen_where
@@ -253,14 +253,14 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                             use #data_name::*;
                             match source {
                                 #var_name(x) => self.0.pm_mut(x),
-                                _ => None,
+                                _ => Option::None,
                             }
                         }
                     }
                 };
 
                 let impl_mv = quote! {
-                    impl<#(#data_gen_param,)* Tr> lens_rs::Traversal<#data_name #data_gen> for #optic_name<Tr>
+                    impl<#(#data_gen_param,)* Tr> lens_rs::Traversal<#data_name #data_gen> for lens_rs::optics::#optic_name<Tr>
                     where
                         Tr: lens_rs::Traversal<#ty>,
                         #data_gen_where
@@ -274,7 +274,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Pm> lens_rs::Prism<#data_name #data_gen> for #optic_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::Prism<#data_name #data_gen> for lens_rs::optics::#optic_name<Pm>
                     where
                         Pm: lens_rs::Prism<#ty>,
                         #data_gen_where
@@ -283,7 +283,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                             use #data_name::*;
                             match source {
                                 #var_name(x) => self.0.pm(x),
-                                _ => None,
+                                _ => Option::None,
                             }
                         }
                     }
@@ -327,7 +327,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     .flat_map(|x| x.predicates.clone())
                     .collect::<Punctuated<_, Token![,]>>();
 
-                let optics_name = format_ident!("_{}", f.ident.as_ref().unwrap());
+                let optics_name = format_ident!("{}", f.ident.as_ref().unwrap());
                 let to = &f.ty;
                 let field_name = f.ident.as_ref().unwrap();
 
@@ -340,7 +340,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 let mutability = syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
 
                 let impl_ref = quote! {
-                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalRef<#data_name #data_gen> for #optics_name<Tr>
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalRef<#data_name #data_gen> for lens_rs::optics::#optics_name<Tr>
                     where
                         Tr: lens_rs::TraversalRef<#to>,
                         #data_gen_where
@@ -352,7 +352,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismRef<#data_name #data_gen> for #optics_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismRef<#data_name #data_gen> for lens_rs::optics::#optics_name<Pm>
                     where
                         Pm: lens_rs::PrismRef<#to>,
                         #data_gen_where
@@ -364,7 +364,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Ls> lens_rs::LensRef<#data_name #data_gen> for #optics_name<Ls>
+                    impl<#(#data_gen_param,)* Ls> lens_rs::LensRef<#data_name #data_gen> for lens_rs::optics::#optics_name<Ls>
                     where
                         Ls: LensRef<#to>,
                         #data_gen_where
@@ -378,7 +378,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 };
 
                 let impl_mut = quote! {
-                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalMut<#data_name #data_gen> for #optics_name<Tr>
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalMut<#data_name #data_gen> for lens_rs::optics::#optics_name<Tr>
                     where
                         Tr: lens_rs::Traversal<#to>,
                         #data_gen_where
@@ -388,7 +388,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismMut<#data_name #data_gen> for #optics_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismMut<#data_name #data_gen> for lens_rs::optics::#optics_name<Pm>
                     where
                         Pm: lens_rs::PrismMut<#to>,
                         #data_gen_where
@@ -398,7 +398,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Ls> lens_rs::LensMut<#data_name #data_gen> for #optics_name<Ls>
+                    impl<#(#data_gen_param,)* Ls> lens_rs::LensMut<#data_name #data_gen> for lens_rs::optics::#optics_name<Ls>
                     where
                         Ls: LensMut<#to>,
                         #data_gen_where
@@ -411,7 +411,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 };
 
                 let impl_mv = quote! {
-                    impl<#(#data_gen_param,)* Tr> lens_rs::Traversal<#data_name #data_gen> for #optics_name<Tr>
+                    impl<#(#data_gen_param,)* Tr> lens_rs::Traversal<#data_name #data_gen> for lens_rs::optics::#optics_name<Tr>
                     where
                         Tr: lens_rs::Traversal<#to>,
                         #data_gen_where
@@ -421,7 +421,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Pm> lens_rs::Prism<#data_name #data_gen> for #optics_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::Prism<#data_name #data_gen> for lens_rs::optics::#optics_name<Pm>
                     where
                         Pm: lens_rs::Prism<#to>,
                         #data_gen_where
@@ -431,7 +431,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Ls> lens_rs::Lens<#data_name #data_gen> for #optics_name<Ls>
+                    impl<#(#data_gen_param,)* Ls> lens_rs::Lens<#data_name #data_gen> for lens_rs::optics::#optics_name<Ls>
                     where
                         Ls: Lens<#to>,
                         #data_gen_where
@@ -483,7 +483,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 let mutability = syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
 
                 let impl_ref = quote! {
-                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalRef<#data_name #data_gen> for #optics_name<Tr>
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalRef<#data_name #data_gen> for lens_rs::optics::#optics_name<Tr>
                     where
                         Tr: lens_rs::TraversalRef<#to>,
                         #data_gen_where
@@ -495,7 +495,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismRef<#data_name #data_gen> for #optics_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismRef<#data_name #data_gen> for lens_rs::optics::#optics_name<Pm>
                     where
                         Pm: lens_rs::PrismRef<#to>,
                         #data_gen_where
@@ -507,7 +507,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Ls> lens_rs::LensRef<#data_name #data_gen> for #optics_name<Ls>
+                    impl<#(#data_gen_param,)* Ls> lens_rs::LensRef<#data_name #data_gen> for lens_rs::optics::#optics_name<Ls>
                     where
                         Ls: LensRef<#to>,
                         #data_gen_where
@@ -521,7 +521,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 };
 
                 let impl_mut = quote! {
-                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalMut<#data_name #data_gen> for #optics_name<Tr>
+                    impl<#(#data_gen_param,)* Tr> lens_rs::TraversalMut<#data_name #data_gen> for lens_rs::optics::#optics_name<Tr>
                     where
                         Tr: lens_rs::Traversal<#to>,
                         #data_gen_where
@@ -531,7 +531,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismMut<#data_name #data_gen> for #optics_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::PrismMut<#data_name #data_gen> for lens_rs::optics::#optics_name<Pm>
                     where
                         Pm: lens_rs::PrismMut<#to>,
                         #data_gen_where
@@ -541,7 +541,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Ls> lens_rs::LensMut<#data_name #data_gen> for #optics_name<Ls>
+                    impl<#(#data_gen_param,)* Ls> lens_rs::LensMut<#data_name #data_gen> for lens_rs::optics::#optics_name<Ls>
                     where
                         Ls: LensMut<#to>,
                         #data_gen_where
@@ -554,7 +554,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 };
 
                 let impl_mv = quote! {
-                    impl<#(#data_gen_param,)* Tr> lens_rs::Traversal<#data_name #data_gen> for #optics_name<Tr>
+                    impl<#(#data_gen_param,)* Tr> lens_rs::Traversal<#data_name #data_gen> for lens_rs::optics::#optics_name<Tr>
                     where
                         Tr: lens_rs::Traversal<#to>,
                         #data_gen_where
@@ -564,7 +564,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Pm> lens_rs::Prism<#data_name #data_gen> for #optics_name<Pm>
+                    impl<#(#data_gen_param,)* Pm> lens_rs::Prism<#data_name #data_gen> for lens_rs::optics::#optics_name<Pm>
                     where
                         Pm: lens_rs::Prism<#to>,
                         #data_gen_where
@@ -574,7 +574,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         }
                     }
 
-                    impl<#(#data_gen_param,)* Ls> lens_rs::Lens<#data_name #data_gen> for #optics_name<Ls>
+                    impl<#(#data_gen_param,)* Ls> lens_rs::Lens<#data_name #data_gen> for lens_rs::optics::#optics_name<Ls>
                     where
                         Ls: Lens<#to>,
                         #data_gen_where
@@ -609,7 +609,7 @@ impl<'a> OpticCollector<'a> {
                 field
                     .ident
                     .as_ref()
-                    .map(|ident| format!("_{}", ident.to_string()))
+                    .map(|ident| format!("{}", ident.to_string()))
                     .map(|optic_name| self.0.insert(optic_name));
             }
         });
@@ -635,7 +635,7 @@ impl<'a> Visit<'_> for OpticCollector<'a> {
                 attr.path
                     .is_ident(&syn::Ident::new("optic", Span::call_site()))
             }) {
-                self.0.insert(format!("_{}", variant.ident));
+                self.0.insert(format!("{}", variant.ident));
             }
         })
     }
