@@ -20,7 +20,7 @@ fn test() -> Option<()> {
         a: 3,
         b: 2,
     });
-    assert_eq!(optics!(_Some.B.b).pm(x)?, 2);
+    assert_eq!(optics!(Some.B.b).pm(x)?, 2);
     
     Some(())
 }

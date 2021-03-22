@@ -64,7 +64,7 @@ fn main() {
     optics!(_1.Left._1).pm_mut(&mut x).map(|x| *x *= 2);
     optics!(_1.Right).pm_mut(&mut x).map(|x: &mut i32| *x *= 2);
     *optics!(_0).view_mut(&mut x) += 1;
-    optics!(_1.Left._0.Mapped.Some.a)
+    optics!(_1.Left._0._mapped.Some.a)
         .traverse_mut(&mut x)
         .into_iter()
         .for_each(|s| *s = s.to_uppercase());
