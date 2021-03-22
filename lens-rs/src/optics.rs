@@ -26,10 +26,12 @@ pub struct _5<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _6<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct Both<Optic>(pub Optic);
+#[allow(non_camel_case_types)]
+pub struct _both<Optic>(pub Optic);
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct Mapped<Optic>(pub Optic);
+#[allow(non_camel_case_types)]
+pub struct _mapped<Optic>(pub Optic);
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[allow(non_camel_case_types)]
@@ -523,7 +525,7 @@ mod impl_tuples {
 
     macro_rules! impl_both {
         (<$param:ident> $tuple:ty, $($fields:tt),*) => {
-            impl<Tr, $param> TraversalRef<$tuple> for Both<Tr>
+            impl<Tr, $param> TraversalRef<$tuple> for _both<Tr>
             where
                 Tr: TraversalRef<$param>
             {
@@ -536,7 +538,7 @@ mod impl_tuples {
                 }
             }
 
-            impl<Tr, $param> TraversalMut<$tuple> for Both<Tr>
+            impl<Tr, $param> TraversalMut<$tuple> for _both<Tr>
             where
                 Tr: TraversalMut<$param>
             {
@@ -547,7 +549,7 @@ mod impl_tuples {
                 }
             }
 
-            impl<Tr, $param> Traversal<$tuple> for Both<Tr>
+            impl<Tr, $param> Traversal<$tuple> for _both<Tr>
             where
                 Tr: Traversal<$param>
             {
@@ -568,7 +570,7 @@ mod impl_tuples {
     impl_both!(<A> (A, A, A, A, A, A), 0, 1, 2, 3, 4, 5);
     impl_both!(<A> (A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6);
 
-    impl<Pm, A> PrismRef<(A,)> for Both<Pm>
+    impl<Pm, A> PrismRef<(A,)> for _both<Pm>
     where
         Pm: PrismRef<A>,
     {
@@ -577,7 +579,7 @@ mod impl_tuples {
         }
     }
 
-    impl<Pm, A> PrismMut<(A,)> for Both<Pm>
+    impl<Pm, A> PrismMut<(A,)> for _both<Pm>
     where
         Pm: PrismMut<A>,
     {
@@ -586,7 +588,7 @@ mod impl_tuples {
         }
     }
 
-    impl<Pm, A> Prism<(A,)> for Both<Pm>
+    impl<Pm, A> Prism<(A,)> for _both<Pm>
     where
         Pm: Prism<A>,
     {
@@ -595,7 +597,7 @@ mod impl_tuples {
         }
     }
 
-    impl<Ls, A> LensRef<(A,)> for Both<Ls>
+    impl<Ls, A> LensRef<(A,)> for _both<Ls>
     where
         Ls: LensRef<A>,
     {
@@ -604,7 +606,7 @@ mod impl_tuples {
         }
     }
 
-    impl<Ls, A> LensMut<(A,)> for Both<Ls>
+    impl<Ls, A> LensMut<(A,)> for _both<Ls>
     where
         Ls: LensMut<A>,
     {
@@ -613,7 +615,7 @@ mod impl_tuples {
         }
     }
 
-    impl<Ls, A> Lens<(A,)> for Both<Ls>
+    impl<Ls, A> Lens<(A,)> for _both<Ls>
     where
         Ls: Lens<A>,
     {
@@ -622,7 +624,7 @@ mod impl_tuples {
         }
     }
 
-    impl<Rv, A> Review<(A,)> for Both<Rv>
+    impl<Rv, A> Review<(A,)> for _both<Rv>
     where
         Rv: Review<A>,
     {
@@ -643,7 +645,7 @@ mod impl_iters {
 
     macro_rules! impl_iter {
         (<$($param:ident)*> $iter:ty) => {
-            impl<Tr, $($param,)*> TraversalRef<$iter> for Mapped<Tr>
+            impl<Tr, $($param,)*> TraversalRef<$iter> for _mapped<Tr>
             where
                 Tr: TraversalRef<<$iter as IntoIterator>::Item>,
             {
@@ -654,7 +656,7 @@ mod impl_iters {
                 }
             }
 
-            impl<Tr, $($param,)*> TraversalMut<$iter> for Mapped<Tr>
+            impl<Tr, $($param,)*> TraversalMut<$iter> for _mapped<Tr>
             where
                 Tr: TraversalMut<<$iter as IntoIterator>::Item>,
             {
@@ -666,7 +668,7 @@ mod impl_iters {
                 }
             }
 
-            impl<Tr, $($param,)*> Traversal<$iter> for Mapped<Tr>
+            impl<Tr, $($param,)*> Traversal<$iter> for _mapped<Tr>
             where
                 Tr: Traversal<<$iter as IntoIterator>::Item>,
             {
