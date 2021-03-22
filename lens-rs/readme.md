@@ -35,9 +35,9 @@ fn test() -> Option<()> {
 
 derive lens for data types
 ```rust
-use lens_rs_derive::*;
+use lens_rs::*;
 
-#[derive(Optic, Review, Prism, Debug)]
+#[derive(Review, Prism, Debug)]
 enum AnEnum<T> {
     A(T, i32),
     #[optic] B(T),
@@ -51,17 +51,17 @@ struct Foo {
 
 
 fn test() -> Option<()> {
-    let x = optics!(_Some._B).review(Foo {
+    let x = optics!(_Some.B).review(Foo {
         a: 3,
         b: 2,
     });
-    assert_eq!(optics!(_Some._B._b).pm(x)?, 2);
+    assert_eq!(optics!(_Some.B.b).pm(x)?, 2);
     
     Some(())
 }
 ```
 
-assume a type T may have field that the type is `i32`.
+assume a type T may have substructure that the type is `i32`.
 ```rust
 fn bar<T, Pm: Prism<T, To=i32>>(t: &mut T, pm: Pm) {
     pm.pm_mut(t).map(|x| *x += 2);
@@ -70,10 +70,32 @@ fn bar<T, Pm: Prism<T, To=i32>>(t: &mut T, pm: Pm) {
 fn test() {
     let mut complex = (1, Ok((Err(2), 3)));
     bar(&mut complex, optics!(_0));
-    bar(&mut complex, optics!(_1._Err)); // do nothing
-    bar(&mut complex, optics!(_1._Ok._0._Ok)); // do nothing
-    bar(&mut complex, optics!(_1._Ok._0._Err));
-    bar(&mut complex, optics!(_1._Ok._1));
+    bar(&mut complex, optics!(_1.Err)); // do nothing
+    bar(&mut complex, optics!(_1.Ok._0.Ok)); // do nothing
+    bar(&mut complex, optics!(_1.Ok._0.Err));
+    bar(&mut complex, optics!(_1.Ok._1));
     assert_eq!(complex, (3, Ok((Err(4), 5))));
 }
+```
+
+assume a type T must have a field `.a`.
+```rust
+fn with_field_a<T>(t: T) -> String
+where
+    field![a]: Lens<T, To=String>
+{
+    optics!(a).view(t)
+}
+
+let foo = Foo {
+    a: "this is Foo".to_string(),
+    b: ()
+};
+let bar = Bar {
+    a: "this is Bar".to_string(),
+    c: 0
+};
+
+println!("{}", with_field_a(foo));
+println!("{}", with_field_a(bar));
 ```

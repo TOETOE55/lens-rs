@@ -82,7 +82,6 @@ mod impl__ {
     }
 
     impl<T> PrismRef<T> for __ {
-        type To = T;
         fn pm_ref<'a>(&self, source: &'a T) -> Option<&'a Self::To> {
             Option::Some(source)
         }
@@ -101,7 +100,6 @@ mod impl__ {
     }
 
     impl<T> LensRef<T> for __ {
-        type To = T;
         fn view_ref<'a>(&self, source: &'a T) -> &'a Self::To {
             source
         }
@@ -162,6 +160,18 @@ mod impl_result {
         }
     }
 
+    impl<Tr, T, E> Traversal<Result<T, E>> for optics::Ok<Tr>
+    where
+        Tr: Traversal<T>,
+    {
+        fn traverse(&self, source: Result<T, E>) -> Vec<Self::To> {
+            source
+                .into_iter()
+                .flat_map(|t| self.0.traverse(t))
+                .collect()
+        }
+    }
+
     impl<Tr, T, E> Traversal<Result<T, E>> for optics::Err<Tr>
     where
         Tr: Traversal<E>,
@@ -208,8 +218,6 @@ mod impl_result {
     where
         Pm: PrismRef<T>,
     {
-        type To = Pm::To;
-
         fn pm_ref<'a>(&self, source: &'a Result<T, E>) -> Option<&'a Self::To> {
             source.as_ref().ok().and_then(|t| self.0.pm_ref(t))
         }
@@ -248,7 +256,6 @@ mod impl_result {
     where
         Pm: PrismRef<E>,
     {
-        type To = Pm::To;
         fn pm_ref<'a>(&self, source: &'a Result<T, E>) -> Option<&'a Self::To> {
             source.as_ref().err().and_then(|t| self.0.pm_ref(t))
         }
@@ -333,7 +340,6 @@ mod impl_some {
     where
         Pm: PrismRef<T>,
     {
-        type To = Pm::To;
         fn pm_ref<'a>(&self, source: &'a Option<T>) -> Option<&'a Self::To> {
             source.as_ref().and_then(|t| self.0.pm_ref(t))
         }
@@ -343,7 +349,6 @@ mod impl_some {
     where
         Pm: PrismMut<T>,
     {
-
         fn pm_mut<'a>(&self, source: &'a mut Option<T>) -> Option<&'a mut Self::To> {
             source.as_mut().and_then(|t| self.0.pm_mut(t))
         }
@@ -353,7 +358,6 @@ mod impl_some {
     where
         Pm: Prism<T>,
     {
-
         fn pm(&self, source: Option<T>) -> Option<Self::To> {
             source.and_then(|t| self.0.pm(t))
         }
@@ -415,7 +419,6 @@ mod impl_tuples {
             where
                 Pm: PrismRef<$to>,
             {
-                type To = Pm::To;
 
                 fn pm_ref<'a>(&self, source: &'a ($($param,)*)) -> Option<&'a Self::To> {
                     self.0.pm_ref(&source.$field)
@@ -426,7 +429,6 @@ mod impl_tuples {
             where
                 Pm: PrismMut<$to>,
             {
-                // type To = Pm::To;
 
                 fn pm_mut<'a>(&self, source: &'a mut ($($param,)*)) -> Option<&'a mut Self::To> {
                     self.0.pm_mut(&mut source.$field)
@@ -437,7 +439,6 @@ mod impl_tuples {
             where
                 Pm: Prism<$to>,
             {
-                // type To = Pm::To;
 
                 fn pm(&self, source: ($($param,)*)) -> Option<Self::To> {
                     self.0.pm(source.$field)
@@ -448,8 +449,6 @@ mod impl_tuples {
             where
                 Ls: LensRef<$to>,
             {
-                type To = Ls::To;
-
                 fn view_ref<'a>(&self, source: &'a ($($param,)*)) -> &'a Self::To {
                     self.0.view_ref(&source.$field)
                 }
@@ -573,8 +572,6 @@ mod impl_tuples {
     where
         Pm: PrismRef<A>,
     {
-        type To = Pm::To;
-
         fn pm_ref<'a>(&self, source: &'a (A,)) -> Option<&'a Self::To> {
             self.0.pm_ref(&source.0)
         }
@@ -602,8 +599,6 @@ mod impl_tuples {
     where
         Ls: LensRef<A>,
     {
-        type To = Ls::To;
-
         fn view_ref<'a>(&self, source: &'a (A,)) -> &'a Self::To {
             self.0.view_ref(&source.0)
         }
@@ -713,7 +708,6 @@ mod impl_ptr {
                 where
                     Pm: PrismRef<<$ptr as Deref>::Target>,
             {
-                type To = Pm::To;
                 fn pm_ref<'a>(&self, source: &'a $ptr) -> Option<&'a Self::To> {
                     self.0.pm_ref(source)
                 }
@@ -723,8 +717,6 @@ mod impl_ptr {
                 where
                     Ls: LensRef<<$ptr as Deref>::Target>
             {
-                type To = Ls::To;
-
                 fn view_ref<'a>(&self, source: &'a $ptr) -> &'a Self::To {
                     self.0.view_ref(source)
                 }
@@ -736,7 +728,7 @@ mod impl_ptr {
         (<$($life:lifetime),*; $($param:ident),*> $ptr:ty, $optic:ident) => {
             impl<$($life,)* $($param,)* Tr> TraversalMut<$ptr> for $optic<Tr>
             where
-                    Tr: TraversalMut<<$ptr as Deref>::Target>,
+                Tr: TraversalMut<<$ptr as Deref>::Target>,
             {
                 fn traverse_mut<'a>(&self, source: &'a mut $ptr) -> Vec<&'a mut Self::To> {
                     self.0.traverse_mut(source)
@@ -744,8 +736,8 @@ mod impl_ptr {
             }
 
             impl<$($life,)* $($param,)* Pm> PrismMut<$ptr> for $optic<Pm>
-                where
-                    Pm: PrismMut<<$ptr as Deref>::Target>,
+            where
+                Pm: PrismMut<<$ptr as Deref>::Target>,
             {
                 fn pm_mut<'a>(&self, source: &'a mut $ptr) -> Option<&'a mut Self::To> {
                     self.0.pm_mut(source)
@@ -753,8 +745,8 @@ mod impl_ptr {
             }
 
             impl<$($life,)* $($param,)* Ls> LensMut<$ptr> for $optic<Ls>
-                where
-                    Ls: LensMut<<$ptr as Deref>::Target>
+            where
+                Ls: LensMut<<$ptr as Deref>::Target>
             {
                 fn view_mut<'a>(&self, source: &'a mut $ptr) -> &'a mut Self::To {
                     self.0.view_mut(source)

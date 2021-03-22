@@ -48,16 +48,15 @@ let mut x: (_, Result<_, ()>) = (1, Ok((2, 3)));
 assert_eq!(optics!(_1._Ok._1).pm(x)?, 6);
 ```
 */
-pub trait PrismRef<T> {
-    type To;
+pub trait PrismRef<T>: TraversalRef<T> {
     fn pm_ref<'a>(&self, source: &'a T) -> Option<&'a Self::To>;
 }
 
-pub trait PrismMut<T>: PrismRef<T> {
+pub trait PrismMut<T>: PrismRef<T> + TraversalMut<T> {
     fn pm_mut<'a>(&self, source: &'a mut T) -> Option<&'a mut Self::To>;
 }
 
-pub trait Prism<T>: PrismMut<T> {
+pub trait Prism<T>: PrismMut<T> + Traversal<T> {
     fn pm(&self, source: T) -> Option<Self::To>;
 }
 
@@ -71,15 +70,14 @@ let mut x = (1, (2, (3, 4)));
 assert_eq!(optics!(_1._1._1).view(x), 8);
 ```
 */
-pub trait LensRef<T> {
-    type To;
+pub trait LensRef<T>: PrismRef<T> {
     fn view_ref<'a>(&self, source: &'a T) -> &'a Self::To;
 }
 
-pub trait LensMut<T>: LensRef<T> {
+pub trait LensMut<T>: LensRef<T> + PrismMut<T> {
     fn view_mut<'a>(&self, source: &'a mut T) -> &'a mut Self::To;
 }
 
-pub trait Lens<T>: LensMut<T> {
+pub trait Lens<T>: LensMut<T> + Prism<T> {
     fn view(&self, source: T) -> Self::To;
 }

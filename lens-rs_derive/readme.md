@@ -3,24 +3,24 @@ deriving lens for custom data types.
 
 ## Example
 ```rust
-#[derive(Optic, Review, Prism, Debug)]
+#[derive(Review, Prism, Debug)]
 enum AnEnum<T> {
     A(T, i32),
     #[optic] B(T),
 }
 
-#[derive(Optic, Lens, Debug)]
+#[derive(Lens, Debug)]
 struct Foo {
     #[optic] a: i32,
     #[optic] b: i32,
 }
 
 fn test() -> Option<()> {
-    let x = optics!(_Some._B).review(Foo {
+    let x = optics!(Some.B).review(Foo {
         a: 3,
         b: 2,
     });
-    assert_eq!(optics!(_Some._B._b).pm(x)?, 2);
+    assert_eq!(optics!(_Some.B.b).pm(x)?, 2);
     
     Some(())
 }
