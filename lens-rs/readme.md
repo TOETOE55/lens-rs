@@ -99,3 +99,13 @@ let bar = Bar {
 println!("{}", with_field_a(foo));
 println!("{}", with_field_a(bar));
 ```
+
+## Cargo.toml
+
+add it in Cargo.toml
+
+```toml
+[package.metadata.inwelling]
+lens-rs = true
+```
+
