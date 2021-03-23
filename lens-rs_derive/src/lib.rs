@@ -395,7 +395,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
                     impl<#(#data_gen_param,)* Ls> lens_rs::LensMut<#data_name #data_gen> for lens_rs::optics::#optics_name<Ls>
                     where
-                        Ls: LensMut<#to>,
+                        Ls: lens_rs::LensMut<#to>,
                         #data_gen_where
                     {
                         fn view_mut<'__a98shdai>(&self, source: &'__a98shdai mut #data_name #data_gen) -> &'__a98shdai mut Self::To {

@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "lens-rs",
-    "lens-rs_derive"
+    "lens-rs_derive",
+    "lens-rs_test"
 ]

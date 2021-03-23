@@ -15,8 +15,8 @@ pub use lens_rs_derive::{Lens, Prism, Review};
 
 #[macro_export]
 macro_rules! optics {
-    () => { __ };
-    ($optic:ident) => { lens_rs::optics::$optic(__) };
+    () => { lens_rs::optics::__ };
+    ($optic:ident) => { lens_rs::optics::$optic(lens_rs::optics::__) };
     ($optic:ident . $($optics:tt)*) => {
         lens_rs::optics::$optic(optics!($($optics)*))
     }
@@ -24,8 +24,8 @@ macro_rules! optics {
 
 #[macro_export]
 macro_rules! field {
-    [] => { __ };
-    [$optic:ident] => { lens_rs::optics::$optic<__> };
+    [] => { lens_rs::optics::__ };
+    [$optic:ident] => { lens_rs::optics::$optic<lens_rs::optics::__> };
     [$optic:ident . $($optics:tt)*] => {
         lens_rs::optics::$optic<field![$($optics)*]>
     }
