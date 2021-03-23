@@ -23,7 +23,7 @@ optics!(_1.Mapped._Some._0)
     .traverse_mut(&mut x)
     .into_iter()
     .for_each(|i| *i += 1);
-assert_eq!(optics!(_1.Mapped._Some._0).traverse(x), vec![3]);
+assert_eq!(optics!(_1._mapped.Some._0).traverse(x), vec![3]);
 ```
 */
 pub trait TraversalRef<T> {
@@ -44,8 +44,8 @@ A trait representing the optics behaves as the first-class pattern.
 A `Prism` can access the substructure may exist.
 ```
 let mut x: (_, Result<_, ()>) = (1, Ok((2, 3)));
-*optics!(_1._Ok._1).pm_mut(&mut x)? *= 2;
-assert_eq!(optics!(_1._Ok._1).pm(x)?, 6);
+*optics!(_1.Ok._1).pm_mut(&mut x)? *= 2;
+assert_eq!(optics!(_1.Ok._1).pm(x)?, 6);
 ```
 */
 pub trait PrismRef<T>: TraversalRef<T> {
