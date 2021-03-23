@@ -43,7 +43,7 @@ enum AnEnum<T> {
     #[optic] B(T),
 }
 
-#[derive(Optic, Lens, Debug)]
+#[derive(Lens, Debug)]
 struct Foo {
     #[optic] a: i32,
     #[optic] b: i32,
