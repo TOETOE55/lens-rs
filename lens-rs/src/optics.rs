@@ -694,10 +694,10 @@ mod impl_ptr {
     use std::sync::Arc;
 
     macro_rules! impl_ref {
-        (<$($life:lifetime),*; $($param:ident),*> $ptr:ty, $optic:ident) => {
-            impl<$($life,)* $($param,)* Tr> TraversalRef<$ptr> for $optic<Tr>
+        (<$($life:lifetime),*; $param:ident> $ptr:ty, $optic:ident) => {
+            impl<$($life,)* $param: ?Sized, Tr> TraversalRef<$ptr> for $optic<Tr>
             where
-                    Tr: TraversalRef<<$ptr as Deref>::Target>,
+                Tr: TraversalRef<<$ptr as Deref>::Target>,
             {
                 type To = Tr::To;
 
@@ -706,7 +706,7 @@ mod impl_ptr {
                 }
             }
 
-            impl<$($life,)* $($param,)* Pm> PrismRef<$ptr> for $optic<Pm>
+            impl<$($life,)* $param: ?Sized, Pm> PrismRef<$ptr> for $optic<Pm>
                 where
                     Pm: PrismRef<<$ptr as Deref>::Target>,
             {
@@ -715,7 +715,7 @@ mod impl_ptr {
                 }
             }
 
-            impl<$($life,)* $($param,)* Ls> LensRef<$ptr> for $optic<Ls>
+            impl<$($life,)* $param: ?Sized, Ls> LensRef<$ptr> for $optic<Ls>
                 where
                     Ls: LensRef<<$ptr as Deref>::Target>
             {
@@ -727,8 +727,8 @@ mod impl_ptr {
     }
 
     macro_rules! impl_mut {
-        (<$($life:lifetime),*; $($param:ident),*> $ptr:ty, $optic:ident) => {
-            impl<$($life,)* $($param,)* Tr> TraversalMut<$ptr> for $optic<Tr>
+        (<$($life:lifetime),*; $param:ident> $ptr:ty, $optic:ident) => {
+            impl<$($life,)* $param: ?Sized, Tr> TraversalMut<$ptr> for $optic<Tr>
             where
                 Tr: TraversalMut<<$ptr as Deref>::Target>,
             {
@@ -737,7 +737,7 @@ mod impl_ptr {
                 }
             }
 
-            impl<$($life,)* $($param,)* Pm> PrismMut<$ptr> for $optic<Pm>
+            impl<$($life,)* $param: ?Sized, Pm> PrismMut<$ptr> for $optic<Pm>
             where
                 Pm: PrismMut<<$ptr as Deref>::Target>,
             {
@@ -746,7 +746,7 @@ mod impl_ptr {
                 }
             }
 
-            impl<$($life,)* $($param,)* Ls> LensMut<$ptr> for $optic<Ls>
+            impl<$($life,)* $param: ?Sized, Ls> LensMut<$ptr> for $optic<Ls>
             where
                 Ls: LensMut<<$ptr as Deref>::Target>
             {

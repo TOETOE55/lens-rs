@@ -26,12 +26,12 @@ optics!(_1.Mapped._Some._0)
 assert_eq!(optics!(_1._mapped.Some._0).traverse(x), vec![3]);
 ```
 */
-pub trait TraversalRef<T> {
+pub trait TraversalRef<T: ?Sized> {
     type To;
     fn traverse_ref<'a>(&self, source: &'a T) -> Vec<&'a Self::To>;
 }
 
-pub trait TraversalMut<T>: TraversalRef<T> {
+pub trait TraversalMut<T: ?Sized>: TraversalRef<T> {
     fn traverse_mut<'a>(&self, source: &'a mut T) -> Vec<&'a mut Self::To>;
 }
 
@@ -48,11 +48,11 @@ let mut x: (_, Result<_, ()>) = (1, Ok((2, 3)));
 assert_eq!(optics!(_1.Ok._1).pm(x)?, 6);
 ```
 */
-pub trait PrismRef<T>: TraversalRef<T> {
+pub trait PrismRef<T: ?Sized>: TraversalRef<T> {
     fn pm_ref<'a>(&self, source: &'a T) -> Option<&'a Self::To>;
 }
 
-pub trait PrismMut<T>: PrismRef<T> + TraversalMut<T> {
+pub trait PrismMut<T: ?Sized>: PrismRef<T> + TraversalMut<T> {
     fn pm_mut<'a>(&self, source: &'a mut T) -> Option<&'a mut Self::To>;
 }
 
@@ -70,11 +70,11 @@ let mut x = (1, (2, (3, 4)));
 assert_eq!(optics!(_1._1._1).view(x), 8);
 ```
 */
-pub trait LensRef<T>: PrismRef<T> {
+pub trait LensRef<T: ?Sized>: PrismRef<T> {
     fn view_ref<'a>(&self, source: &'a T) -> &'a Self::To;
 }
 
-pub trait LensMut<T>: LensRef<T> + PrismMut<T> {
+pub trait LensMut<T: ?Sized>: LensRef<T> + PrismMut<T> {
     fn view_mut<'a>(&self, source: &'a mut T) -> &'a mut Self::To;
 }
 
