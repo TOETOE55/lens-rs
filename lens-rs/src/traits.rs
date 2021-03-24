@@ -1,3 +1,5 @@
+use std::iter::FromIterator;
+
 /**
 * A trait representing the optics describes how to construct a single value.
 * ## Example
@@ -10,7 +12,12 @@
 */
 pub trait Review<T> {
     type From;
-    fn review(&self, from: Self::From) -> T;
+    fn review<F: Into<Self::From>>(&self, from: F) -> T;
+}
+
+pub trait Fold<T>: Review<T> {
+    type From;
+    fn fold<F: IntoIterator<Item=Self::From>>(&self, from: F) -> T;
 }
 
 /**
@@ -28,11 +35,15 @@ assert_eq!(optics!(_1._mapped.Some._0).traverse(x), vec![3]);
 */
 pub trait TraversalRef<T> {
     type To;
-    fn traverse_ref<'a>(&self, source: &'a T) -> Vec<&'a Self::To>;
+    fn traverse_ref<'a, F: FromIterator<&'a Self::To>>(&self, source: &'a T) -> F
+    where
+        Self::To: 'a;
 }
 
 pub trait TraversalMut<T>: TraversalRef<T> {
-    fn traverse_mut<'a>(&self, source: &'a mut T) -> Vec<&'a mut Self::To>;
+    fn traverse_mut<'a, F: FromIterator<&'a mut Self::To>>(&self, source: &'a mut T) -> F
+    where
+        Self::To: 'a;
 }
 
 pub trait Traversal<T>: TraversalMut<T> {
@@ -49,15 +60,19 @@ assert_eq!(optics!(_1.Ok._1).pm(x)?, 6);
 ```
 */
 pub trait PrismRef<T>: TraversalRef<T> {
-    fn pm_ref<'a>(&self, source: &'a T) -> Option<&'a Self::To>;
+    fn pm_ref<'a, F: From<Option<&'a Self::To>>>(&self, source: &'a T) -> F
+    where
+        Self::To: 'a;
 }
 
 pub trait PrismMut<T>: PrismRef<T> + TraversalMut<T> {
-    fn pm_mut<'a>(&self, source: &'a mut T) -> Option<&'a mut Self::To>;
+    fn pm_mut<'a, F: From<Option<&'a mut Self::To>>>(&self, source: &'a mut T) -> F
+    where
+        Self::To: 'a;
 }
 
 pub trait Prism<T>: PrismMut<T> + Traversal<T> {
-    fn pm(&self, source: T) -> Option<Self::To>;
+    fn pm<F: From<Option<Self::To>>>(&self, source: T) -> F;
 }
 
 /**
@@ -71,13 +86,17 @@ assert_eq!(optics!(_1._1._1).view(x), 8);
 ```
 */
 pub trait LensRef<T>: PrismRef<T> {
-    fn view_ref<'a>(&self, source: &'a T) -> &'a Self::To;
+    fn view_ref<'a, F: From<&'a Self::To>>(&self, source: &'a T) -> F
+    where
+        Self::To: 'a;
 }
 
 pub trait LensMut<T>: LensRef<T> + PrismMut<T> {
-    fn view_mut<'a>(&self, source: &'a mut T) -> &'a mut Self::To;
+    fn view_mut<'a, F: From<&'a mut Self::To>>(&self, source: &'a mut T) -> F
+    where
+        Self::To: 'a;
 }
 
 pub trait Lens<T>: LensMut<T> + Prism<T> {
-    fn view(&self, source: T) -> Self::To;
+    fn view<F: From<Self::To>>(&self, source: T) -> F;
 }
