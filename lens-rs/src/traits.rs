@@ -15,11 +15,6 @@ pub trait Review<T> {
     fn review<F: Into<Self::From>>(&self, from: F) -> T;
 }
 
-pub trait Fold<T>: Review<T> {
-    type From;
-    fn fold<F: IntoIterator<Item=Self::From>>(&self, from: F) -> T;
-}
-
 /**
 A trait representing the optics allows you to traverse over a structure and change out its contents.
 A `Traversal` can access the multiple substructures.
@@ -33,21 +28,21 @@ optics!(_1.Mapped._Some._0)
 assert_eq!(optics!(_1._mapped.Some._0).traverse(x), vec![3]);
 ```
 */
-pub trait TraversalRef<T> {
+pub trait TraversalRef<T: ?Sized> {
     type To;
     fn traverse_ref<'a, F: FromIterator<&'a Self::To>>(&self, source: &'a T) -> F
     where
         Self::To: 'a;
 }
 
-pub trait TraversalMut<T>: TraversalRef<T> {
+pub trait TraversalMut<T: ?Sized>: TraversalRef<T> {
     fn traverse_mut<'a, F: FromIterator<&'a mut Self::To>>(&self, source: &'a mut T) -> F
     where
         Self::To: 'a;
 }
 
 pub trait Traversal<T>: TraversalMut<T> {
-    fn traverse(&self, source: T) -> Vec<Self::To>;
+    fn traverse<F: FromIterator<Self::To>>(&self, source: T) -> F;
 }
 
 /**
@@ -59,13 +54,13 @@ let mut x: (_, Result<_, ()>) = (1, Ok((2, 3)));
 assert_eq!(optics!(_1.Ok._1).pm(x)?, 6);
 ```
 */
-pub trait PrismRef<T>: TraversalRef<T> {
+pub trait PrismRef<T: ?Sized>: TraversalRef<T> {
     fn pm_ref<'a, F: From<Option<&'a Self::To>>>(&self, source: &'a T) -> F
     where
         Self::To: 'a;
 }
 
-pub trait PrismMut<T>: PrismRef<T> + TraversalMut<T> {
+pub trait PrismMut<T: ?Sized>: PrismRef<T> + TraversalMut<T> {
     fn pm_mut<'a, F: From<Option<&'a mut Self::To>>>(&self, source: &'a mut T) -> F
     where
         Self::To: 'a;
@@ -85,13 +80,13 @@ let mut x = (1, (2, (3, 4)));
 assert_eq!(optics!(_1._1._1).view(x), 8);
 ```
 */
-pub trait LensRef<T>: PrismRef<T> {
+pub trait LensRef<T: ?Sized>: PrismRef<T> {
     fn view_ref<'a, F: From<&'a Self::To>>(&self, source: &'a T) -> F
     where
         Self::To: 'a;
 }
 
-pub trait LensMut<T>: LensRef<T> + PrismMut<T> {
+pub trait LensMut<T: ?Sized>: LensRef<T> + PrismMut<T> {
     fn view_mut<'a, F: From<&'a mut Self::To>>(&self, source: &'a mut T) -> F
     where
         Self::To: 'a;
