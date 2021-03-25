@@ -1,6 +1,6 @@
 # lens-rs guide
 
-Several days ago, I've written a library [`lens-rs`](https://github.com/TOETOE55/lens-rs) for Rust accidentally . 
+Several days ago, I've written a library [`lens-rs`](https://github.com/TOETOE55/lens-rs) for Rust. 
 
 Before, I have never imagined that the lens could be implemented in Rust and would be so useful in Rust.Compare with `lens` in Haskell, there are no weird operators, grotesque symbols and confusing types in this case. 
 
@@ -172,12 +172,12 @@ pub trait Review<T> {
 }
 
 /// Traversal
-pub trait TraversalRef<T> {
+pub trait TraversalRef<T: ?Sized> {
     type To;
     fn traverse_ref<'a>(&self, source: &'a T) -> Vec<&'a Self::To>;
 }
 
-pub trait TraversalMut<T>: TraversalRef<T> {
+pub trait TraversalMut<T: ?Sized>: TraversalRef<T> {
     fn traverse_mut<'a>(&self, source: &'a mut T) -> Vec<&'a mut Self::To>;
 }
 
@@ -186,11 +186,11 @@ pub trait Traversal<T>: TraversalMut<T> {
 }
 
 /// Prism
-pub trait PrismRef<T>: TraversalRef<T> {
+pub trait PrismRef<T: ?Sized>: TraversalRef<T> {
     fn pm_ref<'a>(&self, source: &'a T) -> Option<&'a Self::To>;
 }
 
-pub trait PrismMut<T>: PrismRef<T> + TraversalMut<T> {
+pub trait PrismMut<T: ?Sized>: PrismRef<T> + TraversalMut<T> {
     fn pm_mut<'a>(&self, source: &'a mut T) -> Option<&'a mut Self::To>;
 }
 
@@ -200,11 +200,11 @@ pub trait Prism<T>: PrismMut<T> + Traversal<T> {
 }
 
 /// Lens
-pub trait LensRef<T>: PrismRef<T> {
+pub trait LensRef<T: ?Sized>: PrismRef<T> {
     fn view_ref<'a>(&self, source: &'a T) -> &'a Self::To;
 }
 
-pub trait LensMut<T>: LensRef<T> + PrismMut<T> {
+pub trait LensMut<T: ?Sized>: LensRef<T> + PrismMut<T> {
     fn view_mut<'a>(&self, source: &'a mut T) -> &'a mut Self::To;
 }
 
@@ -281,4 +281,4 @@ oh, don't forget to add this in `Cargo.toml`
 lens-rs = true
 ```
 
-Finally, I must thank @oooutlk, he helped me a lot in developing `lens-rs_derive`(generating optics in `lens_rs::optics` using `inwelling`).
+Finally, I must thank @oooutlk, he helped me a lot in developing `lens-rs_derive`(generating optics in `lens_rs::optics` using [`inwelling`](https://github.com/oooutlk/inwelling)).
