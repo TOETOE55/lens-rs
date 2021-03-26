@@ -166,7 +166,7 @@ mod impl_result {
     where
         Tr: Traversal<T>,
     {
-        fn traverse(&self, source: Result<T, E>) -> Vec<Self::To> {
+        fn traverse(&self, source: Result<T, E>) -> Vec<Self::To> where Self::To: Sized {
             source
                 .into_iter()
                 .flat_map(|t| self.0.traverse(t))
@@ -178,7 +178,7 @@ mod impl_result {
     where
         Tr: Traversal<E>,
     {
-        fn traverse(&self, source: Result<T, E>) -> Vec<Self::To> {
+        fn traverse(&self, source: Result<T, E>) -> Vec<Self::To> where Self::To: Sized {
             source
                 .err()
                 .into_iter()
@@ -238,7 +238,7 @@ mod impl_result {
     where
         Pm: Prism<T>,
     {
-        fn pm(&self, source: Result<T, E>) -> Option<Self::To> {
+        fn pm(&self, source: Result<T, E>) -> Option<Self::To> where Self::To: Sized {
             source.ok().and_then(|t| self.0.pm(t))
         }
     }
@@ -276,7 +276,7 @@ mod impl_result {
     where
         Pm: Prism<E>,
     {
-        fn pm(&self, source: Result<T, E>) -> Option<Self::To> {
+        fn pm(&self, source: Result<T, E>) -> Option<Self::To> where Self::To: Sized {
             source.err().and_then(|t| self.0.pm(t))
         }
     }
@@ -330,7 +330,7 @@ mod impl_some {
     where
         Tr: Traversal<T>,
     {
-        fn traverse(&self, source: Option<T>) -> Vec<Self::To> {
+        fn traverse(&self, source: Option<T>) -> Vec<Self::To> where Self::To: Sized {
             source
                 .into_iter()
                 .flat_map(|t| self.0.traverse(t))
@@ -360,7 +360,7 @@ mod impl_some {
     where
         Pm: Prism<T>,
     {
-        fn pm(&self, source: Option<T>) -> Option<Self::To> {
+        fn pm(&self, source: Option<T>) -> Option<Self::To> where Self::To: Sized {
             source.and_then(|t| self.0.pm(t))
         }
     }
@@ -412,7 +412,7 @@ mod impl_tuples {
             where
                 Tr: Traversal<$to>,
             {
-                fn traverse(&self, source: ($($param,)*)) -> Vec<Self::To> {
+                fn traverse(&self, source: ($($param,)*)) -> Vec<Self::To> where Self::To: Sized {
                     self.0.traverse(source.$field)
                 }
             }
@@ -442,7 +442,7 @@ mod impl_tuples {
                 Pm: Prism<$to>,
             {
 
-                fn pm(&self, source: ($($param,)*)) -> Option<Self::To> {
+                fn pm(&self, source: ($($param,)*)) -> Option<Self::To> where Self::To: Sized {
                     self.0.pm(source.$field)
                 }
             }
@@ -469,7 +469,7 @@ mod impl_tuples {
             where
                 Ls: Lens<$to>,
             {
-                fn view(&self, source: ($($param,)*)) -> Self::To {
+                fn view(&self, source: ($($param,)*)) -> Self::To where Self::To: Sized {
                     self.0.view(source.$field)
                 }
             }
@@ -553,7 +553,7 @@ mod impl_tuples {
             where
                 Tr: Traversal<$param>
             {
-                fn traverse(&self, source: $tuple) -> Vec<Self::To> {
+                fn traverse(&self, source: $tuple) -> Vec<Self::To> where Self::To: Sized {
                     let mut vec = vec![];
                     $(vec.extend(self.0.traverse(source.$fields));)*
                     vec
@@ -592,7 +592,7 @@ mod impl_tuples {
     where
         Pm: Prism<A>,
     {
-        fn pm(&self, source: (A,)) -> Option<Self::To> {
+        fn pm(&self, source: (A,)) -> Option<Self::To> where Self::To: Sized {
             self.0.pm(source.0)
         }
     }
@@ -619,7 +619,7 @@ mod impl_tuples {
     where
         Ls: Lens<A>,
     {
-        fn view(&self, source: (A,)) -> Self::To {
+        fn view(&self, source: (A,)) -> Self::To where Self::To: Sized {
             self.0.view(source.0)
         }
     }
@@ -644,10 +644,10 @@ mod impl_iters {
     use std::collections::*;
 
     macro_rules! impl_iter {
-        (<$($param:ident)*> $iter:ty) => {
-            impl<Tr, $($param,)*> TraversalRef<$iter> for _mapped<Tr>
+        (<$param:ident> $iter:ty) => {
+            impl<Tr, $param> TraversalRef<$iter> for _mapped<Tr>
             where
-                Tr: TraversalRef<<$iter as IntoIterator>::Item>,
+                Tr: TraversalRef<$param>,
             {
                 type To = Tr::To;
 
@@ -656,9 +656,9 @@ mod impl_iters {
                 }
             }
 
-            impl<Tr, $($param,)*> TraversalMut<$iter> for _mapped<Tr>
+            impl<Tr, $param> TraversalMut<$iter> for _mapped<Tr>
             where
-                Tr: TraversalMut<<$iter as IntoIterator>::Item>,
+                Tr: TraversalMut<$param>,
             {
                 fn traverse_mut<'a>(&self, source: &'a mut $iter) -> Vec<&'a mut Self::To> {
                     source
@@ -668,11 +668,11 @@ mod impl_iters {
                 }
             }
 
-            impl<Tr, $($param,)*> Traversal<$iter> for _mapped<Tr>
+            impl<Tr, $param> Traversal<$iter> for _mapped<Tr>
             where
-                Tr: Traversal<<$iter as IntoIterator>::Item>,
+                Tr: Traversal<$param>,
             {
-                fn traverse(&self, source: $iter) -> Vec<Self::To> {
+                fn traverse(&self, source: $iter) -> Vec<Self::To> where Self::To: Sized {
                     source
                         .into_iter()
                         .flat_map(|t| self.0.traverse(t))
@@ -772,7 +772,7 @@ mod impl_ptr {
     where
         Tr: Traversal<T>,
     {
-        fn traverse(&self, source: Box<T>) -> Vec<Self::To> {
+        fn traverse(&self, source: Box<T>) -> Vec<Self::To> where Self::To: Sized {
             self.0.traverse(*source)
         }
     }
@@ -781,7 +781,7 @@ mod impl_ptr {
     where
         Pm: Prism<T>,
     {
-        fn pm(&self, source: Box<T>) -> Option<Self::To> {
+        fn pm(&self, source: Box<T>) -> Option<Self::To> where Self::To: Sized {
             self.0.pm(*source)
         }
     }
@@ -790,7 +790,7 @@ mod impl_ptr {
     where
         Ls: Lens<T>,
     {
-        fn view(&self, source: Box<T>) -> Self::To {
+        fn view(&self, source: Box<T>) -> Self::To where Self::To: Sized {
             self.0.view(*source)
         }
     }

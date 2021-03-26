@@ -88,7 +88,7 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
                         __Rv: lens_rs::Review<#ty>,
                         #data_gen_where
                     {
-                        type From = Rv::From;
+                        type From = __Rv::From;
 
                         fn review(&self, from: Self::From) -> #data_name #data_gen {
                             // let tuple = self.0.review(from);
@@ -215,7 +215,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         __Tr: lens_rs::Traversal<#ty>,
                         #data_gen_where
                     {
-                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> {
+                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> where Self::To: Sized {
                             use #data_name::*;
                             match source {
                                 #var_name(x) => self.0.traverse(x),
@@ -229,7 +229,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         __Pm: lens_rs::Prism<#ty>,
                         #data_gen_where
                     {
-                        fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> {
+                        fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> where Self::To: Sized {
                             use #data_name::*;
                             match source {
                                 #var_name(x) => self.0.pm(x),
@@ -304,7 +304,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
                     impl<#(#data_gen_param,)* __Pm> lens_rs::PrismRef<#data_name #data_gen> for lens_rs::optics::#optics_name<__Pm>
                     where
-                        Pm: lens_rs::PrismRef<#to>,
+                        __Pm: lens_rs::PrismRef<#to>,
                         #data_gen_where
                     {
                         fn pm_ref<'__a98shdai>(&self, source: &'__a98shdai #data_name #data_gen) -> Option<&'__a98shdai Self::To> {
@@ -359,20 +359,20 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 let impl_mv = quote! {
                     impl<#(#data_gen_param,)* __Tr> lens_rs::Traversal<#data_name #data_gen> for lens_rs::optics::#optics_name<__Tr>
                     where
-                        Tr: lens_rs::Traversal<#to>,
+                        __Tr: lens_rs::Traversal<#to>,
                         #data_gen_where
                     {
-                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> {
+                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> where Self::To: Sized {
                             self.0.traverse(source.#field_name)
                         }
                     }
 
                     impl<#(#data_gen_param,)* __Pm> lens_rs::Prism<#data_name #data_gen> for lens_rs::optics::#optics_name<__Pm>
                     where
-                        Pm: lens_rs::Prism<#to>,
+                        __Pm: lens_rs::Prism<#to>,
                         #data_gen_where
                     {
-                        fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> {
+                        fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> where Self::To: Sized {
                             self.0.pm(source.#field_name)
                         }
                     }
@@ -382,7 +382,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         __Ls: lens_rs::Lens<#to>,
                         #data_gen_where
                     {
-                        fn view(&self, source: #data_name #data_gen) -> Self::To {
+                        fn view(&self, source: #data_name #data_gen) -> Self::To where Self::To: Sized {
                             self.0.view(source.#field_name)
                         }
                     }
@@ -465,7 +465,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 let impl_mut = quote! {
                     impl<#(#data_gen_param,)* __Tr> lens_rs::TraversalMut<#data_name #data_gen> for lens_rs::optics::#optics_name<__Tr>
                     where
-                        Tr: lens_rs::TraversalMut<#to>,
+                        __Tr: lens_rs::TraversalMut<#to>,
                         #data_gen_where
                     {
                         fn traverse_mut<'a>(&self, source: &'a mut #data_name #data_gen) -> Vec<&'a mut Self::To> {
@@ -501,7 +501,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         __Tr: lens_rs::Traversal<#to>,
                         #data_gen_where
                     {
-                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> {
+                        fn traverse(&self, source: #data_name #data_gen) -> Vec<Self::To> where Self::To: Sized {
                             self.0.traverse(source.#field_name)
                         }
                     }
@@ -511,7 +511,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         __Pm: lens_rs::Prism<#to>,
                         #data_gen_where
                     {
-                        fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> {
+                        fn pm(&self, source: #data_name #data_gen) -> Option<Self::To> where Self::To: Sized {
                             self.0.pm(source.#field_name)
                         }
                     }
@@ -521,7 +521,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         __Ls: lens_rs::Lens<#to>,
                         #data_gen_where
                     {
-                        fn view(&self, source: #data_name #data_gen) -> Self::To {
+                        fn view(&self, source: #data_name #data_gen) -> Self::To where Self::To: Sized {
                             self.0.view(source.#field_name)
                         }
                     }

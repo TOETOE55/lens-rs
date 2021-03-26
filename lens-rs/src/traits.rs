@@ -27,7 +27,7 @@ assert_eq!(optics!(_1._mapped.Some._0).traverse(x), vec![3]);
 ```
 */
 pub trait TraversalRef<T: ?Sized> {
-    type To;
+    type To: ?Sized;
     fn traverse_ref<'a>(&self, source: &'a T) -> Vec<&'a Self::To>;
 }
 
@@ -36,7 +36,7 @@ pub trait TraversalMut<T: ?Sized>: TraversalRef<T> {
 }
 
 pub trait Traversal<T>: TraversalMut<T> {
-    fn traverse(&self, source: T) -> Vec<Self::To>;
+    fn traverse(&self, source: T) -> Vec<Self::To> where Self::To: Sized;
 }
 
 /**
@@ -57,7 +57,7 @@ pub trait PrismMut<T: ?Sized>: PrismRef<T> + TraversalMut<T> {
 }
 
 pub trait Prism<T>: PrismMut<T> + Traversal<T> {
-    fn pm(&self, source: T) -> Option<Self::To>;
+    fn pm(&self, source: T) -> Option<Self::To> where Self::To: Sized;
 }
 
 /**
@@ -79,5 +79,5 @@ pub trait LensMut<T: ?Sized>: LensRef<T> + PrismMut<T> {
 }
 
 pub trait Lens<T>: LensMut<T> + Prism<T> {
-    fn view(&self, source: T) -> Self::To;
+    fn view(&self, source: T) -> Self::To where Self::To: Sized;
 }
