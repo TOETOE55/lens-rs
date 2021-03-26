@@ -26,17 +26,17 @@ optics!(_1.Mapped._Some._0)
 assert_eq!(optics!(_1._mapped.Some._0).traverse(x), vec![3]);
 ```
 */
-pub trait TraversalRef<T: ?Sized> {
+pub trait TraversalRef<Optics> {
     type To: ?Sized;
-    fn traverse_ref<'a>(&self, source: &'a T) -> Vec<&'a Self::To>;
+    fn traverse_ref(&self, optics: Optics) -> Vec<&Self::To>;
 }
 
-pub trait TraversalMut<T: ?Sized>: TraversalRef<T> {
-    fn traverse_mut<'a>(&self, source: &'a mut T) -> Vec<&'a mut Self::To>;
+pub trait TraversalMut<Optics>: TraversalRef<Optics> {
+    fn traverse_mut(&mut self, optics: Optics) -> Vec<&mut Self::To>;
 }
 
-pub trait Traversal<T>: TraversalMut<T> {
-    fn traverse(&self, source: T) -> Vec<Self::To>
+pub trait Traversal<Optics>: TraversalMut<Optics> {
+    fn traverse(self, optic: Optics) -> Vec<Self::To>
     where
         Self::To: Sized;
 }
@@ -50,16 +50,16 @@ let mut x: (_, Result<_, ()>) = (1, Ok((2, 3)));
 assert_eq!(optics!(_1.Ok._1).pm(x)?, 6);
 ```
 */
-pub trait PrismRef<T: ?Sized>: TraversalRef<T> {
-    fn pm_ref<'a>(&self, source: &'a T) -> Option<&'a Self::To>;
+pub trait PrismRef<Optics>: TraversalRef<Optics> {
+    fn pm_ref(&self, optics: Optics) -> Option<&Self::To>;
 }
 
-pub trait PrismMut<T: ?Sized>: PrismRef<T> + TraversalMut<T> {
-    fn pm_mut<'a>(&self, source: &'a mut T) -> Option<&'a mut Self::To>;
+pub trait PrismMut<Optics>: PrismRef<Optics> + TraversalMut<Optics> {
+    fn pm_mut(&mut self, optics: Optics) -> Option<&mut Self::To>;
 }
 
-pub trait Prism<T>: PrismMut<T> + Traversal<T> {
-    fn pm(&self, source: T) -> Option<Self::To>
+pub trait Prism<Optics>: PrismMut<Optics> + Traversal<Optics> {
+    fn pm(self, source: Optics) -> Option<Self::To>
     where
         Self::To: Sized;
 }
@@ -74,16 +74,16 @@ let mut x = (1, (2, (3, 4)));
 assert_eq!(optics!(_1._1._1).view(x), 8);
 ```
 */
-pub trait LensRef<T: ?Sized>: PrismRef<T> {
-    fn view_ref<'a>(&self, source: &'a T) -> &'a Self::To;
+pub trait LensRef<Optics>: PrismRef<Optics> {
+    fn view_ref(&self, optics: Optics) -> &Self::To;
 }
 
-pub trait LensMut<T: ?Sized>: LensRef<T> + PrismMut<T> {
-    fn view_mut<'a>(&self, source: &'a mut T) -> &'a mut Self::To;
+pub trait LensMut<Optics>: LensRef<Optics> + PrismMut<Optics> {
+    fn view_mut(&mut self, optics: Optics) -> &mut Self::To;
 }
 
-pub trait Lens<T>: LensMut<T> + Prism<T> {
-    fn view(&self, source: T) -> Self::To
+pub trait Lens<Optics>: LensMut<Optics> + Prism<Optics> {
+    fn view(self, optics: Optics) -> Self::To
     where
         Self::To: Sized;
 }

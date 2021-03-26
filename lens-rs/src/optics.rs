@@ -69,58 +69,65 @@ mod impl__ {
         }
     }
 
-    impl<T> TraversalRef<T> for __ {
+    impl<T> TraversalRef<__> for T {
         type To = T;
-        fn traverse_ref<'a>(&self, source: &'a T) -> Vec<&'a Self::To> {
-            vec![source]
+
+        fn traverse_ref(&self, _optics: __) -> Vec<&Self::To> {
+            vec![self]
         }
     }
 
-    impl<T> TraversalMut<T> for __ {
-        fn traverse_mut<'a>(&self, source: &'a mut T) -> Vec<&'a mut Self::To> {
-            vec![source]
+    impl<T> TraversalMut<__> for T {
+        fn traverse_mut(&self, _optics: __) -> Vec<&mut Self::To> {
+            vec![self]
         }
     }
 
-    impl<T> Traversal<T> for __ {
-        fn traverse(&self, source: T) -> Vec<Self::To> {
-            vec![source]
+    impl<T> Traversal<__> for T {
+        fn traverse(self, _optics: __) -> Vec<Self::To> {
+            vec![self]
         }
     }
 
-    impl<T> PrismRef<T> for __ {
-        fn pm_ref<'a>(&self, source: &'a T) -> Option<&'a Self::To> {
-            Option::Some(source)
+    impl<T> PrismRef<__> for T {
+        fn pm_ref(&self, _optics: __) -> Option<&Self::To> {
+            Option::Some(self)
         }
     }
 
-    impl<T> PrismMut<T> for __ {
-        fn pm_mut<'a>(&self, source: &'a mut T) -> Option<&'a mut Self::To> {
-            Option::Some(source)
+    impl<T> PrismMut<__> for T {
+        fn pm_mut(&mut self, _optics: __) -> Option<&mut Self::To> {
+            Option::Some(self)
         }
     }
 
-    impl<T> Prism<T> for __ {
-        fn pm(&self, source: T) -> Option<Self::To> {
-            Option::Some(source)
+    impl<T> Prism<__> for T {
+        fn pm(self, source: __) -> Option<Self::To>
+        where
+            Self::To: Sized
+        {
+            Option::Some(self)
         }
     }
 
-    impl<T> LensRef<T> for __ {
-        fn view_ref<'a>(&self, source: &'a T) -> &'a Self::To {
-            source
+    impl<T> LensRef<__> for T {
+        fn view_ref(&self, _optics: __) -> &Self::To {
+            self
         }
     }
 
-    impl<T> LensMut<T> for __ {
-        fn view_mut<'a>(&self, source: &'a mut T) -> &'a mut Self::To {
-            source
+    impl<T> LensMut<__> for T {
+        fn view_mut(&mut self, _optics: __) -> &mut Self::To {
+            self
         }
     }
 
-    impl<T> Lens<T> for __ {
-        fn view(&self, source: T) -> Self::To {
-            source
+    impl<T> Lens<__> for T {
+        fn view(self, _optics: __) -> Self::To
+        where
+            Self::To: Sized
+        {
+            self
         }
     }
 }
@@ -861,7 +868,7 @@ mod impl_ptr {
 
     impl_ref!(<; T> Box<T>, _box);
     impl_ref!(<; T> Rc<T>, _rc);
-    impl_ref!(<; T> Rc<T>, _arc);
+    impl_ref!(<; T> Arc<T>, _arc);
     impl_ref!(<'t; T> &'t mut T, _mut);
     impl_ref!(<'t; T> &'t T, _ref);
 
