@@ -7,7 +7,7 @@ pub use traits::{
 };
 
 pub use optics::{
-    _arc, _both, _box, _clone, _ix, _mapped, _mut, _rc, _ref, _0, _1, _2, _3, _4, _5, _6, __,
+    _arc, _both, _box, _ix, _mapped, _mut, _rc, _ref, _0, _1, _2, _3, _4, _5, _6, __,
 };
 
 pub use lens_rs_derive::{Lens, Prism, Review};

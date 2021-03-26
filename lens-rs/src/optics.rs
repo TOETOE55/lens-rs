@@ -53,9 +53,6 @@ pub struct _arc<Optic>(pub Optic);
 #[allow(non_camel_case_types)]
 pub struct _ix<I, Optic>(pub Optic, pub I);
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-#[allow(non_camel_case_types)]
-pub struct _clone<Optic>(pub Optic);
 
 //impls
 mod impl__ {
@@ -1041,5 +1038,6 @@ mod impl_ix {
         }
     }
 }
+
 
 include!(concat!(env!("OUT_DIR"), "/optics.rs"));
