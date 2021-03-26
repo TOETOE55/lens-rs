@@ -6,7 +6,7 @@ edition = "2018"
 license = "MIT/Apache-2.0"
 readme = "readme.md"
 categories = [ "rust-patterns" ]
-keywords = [ "pattern", "tarevsesing", "lens"]
+keywords = [ "pattern", "tareversing", "lens"]
 repository = "https://github.com/TOETOE55/lens-rs"
 description = "macro to derive lens for data type"
 
