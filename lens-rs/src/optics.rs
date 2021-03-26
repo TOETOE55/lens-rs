@@ -49,6 +49,14 @@ pub struct _rc<Optic>(pub Optic);
 #[allow(non_camel_case_types)]
 pub struct _arc<Optic>(pub Optic);
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[allow(non_camel_case_types)]
+pub struct _ix<I, Optic>(pub Optic, pub I);
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[allow(non_camel_case_types)]
+pub struct _clone<Optic>(pub Optic);
+
 //impls
 mod impl__ {
     /***********************************************************
@@ -166,7 +174,10 @@ mod impl_result {
     where
         Tr: Traversal<T>,
     {
-        fn traverse(&self, source: Result<T, E>) -> Vec<Self::To> where Self::To: Sized {
+        fn traverse(&self, source: Result<T, E>) -> Vec<Self::To>
+        where
+            Self::To: Sized,
+        {
             source
                 .into_iter()
                 .flat_map(|t| self.0.traverse(t))
@@ -178,7 +189,10 @@ mod impl_result {
     where
         Tr: Traversal<E>,
     {
-        fn traverse(&self, source: Result<T, E>) -> Vec<Self::To> where Self::To: Sized {
+        fn traverse(&self, source: Result<T, E>) -> Vec<Self::To>
+        where
+            Self::To: Sized,
+        {
             source
                 .err()
                 .into_iter()
@@ -238,7 +252,10 @@ mod impl_result {
     where
         Pm: Prism<T>,
     {
-        fn pm(&self, source: Result<T, E>) -> Option<Self::To> where Self::To: Sized {
+        fn pm(&self, source: Result<T, E>) -> Option<Self::To>
+        where
+            Self::To: Sized,
+        {
             source.ok().and_then(|t| self.0.pm(t))
         }
     }
@@ -276,7 +293,10 @@ mod impl_result {
     where
         Pm: Prism<E>,
     {
-        fn pm(&self, source: Result<T, E>) -> Option<Self::To> where Self::To: Sized {
+        fn pm(&self, source: Result<T, E>) -> Option<Self::To>
+        where
+            Self::To: Sized,
+        {
             source.err().and_then(|t| self.0.pm(t))
         }
     }
@@ -330,7 +350,10 @@ mod impl_some {
     where
         Tr: Traversal<T>,
     {
-        fn traverse(&self, source: Option<T>) -> Vec<Self::To> where Self::To: Sized {
+        fn traverse(&self, source: Option<T>) -> Vec<Self::To>
+        where
+            Self::To: Sized,
+        {
             source
                 .into_iter()
                 .flat_map(|t| self.0.traverse(t))
@@ -360,12 +383,13 @@ mod impl_some {
     where
         Pm: Prism<T>,
     {
-        fn pm(&self, source: Option<T>) -> Option<Self::To> where Self::To: Sized {
+        fn pm(&self, source: Option<T>) -> Option<Self::To>
+        where
+            Self::To: Sized,
+        {
             source.and_then(|t| self.0.pm(t))
         }
     }
-
-
 
     impl<Rv, T> Review<Option<T>> for optics::None<Rv>
     where
@@ -592,7 +616,10 @@ mod impl_tuples {
     where
         Pm: Prism<A>,
     {
-        fn pm(&self, source: (A,)) -> Option<Self::To> where Self::To: Sized {
+        fn pm(&self, source: (A,)) -> Option<Self::To>
+        where
+            Self::To: Sized,
+        {
             self.0.pm(source.0)
         }
     }
@@ -619,7 +646,10 @@ mod impl_tuples {
     where
         Ls: Lens<A>,
     {
-        fn view(&self, source: (A,)) -> Self::To where Self::To: Sized {
+        fn view(&self, source: (A,)) -> Self::To
+        where
+            Self::To: Sized,
+        {
             self.0.view(source.0)
         }
     }
@@ -652,7 +682,10 @@ mod impl_iters {
                 type To = Tr::To;
 
                 fn traverse_ref<'a>(&self, source: &'a $iter) -> Vec<&'a Self::To> {
-                    source.into_iter().flat_map(|t| self.0.traverse_ref(t)).collect()
+                    source
+                        .into_iter()
+                        .flat_map(|t| self.0.traverse_ref(t))
+                        .collect()
                 }
             }
 
@@ -672,14 +705,17 @@ mod impl_iters {
             where
                 Tr: Traversal<$param>,
             {
-                fn traverse(&self, source: $iter) -> Vec<Self::To> where Self::To: Sized {
+                fn traverse(&self, source: $iter) -> Vec<Self::To>
+                where
+                    Self::To: Sized,
+                {
                     source
                         .into_iter()
                         .flat_map(|t| self.0.traverse(t))
                         .collect()
                 }
             }
-        }
+        };
     }
 
     impl_iter!(<T> Vec<T>);
@@ -772,7 +808,10 @@ mod impl_ptr {
     where
         Tr: Traversal<T>,
     {
-        fn traverse(&self, source: Box<T>) -> Vec<Self::To> where Self::To: Sized {
+        fn traverse(&self, source: Box<T>) -> Vec<Self::To>
+        where
+            Self::To: Sized,
+        {
             self.0.traverse(*source)
         }
     }
@@ -781,7 +820,10 @@ mod impl_ptr {
     where
         Pm: Prism<T>,
     {
-        fn pm(&self, source: Box<T>) -> Option<Self::To> where Self::To: Sized {
+        fn pm(&self, source: Box<T>) -> Option<Self::To>
+        where
+            Self::To: Sized,
+        {
             self.0.pm(*source)
         }
     }
@@ -790,7 +832,10 @@ mod impl_ptr {
     where
         Ls: Lens<T>,
     {
-        fn view(&self, source: Box<T>) -> Self::To where Self::To: Sized {
+        fn view(&self, source: Box<T>) -> Self::To
+        where
+            Self::To: Sized,
+        {
             self.0.view(*source)
         }
     }
@@ -825,6 +870,176 @@ mod impl_ptr {
 
     impl_mut!(<; T> Box<T>, _box);
     impl_mut!(<'t; T> &'t mut T, _mut);
+}
+
+mod impl_ix {
+    use crate::*;
+    use std::borrow::Borrow;
+    use std::collections::{BTreeMap, HashMap, VecDeque};
+    use std::hash::Hash;
+    use std::ops::{Range, RangeFrom, RangeFull, RangeTo};
+
+    macro_rules! impl_ix {
+        (<$($param:ident,)? $(const $c:ident: usize)?> $t:ty[$ix:ty]: $o:ty) => {
+            impl<$($param,)? Tr, $(const $c : usize)?> TraversalRef<$t> for _ix<$ix, Tr>
+            where
+                Tr: TraversalRef<$o>,
+            {
+                type To = Tr::To;
+
+                fn traverse_ref<'a>(&self, source: &'a $t) -> Vec<&'a Self::To> {
+                    self.0.traverse_ref(&source[self.1.clone()])
+                }
+            }
+
+            impl<$($param,)? Tr, $(const $c: usize)?> TraversalMut<$t> for _ix<$ix, Tr>
+            where
+                Tr: TraversalMut<$o>,
+            {
+                fn traverse_mut<'a>(&self, source: &'a mut $t) -> Vec<&'a mut Self::To> {
+                    self.0.traverse_mut(&mut source[self.1.clone()])
+                }
+            }
+
+            impl<$($param,)? Pm, $(const $c: usize)?> PrismRef<$t> for _ix<$ix, Pm>
+            where
+                Pm: PrismRef<$o>,
+            {
+
+                fn pm_ref<'a>(&self, source: &'a $t) -> Option<&'a Self::To> {
+                    self.0.pm_ref(&source[self.1.clone()])
+                }
+            }
+
+            impl<$($param,)? Pm, $(const $c: usize)?> PrismMut<$t> for _ix<$ix, Pm>
+            where
+                Pm: PrismMut<$o>,
+            {
+                fn pm_mut<'a>(&self, source: &'a mut $t) -> Option<&'a mut Self::To> {
+                    self.0.pm_mut(&mut source[self.1.clone()])
+                }
+            }
+
+            impl<$($param,)? Ls, $(const $c: usize)?> LensRef<$t> for _ix<$ix, Ls>
+            where
+                Ls: LensRef<$o>,
+            {
+
+                fn view_ref<'a>(&self, source: &'a $t) -> &'a Self::To {
+                    self.0.view_ref(&source[self.1.clone()])
+                }
+            }
+
+            impl<$($param,)? Ls, $(const $c: usize)?> LensMut<$t> for _ix<$ix, Ls>
+            where
+                Ls: LensMut<$o>,
+            {
+                fn view_mut<'a>(&self, source: &'a mut $t) -> &'a mut Self::To {
+                    self.0.view_mut(&mut source[self.1.clone()])
+                }
+            }
+        }
+    }
+
+    impl_ix!(<T,> Vec<T>[usize]: T);
+    impl_ix!(<T,> Vec<T>[Range<usize>]: [T]);
+    impl_ix!(<T,> Vec<T>[RangeTo<usize>]: [T]);
+    impl_ix!(<T,> Vec<T>[RangeFrom<usize>]: [T]);
+    impl_ix!(<T,> Vec<T>[RangeFull]: [T]);
+
+    impl_ix!(<T,> VecDeque<T>[usize]: T);
+
+    impl_ix!(<T, const N: usize> [T; N][usize]: T);
+    impl_ix!(<T, const N: usize> [T; N][Range<usize>]: [T]);
+    impl_ix!(<T, const N: usize> [T; N][RangeTo<usize>]: [T]);
+    impl_ix!(<T, const N: usize> [T; N][RangeFrom<usize>]: [T]);
+    impl_ix!(<T, const N: usize> [T; N][RangeFull]: [T]);
+
+    impl_ix!(<T,> [T][usize]: T);
+    impl_ix!(<T,> [T][Range<usize>]: [T]);
+    impl_ix!(<T,> [T][RangeTo<usize>]: [T]);
+    impl_ix!(<T,> [T][RangeFrom<usize>]: [T]);
+    impl_ix!(<T,> [T][RangeFull]: [T]);
+
+    impl_ix!(<> String[Range<usize>]: str);
+    impl_ix!(<> String[RangeTo<usize>]: str);
+    impl_ix!(<> String[RangeFrom<usize>]: str);
+    impl_ix!(<> String[RangeFull]: str);
+
+    impl_ix!(<> str[Range<usize>]: str);
+    impl_ix!(<> str[RangeTo<usize>]: str);
+    impl_ix!(<> str[RangeFrom<usize>]: str);
+    impl_ix!(<> str[RangeFull]: str);
+
+    impl<K, Q: ?Sized, V, Tr> TraversalRef<BTreeMap<K, V>> for _ix<&'_ Q, Tr>
+    where
+        K: Borrow<Q> + Ord,
+        Q: Ord,
+        Tr: TraversalRef<V>,
+    {
+        type To = Tr::To;
+
+        fn traverse_ref<'a>(&self, source: &'a BTreeMap<K, V>) -> Vec<&'a Self::To> {
+            self.0.traverse_ref(&source[self.1])
+        }
+    }
+
+    impl<K, Q: ?Sized, V, Tr> TraversalRef<HashMap<K, V>> for _ix<&'_ Q, Tr>
+    where
+        K: Eq + Hash + Borrow<Q>,
+        Q: Eq + Hash,
+        Tr: TraversalRef<V>,
+    {
+        type To = Tr::To;
+
+        fn traverse_ref<'a>(&self, source: &'a HashMap<K, V>) -> Vec<&'a Self::To> {
+            self.0.traverse_ref(&source[self.1])
+        }
+    }
+
+    impl<K, Q: ?Sized, V, Tr> PrismRef<BTreeMap<K, V>> for _ix<&'_ Q, Tr>
+    where
+        K: Borrow<Q> + Ord,
+        Q: Ord,
+        Tr: PrismRef<V>,
+    {
+        fn pm_ref<'a>(&self, source: &'a BTreeMap<K, V>) -> Option<&'a Self::To> {
+            self.0.pm_ref(&source[self.1])
+        }
+    }
+
+    impl<K, Q: ?Sized, V, Tr> PrismRef<HashMap<K, V>> for _ix<&'_ Q, Tr>
+    where
+        K: Eq + Hash + Borrow<Q>,
+        Q: Eq + Hash,
+        Tr: PrismRef<V>,
+    {
+        fn pm_ref<'a>(&self, source: &'a HashMap<K, V>) -> Option<&'a Self::To> {
+            self.0.pm_ref(&source[self.1])
+        }
+    }
+
+    impl<K, Q: ?Sized, V, Tr> LensRef<BTreeMap<K, V>> for _ix<&'_ Q, Tr>
+    where
+        K: Borrow<Q> + Ord,
+        Q: Ord,
+        Tr: LensRef<V>,
+    {
+        fn view_ref<'a>(&self, source: &'a BTreeMap<K, V>) -> &'a Self::To {
+            self.0.view_ref(&source[self.1])
+        }
+    }
+
+    impl<K, Q: ?Sized, V, Tr> LensRef<HashMap<K, V>> for _ix<&'_ Q, Tr>
+    where
+        K: Eq + Hash + Borrow<Q>,
+        Q: Eq + Hash,
+        Tr: LensRef<V>,
+    {
+        fn view_ref<'a>(&self, source: &'a HashMap<K, V>) -> &'a Self::To {
+            self.0.view_ref(&source[self.1])
+        }
+    }
 }
 
 include!(concat!(env!("OUT_DIR"), "/optics.rs"));

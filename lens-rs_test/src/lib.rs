@@ -145,6 +145,11 @@ mod tests {
         test_nested();
         test_row();
         test_ptr();
+
+        let mut x = (1, vec![2, 3]);
+        *optics!(_1.[0]).view_mut(&mut x) *= 2;
+
+        assert_eq!(x.1[0], 4);
     }
 
 }

@@ -36,7 +36,9 @@ pub trait TraversalMut<T: ?Sized>: TraversalRef<T> {
 }
 
 pub trait Traversal<T>: TraversalMut<T> {
-    fn traverse(&self, source: T) -> Vec<Self::To> where Self::To: Sized;
+    fn traverse(&self, source: T) -> Vec<Self::To>
+    where
+        Self::To: Sized;
 }
 
 /**
@@ -57,7 +59,9 @@ pub trait PrismMut<T: ?Sized>: PrismRef<T> + TraversalMut<T> {
 }
 
 pub trait Prism<T>: PrismMut<T> + Traversal<T> {
-    fn pm(&self, source: T) -> Option<Self::To> where Self::To: Sized;
+    fn pm(&self, source: T) -> Option<Self::To>
+    where
+        Self::To: Sized;
 }
 
 /**
@@ -79,5 +83,7 @@ pub trait LensMut<T: ?Sized>: LensRef<T> + PrismMut<T> {
 }
 
 pub trait Lens<T>: LensMut<T> + Prism<T> {
-    fn view(&self, source: T) -> Self::To where Self::To: Sized;
+    fn view(&self, source: T) -> Self::To
+    where
+        Self::To: Sized;
 }
