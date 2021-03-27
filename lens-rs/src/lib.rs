@@ -26,16 +26,16 @@ macro_rules! optics {
 }
 
 #[macro_export]
-macro_rules! field {
+macro_rules! Optics {
     [] => { lens_rs::optics::__ };
     [$optic:ident] => { lens_rs::optics::$optic<lens_rs::optics::__> };
     [[$ix:ty]] => {
         lens_rs::optics::_ix<$ix, lens_rs::optics::__>
     };
     [$optic:ident . $($optics:tt)*] => {
-        lens_rs::optics::$optic<field![$($optics)*]>
+        lens_rs::optics::$optic<Optics![$($optics)*]>
     };
     [[$ix:ty] . $($optics:tt)*] => {
-        lens_rs::optics::_ix<$ix, field![$($optics)*]>
+        lens_rs::optics::_ix<$ix, Optics![$($optics)*]>
     }
 }

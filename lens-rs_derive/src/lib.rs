@@ -4,12 +4,15 @@ use proc_macro2::Span;
 use quote::*;
 use syn::{
     parenthesized, parse_macro_input, parse_quote, punctuated::Punctuated, visit::Visit, Data,
-    DeriveInput, ItemEnum, ItemStruct, Token,
+    DeriveInput, Fields, ItemEnum, ItemStruct, Token,
 };
 
+use crate::meta_impls::impl_review4variant;
 use std::collections::HashSet;
 use std::fs;
 use syn::parse::{Parse, ParseStream, Result};
+
+mod meta_impls;
 
 enum OpticMutability {
     Move,
@@ -37,6 +40,20 @@ impl Parse for OpticMutability {
     }
 }
 
+fn variant_with_optic_attr(var: &syn::Variant) -> bool {
+    var.attrs.iter().any(|attr| {
+        attr.path
+            .is_ident(&syn::Ident::new("optic", Span::call_site()))
+    })
+}
+
+fn field_with_optic_attr(field: &syn::Field) -> bool {
+    field.attrs.iter().any(|attr| {
+        attr.path
+            .is_ident(&syn::Ident::new("optic", Span::call_site()))
+    })
+}
+
 #[proc_macro_derive(Review, attributes(optic))]
 pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
@@ -45,57 +62,15 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
         Data::Enum(e) => e
             .variants
             .iter()
-            .filter(|var| {
-                var
-                    .attrs
-                    .iter()
-                    .any(|attr| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
-            })
-            .flat_map(|var| {
-                let data = derive_input.clone();
-                let data_name = data.ident;
-                let data_gen = data.generics;
-                let data_gen_param = data_gen.params.iter().collect::<Vec<_>>();
-                let data_gen_where = data_gen
-                    .where_clause
-                    .iter()
-                    .flat_map(|x| x.predicates.clone())
-                    .collect::<Punctuated<_, Token![,]>>();
-
-                let var_name = &var.ident;
-                let optic_name = format_ident!("{}", var.ident);
-                let ty = var
-                    .fields
-                    .iter()
-                    .take(1)
-                    .map(|field| field.ty.clone())
-                    .collect::<Punctuated<_, Token![,]>>();
-
-                // let fields = var
-                //     .fields
-                //     .iter()
-                //     .enumerate()
-                //     .flat_map(|(i, _)| {
-                //         let i = syn::Index::from(i);
-                //         quote! { #i }
-                //     })
-                //     .collect::<Vec<_>>();
-
-                quote! {
-                    impl<#(#data_gen_param,)* __Rv> lens_rs::Review<#data_name #data_gen> for lens_rs::optics::#optic_name<__Rv>
-                    where
-                        __Rv: lens_rs::Review<#ty>,
-                        #data_gen_where
-                    {
-                        type From = __Rv::From;
-
-                        fn review(&self, from: Self::From) -> #data_name #data_gen {
-                            // let tuple = self.0.review(from);
-                            // <#data_name #data_gen>::#var_name(#(tuple . #fields,)*)
-                            <#data_name #data_gen>::#var_name(self.0.review(from))
-                        }
-                    }
-                }
+            .filter(|v| variant_with_optic_attr(v))
+            .flat_map(|var| match var.fields.clone() {
+                Fields::Unnamed(fs) if fs.unnamed.len() == 1 => impl_review4variant(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    var.ident.clone(),
+                    fs.unnamed[0].ty.clone(),
+                ),
+                _ => panic!("can only derive review for variant with single, unnamed variant"),
             })
             .collect(),
         _ => panic!("union and struct can't derive the review"),
@@ -111,12 +86,7 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         Data::Enum(e) => e
             .variants
             .iter()
-            .filter(|var| {
-                var
-                    .attrs
-                    .iter()
-                    .any(|attr| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
-            })
+            .filter(|var| variant_with_optic_attr(var))
             .flat_map(|var| {
                 let data = derive_input.clone();
                 let data_name = data.ident;
@@ -259,12 +229,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         Data::Struct(syn::DataStruct { fields: syn::Fields::Named(fs), .. }) => fs
             .named
             .iter()
-            .filter(|var| {
-                var
-                    .attrs
-                    .iter()
-                    .any(|attr| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
-            })
+            .filter(|field| field_with_optic_attr(field))
             .flat_map(|f| {
                 let data = derive_input.clone();
                 let data_name = data.ident;
@@ -397,12 +362,7 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
             .unnamed
             .iter()
             .take(7)
-            .filter(|var| {
-                var
-                    .attrs
-                    .iter()
-                    .any(|attr| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
-            })
+            .filter(|field| field_with_optic_attr(field))
             .enumerate()
             .flat_map(|(i, f)| {
                 let data = derive_input.clone();

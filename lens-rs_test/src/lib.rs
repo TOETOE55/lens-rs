@@ -57,7 +57,7 @@ mod tests {
 
     fn with_field<T>(t: T) -> String
     where
-        field![a]: Lens<T, To = String>,
+        Optics![a]: Lens<T, To = String>,
     {
         optics!(a).view(t)
     }
