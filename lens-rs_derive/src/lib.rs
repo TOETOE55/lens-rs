@@ -37,7 +37,6 @@ impl Parse for OpticMutability {
     }
 }
 
-
 #[proc_macro_derive(Review, attributes(optic))]
 pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);

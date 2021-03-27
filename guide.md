@@ -130,7 +130,7 @@ You can represent a type has values of some types
 ```rust
 fn may_have_i32<T, Pm: PrismMut<T, To=i32>>(t: &mut T, pm: Pm) {
 //                           ^ `T` may have a value of `i32`
-    pm.pm_mut(t).map(|x| *x+=1);
+    pm.preview_mut(t).map(|x| *x+=1);
 }
 // the above x
 may_have_i32(&mut x, optics!(_0));       // 2 -> 3

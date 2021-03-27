@@ -9,25 +9,26 @@ lens implemented in rust
 ## Example
 access the substructure
 ```rust
+use lens_rs::*;
 fn test() -> Option<()> {
-    let mut nested: Result<Result<_, ()>, ()> = optics!(Ok.Ok).review((1, 2));
-    *optics!(Ok.Ok._0).pm_mut(&mut nested)? += 1;
-    assert_eq!(optics!(Ok.Ok._0).pm(nested)?, 2);
+    let mut nested: Result<Result<_, ()>, ()> = Review::review(optics!(Ok.Ok), (1,2));
+    *x.preview_mut(optics!(Ok.Ok._0))? += 1;
+    assert_eq!(nested.preview(optics!(Ok.Ok._0))?, 2);
 
     let mut x = (1, (2, (3, 4)));
-    *optics!(_1._1._1).view_mut(&mut x) *= 2;
-    assert_eq!(optics!(_1._1._1).view(x), 8);
+    *x.view_mut(optics!(_1._1._1)) *= 2;
+    assert_eq!(x.view(optics!(_1._1._1)), 8);
 
     let mut x: (_, Result<_, ()>) = (1, Ok((2, 3)));
-    *optics!(_1.Ok._1).pm_mut(&mut x)? *= 2;
-    assert_eq!(optics!(_1.Ok._1).pm(x)?, 6);
+    *x.preview_mut(optics!(_1.Ok._1))? *= 2;
+    assert_eq!(x.preview(optics!(_1.Ok._1))?, 6);
 
     let mut x = (1, vec![Some((2, 3)), None]);
-    optics!(_1._mapped.Some._0)
-        .traverse_mut(&mut x)
+        x
+        .traverse_mut(optics!(_1._mapped.Some._0))
         .into_iter()
         .for_each(|i| *i += 1);
-    assert_eq!(optics!(_1._mapped.Some._0).traverse(x), vec![3]);
+    assert_eq!(x.traverse(optics!(_1._mapped.Some._0)), vec![3]);
 
     Some(())
 }
@@ -51,11 +52,11 @@ struct Foo {
 
 
 fn test() -> Option<()> {
-    let x = optics!(Some.B).review(Foo {
+    let x = Review::review(optics!(Some.B), Foo {
         a: 3,
         b: 2,
     });
-    assert_eq!(optics!(Some.B.b).pm(x)?, 2);
+    assert_eq!(x.preview(optics!(Some.B.b))?, 2);
     
     Some(())
 }
@@ -64,7 +65,7 @@ fn test() -> Option<()> {
 assume a type T may have substructure that the type is `i32`.
 ```rust
 fn bar<T, Pm: Prism<T, To=i32>>(t: &mut T, pm: Pm) {
-    pm.pm_mut(t).map(|x| *x += 2);
+    t.preview_mut(pm).map(|x| *x += 2);
 }
 
 fn test() {
@@ -80,11 +81,11 @@ fn test() {
 
 assume a type T must have a field `.a`.
 ```rust
-fn with_field_a<T>(t: T) -> String
+fn with_field_a<T>(t: &T) -> &str
 where
-    field![a]: Lens<T, To=String>
+    T: LensRef<field![a], To=String>
 {
-    optics!(a).view(t)
+    t.view_ref(optics!(a))
 }
 
 let foo = Foo {

@@ -1,5 +1,3 @@
-
-
 #[cfg(test)]
 mod tests {
     use lens_rs::*;
@@ -20,7 +18,7 @@ mod tests {
         #[optic]
         S(Box<Nat>),
         #[optic]
-        Z(())
+        Z(()),
     }
 
     // derive struct
@@ -53,13 +51,13 @@ mod tests {
     struct Tuple<A, B>(#[optic] A, #[optic] B);
 
     // T may have i32
-    fn may_have_i32<T, Pm: PrismRef<T, To=i32>>(t: &T, pm: Pm) -> Option<i32> {
-        pm.pm_ref(t).map(|x| *x)
+    fn may_have_i32<T, Pm: PrismRef<T, To = i32>>(t: &T, pm: Pm) -> Option<i32> {
+        pm.preview_ref(t).map(|x| *x)
     }
 
     fn with_field<T>(t: T) -> String
     where
-        field![a]: Lens<T, To=String>
+        field![a]: Lens<T, To = String>,
     {
         optics!(a).view(t)
     }
@@ -83,11 +81,13 @@ mod tests {
             )),
         );
 
-        optics!(_1.Left._1).pm_mut(&mut x).map(|x| *x *= 2);
-        assert_eq!(optics!(_1.Left._1).pm_ref(&x), Some(&8));
+        optics!(_1.Left._1).preview_mut(&mut x).map(|x| *x *= 2);
+        assert_eq!(optics!(_1.Left._1).preview_ref(&x), Some(&8));
 
-        optics!(_1.Right).pm_mut(&mut x).map(|x: &mut i32| *x *= 2);
-        assert_eq!(optics!(_1.Right).pm_ref(&x),  None);
+        optics!(_1.Right)
+            .preview_mut(&mut x)
+            .map(|x: &mut i32| *x *= 2);
+        assert_eq!(optics!(_1.Right).preview_ref(&x), None);
 
         *optics!(_0).view_mut(&mut x) += 1;
         assert_eq!(x.0, 2);
@@ -96,7 +96,10 @@ mod tests {
             .traverse_mut(&mut x)
             .into_iter()
             .for_each(|s| *s = s.to_uppercase());
-        assert_eq!(optics!(_1.Left._0._mapped.Some.a).traverse(x), vec!["A".to_string(), "C".to_string()]);
+        assert_eq!(
+            optics!(_1.Left._0._mapped.Some.a).traverse(x),
+            vec!["A".to_string(), "C".to_string()]
+        );
 
         Some(())
     }
@@ -109,11 +112,11 @@ mod tests {
 
         let foo = Foo {
             a: "this is Foo".to_string(),
-            b: ()
+            b: (),
         };
         let bar = Bar {
             a: "this is Bar".to_string(),
-            c: 0
+            c: 0,
         };
 
         assert_eq!(with_field(foo), "this is Foo".to_string());
@@ -125,14 +128,12 @@ mod tests {
         let mut two = optics!(S._box.S._box.Z).review(());
         let three = optics!(S._box.S._box.Z).review(());
         assert_eq!(one, S(Box::new(Z(()))));
-        optics!(S._box)
-            .pm_mut(&mut two)
-            .map(move |x| *x = one); // 2+1
+        optics!(S._box).pm_mut(&mut two).map(move |x| *x = one); // 2+1
         assert_eq!(two, three);
 
         let foo = Foo {
             a: &("foo0", Box::new("foo1")),
-            b: ()
+            b: (),
         };
         let foo0 = optics!(a._ref._0).view_ref(&foo);
         let foo1 = optics!(a._ref._1._box).view_ref(&foo);
@@ -151,5 +152,4 @@ mod tests {
 
         assert_eq!(x.1[0], 4);
     }
-
 }

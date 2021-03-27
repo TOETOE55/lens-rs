@@ -3,14 +3,13 @@
 * ## Example
 * ```
 * use lens_rs::*;
-* let optic = optics!(Ok.Err.Some);
-* let nested: Result<Result<(), _>, ()> = optic.review((1,2,3));
+* let nested: Result<Result<(), _>, ()> = Review::review(optics!(Ok.Err.Some), (1,2,3));
 * assert_eq!(nested, Ok(Err(Some((1,2,3)))));
 * ```
 */
-pub trait Review<T> {
+pub trait Review<Optic> {
     type From;
-    fn review(&self, from: Self::From) -> T;
+    fn review(optics: Optic, from: Self::From) -> Self;
 }
 
 /**
@@ -18,12 +17,12 @@ A trait representing the optics allows you to traverse over a structure and chan
 A `Traversal` can access the multiple substructures.
 ## Example
 ```
+use lens_rs::*;
 let mut x = (1, vec![Some((2, 3)), None]);
-optics!(_1.Mapped._Some._0)
-    .traverse_mut(&mut x)
+x.traverse_mut(optics!(_1.Mapped._Some._0))
     .into_iter()
     .for_each(|i| *i += 1);
-assert_eq!(optics!(_1._mapped.Some._0).traverse(x), vec![3]);
+assert_eq!(x.traverse(optics!(_1._mapped.Some._0)), vec![3]);
 ```
 */
 pub trait TraversalRef<Optics> {
@@ -36,7 +35,7 @@ pub trait TraversalMut<Optics>: TraversalRef<Optics> {
 }
 
 pub trait Traversal<Optics>: TraversalMut<Optics> {
-    fn traverse(self, optic: Optics) -> Vec<Self::To>
+    fn traverse(self, optics: Optics) -> Vec<Self::To>
     where
         Self::To: Sized;
 }
@@ -45,21 +44,22 @@ pub trait Traversal<Optics>: TraversalMut<Optics> {
 A trait representing the optics behaves as the first-class pattern.
 A `Prism` can access the substructure may exist.
 ```
+use lens_rs::*;
 let mut x: (_, Result<_, ()>) = (1, Ok((2, 3)));
-*optics!(_1.Ok._1).pm_mut(&mut x)? *= 2;
-assert_eq!(optics!(_1.Ok._1).pm(x)?, 6);
+*x.preview_mut(optics!(_1.Ok._1))? *= 2;
+assert_eq!(x.preview(optics!(_1.Ok._1))?, 6);
 ```
 */
 pub trait PrismRef<Optics>: TraversalRef<Optics> {
-    fn pm_ref(&self, optics: Optics) -> Option<&Self::To>;
+    fn preview_ref(&self, optics: Optics) -> Option<&Self::To>;
 }
 
 pub trait PrismMut<Optics>: PrismRef<Optics> + TraversalMut<Optics> {
-    fn pm_mut(&mut self, optics: Optics) -> Option<&mut Self::To>;
+    fn preview_mut(&mut self, optics: Optics) -> Option<&mut Self::To>;
 }
 
 pub trait Prism<Optics>: PrismMut<Optics> + Traversal<Optics> {
-    fn pm(self, source: Optics) -> Option<Self::To>
+    fn preview(self, optics: Optics) -> Option<Self::To>
     where
         Self::To: Sized;
 }
@@ -69,9 +69,10 @@ A trait representing the optics allows you to access the field.
 A `Lens` can access the substructure must exist.
 ## Example
 ```
+use lens_rs::*;
 let mut x = (1, (2, (3, 4)));
-*optics!(_1._1._1).view_mut(&mut x) *= 2;
-assert_eq!(optics!(_1._1._1).view(x), 8);
+*x.view_mut(optics!(_1._1._1)) *= 2;
+assert_eq!(x.view(optics!(_1._1._1)), 8);
 ```
 */
 pub trait LensRef<Optics>: PrismRef<Optics> {
