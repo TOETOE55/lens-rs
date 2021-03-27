@@ -5,7 +5,7 @@ mod tests {
     use Nat::*;
 
     // derive enum
-    #[derive(Copy, Clone, Debug, Review)]
+    #[derive(Copy, Clone, Debug, Review, Prism)]
     enum Either<L, R> {
         #[optic]
         Left(L),
@@ -64,7 +64,7 @@ mod tests {
     }
 
     fn test_nested() -> Option<()> {
-        let mut x: (i32, Either<Tuple<Vec<Option<Foo<_, _>>>, i32>, i32>) = (
+        let mut x: (i32, Either<Tuple<Vec<Option<Foo<String, i32>>>, i32>, i32>) = (
             1,
             Left(Tuple(
                 vec![
@@ -129,7 +129,7 @@ mod tests {
         let mut two: Nat = Review::review(optics!(S._box.S._box.Z), ());
         let three: Nat = Review::review(optics!(S._box.S._box.Z), ());
         assert_eq!(one, S(Box::new(Z(()))));
-        two.pm_mut(optics!(S._box)).map(move |x| *x = one); // 2+1
+        two.preview_mut(optics!(S._box)).map(move |x| *x = one); // 2+1
         assert_eq!(two, three);
 
         let foo = Foo {
