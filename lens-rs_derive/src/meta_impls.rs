@@ -1,9 +1,7 @@
 extern crate proc_macro;
 use proc_macro2::{Span, TokenStream};
 use quote::*;
-use syn::{
-    parse_quote, punctuated::Punctuated, Token
-};
+use syn::{parse_quote, punctuated::Punctuated, Token, GenericParam};
 
 pub fn impl_review4variant(
     ty_name: syn::Ident,
@@ -322,25 +320,63 @@ impl Params {
         let mut params = Punctuated::new();
         let mut generics_iter = generics.params.into_iter();
 
-        while let Some(syn::GenericParam::Lifetime(lifetime)) = generics_iter.next() {
-            params.push(syn::GenericParam::Lifetime(syn::LifetimeDef {
-                attrs: vec![],
-                lifetime: lifetime.lifetime,
-                colon_token: None,
-                bounds: Default::default(),
-            }));
+        let mut added = false;
+        while let Some(generic) = generics_iter.next() {
+            match generic {
+                syn::GenericParam::Lifetime(lifetime) => {
+                    params.push(syn::GenericParam::Lifetime(syn::LifetimeDef {
+                        attrs: vec![],
+                        lifetime: lifetime.lifetime,
+                        colon_token: None,
+                        bounds: Default::default(),
+                    }));
+                }
+                GenericParam::Type(ty) => {
+                    params.push(syn::GenericParam::Type(syn::TypeParam {
+                        attrs: vec![],
+                        ident: optics_param.clone(),
+                        colon_token: None,
+                        bounds: Default::default(),
+                        eq_token: None,
+                        default: None,
+                    }));
+                    added = true;
+                    params.push(syn::GenericParam::Type(syn::TypeParam {
+                        attrs: vec![],
+                        ident: ty.ident,
+                        colon_token: None,
+                        bounds: Default::default(),
+                        eq_token: None,
+                        default: None,
+                    }));
+                    break;
+                }
+                c @ GenericParam::Const(_) => {
+                    params.push(syn::GenericParam::Type(syn::TypeParam {
+                        attrs: vec![],
+                        ident: optics_param.clone(),
+                        colon_token: None,
+                        bounds: Default::default(),
+                        eq_token: None,
+                        default: None,
+                    }));
+                    added = true;
+                    params.push(c);
+                    break;
+                }
+            }
         }
 
-        params.push(syn::GenericParam::Type(syn::TypeParam {
-            attrs: vec![],
-            ident: optics_param.clone(),
-            colon_token: None,
-            bounds: Default::default(),
-            eq_token: None,
-            default: None,
-        }));
-
-
+        if !added {
+            params.push(syn::GenericParam::Type(syn::TypeParam {
+                attrs: vec![],
+                ident: optics_param.clone(),
+                colon_token: None,
+                bounds: Default::default(),
+                eq_token: None,
+                default: None,
+            }));
+        }
 
         for p in generics_iter {
             match p {
@@ -368,6 +404,7 @@ impl Params {
             }
         }
 
+        // println!("{}", quote! { #params }.to_string());
         Self {
             lt_token: syn::token::Lt {
                 spans: [Span::call_site()],
