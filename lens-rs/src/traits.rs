@@ -7,9 +7,9 @@
 * assert_eq!(nested, Ok(Err(Some((1,2,3)))));
 * ```
 */
-pub trait Review<Optic> {
+pub trait Review<Optics> {
     type From;
-    fn review(optics: Optic, from: Self::From) -> Self;
+    fn review(optics: Optics, from: Self::From) -> Self;
 }
 
 /**
