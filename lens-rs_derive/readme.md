@@ -1,6 +1,8 @@
 # Overview
 deriving lens for custom data types.
 
+see [the guide](https://github.com/TOETOE55/lens-rs/blob/master/guide.md)
+
 ## Example
 ```rust
 #[derive(Debug, Optic, Lens)]

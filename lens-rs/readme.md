@@ -6,6 +6,8 @@ lens implemented in rust
 * A `Prism` can access the substructure may exist.
 * A `Lens` can access the substructure must exist.
 
+see [the guide](https://github.com/TOETOE55/lens-rs/blob/master/guide.md)
+
 ## Example
 access the substructure
 ```rust
