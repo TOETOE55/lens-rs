@@ -54,71 +54,74 @@ mod impl__ {
      ************************************************************/
     use crate::*;
 
-    impl<T> Review<__> for T {
-        type From = T;
+    impl<T> Optic<__> for T {
+        type Image = T;
+    }
 
-        fn review(_optics: __, from: Self::From) -> Self::From {
+    impl<T> Review<__> for T {
+        fn review(_optics: __, from: Self::Image) -> Self::Image
+        where
+            Self::Image: Sized,
+        {
             from
         }
     }
 
     impl<T> TraversalRef<__> for T {
-        type To = T;
-
-        fn traverse_ref(&self, _optics: __) -> Vec<&Self::To> {
+        fn traverse_ref(&self, _optics: __) -> Vec<&Self::Image> {
             vec![self]
         }
     }
 
     impl<T> TraversalMut<__> for T {
-        fn traverse_mut(&mut self, _optics: __) -> Vec<&mut Self::To> {
+        fn traverse_mut(&mut self, _optics: __) -> Vec<&mut Self::Image> {
             vec![self]
         }
     }
 
     impl<T> Traversal<__> for T {
-        fn traverse(self, _optics: __) -> Vec<Self::To> {
+        fn traverse(self, _optics: __) -> Vec<Self::Image> {
             vec![self]
         }
     }
 
     impl<T> PrismRef<__> for T {
-        fn preview_ref(&self, _optics: __) -> Option<&Self::To> {
+        fn preview_ref(&self, _optics: __) -> Option<&Self::Image> {
             Option::Some(self)
         }
     }
 
     impl<T> PrismMut<__> for T {
-        fn preview_mut(&mut self, _optics: __) -> Option<&mut Self::To> {
+        fn preview_mut(&mut self, _optics: __) -> Option<&mut Self::Image> {
             Option::Some(self)
         }
     }
 
     impl<T> Prism<__> for T {
-        fn preview(self, _: __) -> Option<Self::To>
+        fn preview(self, _: __) -> Option<Self::Image>
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             Option::Some(self)
         }
     }
 
     impl<T> LensRef<__> for T {
-        fn view_ref(&self, _optics: __) -> &Self::To {
+        fn view_ref(&self, _optics: __) -> &Self::Image {
             self
         }
     }
 
     impl<T> LensMut<__> for T {
-        fn view_mut(&mut self, _optics: __) -> &mut Self::To {
+        fn view_mut(&mut self, _optics: __) -> &mut Self::Image {
             self
         }
     }
 
     impl<T> Lens<__> for T {
-        fn view(self, _optics: __) -> Self::To
+        fn view(self, _optics: __) -> Self::Image
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             self
         }
@@ -131,13 +134,21 @@ mod impl_result {
      ************************************************************/
     use crate::*;
 
+    impl<Opt, T, E> Optic<optics::Ok<Opt>> for Result<T, E>
+    where
+        T: Optic<Opt>,
+    {
+        type Image = T::Image;
+    }
+
     impl<Rv, T, E> Review<optics::Ok<Rv>> for Result<T, E>
     where
         T: Review<Rv>,
     {
-        type From = T::From;
-
-        fn review(optics: optics::Ok<Rv>, from: Self::From) -> Self {
+        fn review(optics: optics::Ok<Rv>, from: Self::Image) -> Self
+        where
+            Self::Image: Sized,
+        {
             Result::Ok(Review::review(optics.0, from))
         }
     }
@@ -146,9 +157,7 @@ mod impl_result {
     where
         T: TraversalRef<Tr>,
     {
-        type To = T::To;
-
-        fn traverse_ref(&self, optics: optics::Ok<Tr>) -> Vec<&Self::To> {
+        fn traverse_ref(&self, optics: optics::Ok<Tr>) -> Vec<&Self::Image> {
             match self {
                 Result::Ok(t) => t.traverse_ref(optics.0),
                 _ => vec![],
@@ -160,7 +169,7 @@ mod impl_result {
     where
         T: TraversalMut<Tr>,
     {
-        fn traverse_mut(&mut self, optics: optics::Ok<Tr>) -> Vec<&mut Self::To> {
+        fn traverse_mut(&mut self, optics: optics::Ok<Tr>) -> Vec<&mut Self::Image> {
             match self {
                 Result::Ok(t) => t.traverse_mut(optics.0),
                 _ => vec![],
@@ -172,9 +181,9 @@ mod impl_result {
     where
         T: Traversal<Tr>,
     {
-        fn traverse(self, optics: optics::Ok<Tr>) -> Vec<Self::To>
+        fn traverse(self, optics: optics::Ok<Tr>) -> Vec<Self::Image>
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             match self {
                 Result::Ok(t) => t.traverse(optics.0),
@@ -187,9 +196,9 @@ mod impl_result {
     where
         E: Traversal<Tr>,
     {
-        fn traverse(self, optics: optics::Err<Tr>) -> Vec<Self::To>
+        fn traverse(self, optics: optics::Err<Tr>) -> Vec<Self::Image>
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             match self {
                 Result::Err(e) => e.traverse(optics.0),
@@ -198,13 +207,18 @@ mod impl_result {
         }
     }
 
+    impl<Opt, T, E> Optic<optics::Err<Opt>> for Result<T, E>
+    where
+        E: Optic<Opt>,
+    {
+        type Image = E::Image;
+    }
+
     impl<Tr, T, E> TraversalRef<optics::Err<Tr>> for Result<T, E>
     where
         E: TraversalRef<Tr>,
     {
-        type To = E::To;
-
-        fn traverse_ref(&self, optics: optics::Err<Tr>) -> Vec<&Self::To> {
+        fn traverse_ref(&self, optics: optics::Err<Tr>) -> Vec<&Self::Image> {
             match self {
                 Result::Err(e) => e.traverse_ref(optics.0),
                 _ => vec![],
@@ -216,7 +230,7 @@ mod impl_result {
     where
         E: TraversalMut<Tr>,
     {
-        fn traverse_mut(&mut self, optics: optics::Err<Tr>) -> Vec<&mut Self::To> {
+        fn traverse_mut(&mut self, optics: optics::Err<Tr>) -> Vec<&mut Self::Image> {
             match self {
                 Result::Err(e) => e.traverse_mut(optics.0),
                 _ => vec![],
@@ -228,7 +242,7 @@ mod impl_result {
     where
         T: PrismRef<Pm>,
     {
-        fn preview_ref(&self, optics: optics::Ok<Pm>) -> Option<&Self::To> {
+        fn preview_ref(&self, optics: optics::Ok<Pm>) -> Option<&Self::Image> {
             let t = self.as_ref().ok()?;
             t.preview_ref(optics.0)
         }
@@ -238,7 +252,7 @@ mod impl_result {
     where
         T: PrismMut<Pm>,
     {
-        fn preview_mut(&mut self, optics: optics::Ok<Pm>) -> Option<&mut Self::To> {
+        fn preview_mut(&mut self, optics: optics::Ok<Pm>) -> Option<&mut Self::Image> {
             let t = self.as_mut().ok()?;
             t.preview_mut(optics.0)
         }
@@ -248,9 +262,9 @@ mod impl_result {
     where
         T: Prism<Pm>,
     {
-        fn preview(self, optics: optics::Ok<Pm>) -> Option<Self::To>
+        fn preview(self, optics: optics::Ok<Pm>) -> Option<Self::Image>
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             let t = self.ok()?;
             t.preview(optics.0)
@@ -261,9 +275,10 @@ mod impl_result {
     where
         E: Review<Rv>,
     {
-        type From = E::From;
-
-        fn review(optics: optics::Err<Rv>, from: Self::From) -> Self {
+        fn review(optics: optics::Err<Rv>, from: Self::Image) -> Self
+        where
+            Self::Image: Sized,
+        {
             Result::Err(Review::review(optics.0, from))
         }
     }
@@ -272,7 +287,7 @@ mod impl_result {
     where
         E: PrismRef<Pm>,
     {
-        fn preview_ref(&self, optics: optics::Err<Pm>) -> Option<&Self::To> {
+        fn preview_ref(&self, optics: optics::Err<Pm>) -> Option<&Self::Image> {
             let t = self.as_ref().err()?;
             t.preview_ref(optics.0)
         }
@@ -282,7 +297,7 @@ mod impl_result {
     where
         E: PrismMut<Pm>,
     {
-        fn preview_mut(&mut self, optics: optics::Err<Pm>) -> Option<&mut Self::To> {
+        fn preview_mut(&mut self, optics: optics::Err<Pm>) -> Option<&mut Self::Image> {
             let t = self.as_mut().err()?;
             t.preview_mut(optics.0)
         }
@@ -292,9 +307,9 @@ mod impl_result {
     where
         E: Prism<Pm>,
     {
-        fn preview(self, optics: optics::Err<Pm>) -> Option<Self::To>
+        fn preview(self, optics: optics::Err<Pm>) -> Option<Self::Image>
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             let t = self.err()?;
             t.preview(optics.0)
@@ -309,13 +324,21 @@ mod impl_some {
 
     use crate::*;
 
+    impl<Opt, T> Optic<optics::Some<Opt>> for Option<T>
+    where
+        T: Optic<Opt>,
+    {
+        type Image = T::Image;
+    }
+
     impl<Rv, T> Review<optics::Some<Rv>> for Option<T>
     where
         T: Review<Rv>,
     {
-        type From = T::From;
-
-        fn review(optics: optics::Some<Rv>, from: Self::From) -> Self {
+        fn review(optics: optics::Some<Rv>, from: Self::Image) -> Self
+        where
+            Self::Image: Sized,
+        {
             Some(Review::review(optics.0, from))
         }
     }
@@ -324,9 +347,7 @@ mod impl_some {
     where
         T: TraversalRef<Tr>,
     {
-        type To = T::To;
-
-        fn traverse_ref(&self, optics: optics::Some<Tr>) -> Vec<&Self::To> {
+        fn traverse_ref(&self, optics: optics::Some<Tr>) -> Vec<&Self::Image> {
             match self {
                 Some(t) => t.traverse_ref(optics.0),
                 _ => vec![],
@@ -338,7 +359,7 @@ mod impl_some {
     where
         T: TraversalMut<Tr>,
     {
-        fn traverse_mut(&mut self, optics: optics::Some<Tr>) -> Vec<&mut Self::To> {
+        fn traverse_mut(&mut self, optics: optics::Some<Tr>) -> Vec<&mut Self::Image> {
             match self {
                 Some(t) => t.traverse_mut(optics.0),
                 _ => vec![],
@@ -350,9 +371,9 @@ mod impl_some {
     where
         T: Traversal<Tr>,
     {
-        fn traverse(self, optics: optics::Some<Tr>) -> Vec<Self::To>
+        fn traverse(self, optics: optics::Some<Tr>) -> Vec<Self::Image>
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             match self {
                 Some(t) => t.traverse(optics.0),
@@ -365,7 +386,7 @@ mod impl_some {
     where
         T: PrismRef<Pm>,
     {
-        fn preview_ref(&self, optics: optics::Some<Pm>) -> Option<&Self::To> {
+        fn preview_ref(&self, optics: optics::Some<Pm>) -> Option<&Self::Image> {
             self.as_ref()?.preview_ref(optics.0)
         }
     }
@@ -374,7 +395,7 @@ mod impl_some {
     where
         T: PrismMut<Pm>,
     {
-        fn preview_mut(&mut self, optics: optics::Some<Pm>) -> Option<&mut Self::To> {
+        fn preview_mut(&mut self, optics: optics::Some<Pm>) -> Option<&mut Self::Image> {
             self.as_mut()?.preview_mut(optics.0)
         }
     }
@@ -383,21 +404,23 @@ mod impl_some {
     where
         T: Prism<Pm>,
     {
-        fn preview(self, optics: optics::Some<Pm>) -> Option<Self::To>
+        fn preview(self, optics: optics::Some<Pm>) -> Option<Self::Image>
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             self?.preview(optics.0)
         }
     }
 
-    impl<Rv, T> Review<optics::None<Rv>> for Option<T>
-    where
-        (): Review<Rv>,
-    {
-        type From = ();
+    impl<Opt, T> Optic<optics::None<Opt>> for Option<T> {
+        type Image = ();
+    }
 
-        fn review(_optics: optics::None<Rv>, _from: Self::From) -> Self {
+    impl<Rv, T> Review<optics::None<Rv>> for Option<T> {
+        fn review(_optics: optics::None<Rv>, _from: Self::Image) -> Self
+        where
+            Self::Image: Sized,
+        {
             None
         }
     }
@@ -412,13 +435,19 @@ mod impl_tuples {
 
     macro_rules! impl_tuple {
         ({$($param:ident)*}, $field:tt, $optic:ident, $to:ident) => {
+            impl<Opt, $($param,)*> Optic<$optic<Opt>> for ($($param,)*)
+            where
+                $to: Optic<Opt>,
+            {
+                type Image = $to::Image;
+            }
+
             impl<Tr, $($param,)*> TraversalRef<$optic<Tr>> for ($($param,)*)
             where
                 $to: TraversalRef<Tr>,
             {
-                type To = $to::To;
 
-                fn traverse_ref(&self, optics: $optic<Tr>) -> Vec<&Self::To> {
+                fn traverse_ref(&self, optics: $optic<Tr>) -> Vec<&Self::Image> {
                     self.$field.traverse_ref(optics.0)
                 }
             }
@@ -427,7 +456,7 @@ mod impl_tuples {
             where
                 $to: TraversalMut<Tr>,
             {
-                fn traverse_mut(&mut self, optics: $optic<Tr>) -> Vec<&mut Self::To> {
+                fn traverse_mut(&mut self, optics: $optic<Tr>) -> Vec<&mut Self::Image> {
                     self.$field.traverse_mut(optics.0)
                 }
             }
@@ -436,9 +465,9 @@ mod impl_tuples {
             where
                 $to: Traversal<Tr>,
             {
-                fn traverse(self, optics: $optic<Tr>) -> Vec<Self::To>
+                fn traverse(self, optics: $optic<Tr>) -> Vec<Self::Image>
                 where
-                    Self::To: Sized,
+                    Self::Image: Sized,
                 {
                     self.$field.traverse(optics.0)
                 }
@@ -448,7 +477,7 @@ mod impl_tuples {
             where
                 $to: PrismRef<Pm>,
             {
-                fn preview_ref(&self, optics: $optic<Pm>) -> Option<&Self::To> {
+                fn preview_ref(&self, optics: $optic<Pm>) -> Option<&Self::Image> {
                     self.$field.preview_ref(optics.0)
                 }
             }
@@ -457,7 +486,7 @@ mod impl_tuples {
             where
                 $to: PrismMut<Pm>,
             {
-                fn preview_mut(&mut self, optics: $optic<Pm>) -> Option<&mut Self::To> {
+                fn preview_mut(&mut self, optics: $optic<Pm>) -> Option<&mut Self::Image> {
                     self.$field.preview_mut(optics.0)
                 }
             }
@@ -466,9 +495,9 @@ mod impl_tuples {
             where
                 $to: Prism<Pm>,
             {
-                fn preview(self, optics: $optic<Pm>) -> Option<Self::To>
+                fn preview(self, optics: $optic<Pm>) -> Option<Self::Image>
                 where
-                    Self::To: Sized,
+                    Self::Image: Sized,
                 {
                     self.$field.preview(optics.0)
                 }
@@ -478,7 +507,7 @@ mod impl_tuples {
             where
                 $to: LensRef<Ls>,
             {
-                fn view_ref(&self, optics: $optic<Ls>) -> &Self::To {
+                fn view_ref(&self, optics: $optic<Ls>) -> &Self::Image {
                     self.$field.view_ref(optics.0)
                 }
             }
@@ -487,7 +516,7 @@ mod impl_tuples {
             where
                 $to: LensMut<Ls>,
             {
-                fn view_mut(&mut self, optics: $optic<Ls>) -> &mut Self::To {
+                fn view_mut(&mut self, optics: $optic<Ls>) -> &mut Self::Image {
                     self.$field.view_mut(optics.0)
                 }
             }
@@ -496,9 +525,9 @@ mod impl_tuples {
             where
                 $to: Lens<Ls>,
             {
-                fn view(self, optics: $optic<Ls>) -> Self::To
+                fn view(self, optics: $optic<Ls>) -> Self::Image
                 where
-                    Self::To: Sized,
+                    Self::Image: Sized,
                 {
                     self.$field.view(optics.0)
                 }
@@ -545,23 +574,30 @@ mod impl_tuples {
     where
         A: Review<Rv>,
     {
-        type From = A::From;
-
-        fn review(optics: _0<Rv>, from: Self::From) -> Self {
+        fn review(optics: _0<Rv>, from: Self::Image) -> Self
+        where
+            Self::Image: Sized,
+        {
             (Review::review(optics.0, from),)
         }
     }
 
     macro_rules! impl_both {
         (<$param:ident> $tuple:ty, $($fields:tt),*) => {
+            impl<Opt, $param> Optic<_both<Opt>> for $tuple
+            where
+                $param: Optic<Opt>,
+            {
+                type Image = $param::Image;
+            }
+
             impl<Tr, $param> TraversalRef<_both<Tr>> for $tuple
             where
                 Tr: Clone,
                 $param: TraversalRef<Tr>,
             {
-                type To = A::To;
 
-                fn traverse_ref(&self, optics: _both<Tr>) -> Vec<&Self::To> {
+                fn traverse_ref(&self, optics: _both<Tr>) -> Vec<&Self::Image> {
                     let mut vec = vec![];
                     $(vec.append(&mut self.$fields.traverse_ref(optics.0.clone()));)*
                     vec
@@ -573,7 +609,7 @@ mod impl_tuples {
                 Tr: Clone,
                 $param: TraversalMut<Tr>,
             {
-                fn traverse_mut(&mut self, optics: _both<Tr>) -> Vec<&mut Self::To> {
+                fn traverse_mut(&mut self, optics: _both<Tr>) -> Vec<&mut Self::Image> {
                     let mut vec = vec![];
                     $(vec.append(&mut self.$fields.traverse_mut(optics.0.clone()));)*
                     vec
@@ -585,9 +621,9 @@ mod impl_tuples {
                 Tr: Clone,
                 $param: Traversal<Tr>,
             {
-                fn traverse(self, optics: _both<Tr>) -> Vec<Self::To>
+                fn traverse(self, optics: _both<Tr>) -> Vec<Self::Image>
                 where
-                    Self::To: Sized,
+                    Self::Image: Sized,
                 {
                     let mut vec = vec![];
                     $(vec.append(&mut self.$fields.traverse(optics.0.clone()));)*
@@ -609,7 +645,7 @@ mod impl_tuples {
     where
         A: PrismRef<Pm>,
     {
-        fn preview_ref(&self, optics: _both<Pm>) -> Option<&Self::To> {
+        fn preview_ref(&self, optics: _both<Pm>) -> Option<&Self::Image> {
             self.0.preview_ref(optics.0)
         }
     }
@@ -618,7 +654,7 @@ mod impl_tuples {
     where
         A: PrismMut<Pm>,
     {
-        fn preview_mut(&mut self, optics: _both<Pm>) -> Option<&mut Self::To> {
+        fn preview_mut(&mut self, optics: _both<Pm>) -> Option<&mut Self::Image> {
             self.0.preview_mut(optics.0)
         }
     }
@@ -627,9 +663,9 @@ mod impl_tuples {
     where
         A: Prism<Pm>,
     {
-        fn preview(self, optics: _both<Pm>) -> Option<Self::To>
+        fn preview(self, optics: _both<Pm>) -> Option<Self::Image>
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             self.0.preview(optics.0)
         }
@@ -639,7 +675,7 @@ mod impl_tuples {
     where
         A: LensRef<Ls>,
     {
-        fn view_ref(&self, optics: _both<Ls>) -> &Self::To {
+        fn view_ref(&self, optics: _both<Ls>) -> &Self::Image {
             self.0.view_ref(optics.0)
         }
     }
@@ -648,7 +684,7 @@ mod impl_tuples {
     where
         A: LensMut<Ls>,
     {
-        fn view_mut(&mut self, optics: _both<Ls>) -> &mut Self::To {
+        fn view_mut(&mut self, optics: _both<Ls>) -> &mut Self::Image {
             self.0.view_mut(optics.0)
         }
     }
@@ -657,9 +693,9 @@ mod impl_tuples {
     where
         A: Lens<Ls>,
     {
-        fn view(self, optics: _both<Ls>) -> Self::To
+        fn view(self, optics: _both<Ls>) -> Self::Image
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             self.0.view(optics.0)
         }
@@ -669,9 +705,10 @@ mod impl_tuples {
     where
         A: Review<Rv>,
     {
-        type From = A::From;
-
-        fn review(optics: _both<Rv>, from: Self::From) -> Self {
+        fn review(optics: _both<Rv>, from: Self::Image) -> Self
+        where
+            Self::Image: Sized,
+        {
             (Review::review(optics.0, from),)
         }
     }
@@ -686,26 +723,18 @@ mod impl_collect {
 
     macro_rules! impl_iter {
         (<$item:ident> $collector:ty) => {
-            impl<Rv: Clone, $item> Review<_mapped<Rv>> for $collector
+            impl<Opt, $item> Optic<_mapped<Opt>> for $collector
             where
-                $item: Review<Rv>,
+                $item: Optic<Opt>,
             {
-                type From = Vec<$item::From>;
-
-                fn review(optics: _mapped<Rv>, from: Self::From) -> Self {
-                    from.into_iter()
-                        .map(|t| Review::review(optics.0.clone(), t))
-                        .collect()
-                }
+                type Image = $item::Image;
             }
 
             impl<Tr: Clone, $item> TraversalRef<_mapped<Tr>> for $collector
             where
                 $item: TraversalRef<Tr>,
             {
-                type To = $item::To;
-
-                fn traverse_ref(&self, optics: _mapped<Tr>) -> Vec<&Self::To> {
+                fn traverse_ref(&self, optics: _mapped<Tr>) -> Vec<&Self::Image> {
                     self.into_iter()
                         .flat_map(|t| t.traverse_ref(optics.0.clone()))
                         .collect()
@@ -716,7 +745,7 @@ mod impl_collect {
             where
                 $item: TraversalMut<Tr>,
             {
-                fn traverse_mut(&mut self, optics: _mapped<Tr>) -> Vec<&mut Self::To> {
+                fn traverse_mut(&mut self, optics: _mapped<Tr>) -> Vec<&mut Self::Image> {
                     self.into_iter()
                         .flat_map(|t| t.traverse_mut(optics.0.clone()))
                         .collect()
@@ -727,9 +756,9 @@ mod impl_collect {
             where
                 $item: Traversal<Tr>,
             {
-                fn traverse(self, optics: _mapped<Tr>) -> Vec<Self::To>
+                fn traverse(self, optics: _mapped<Tr>) -> Vec<Self::Image>
                 where
-                    Self::To: Sized,
+                    Self::Image: Sized,
                 {
                     self.into_iter()
                         .flat_map(|t| t.traverse(optics.0.clone()))
@@ -751,13 +780,18 @@ mod impl_ptr {
 
     macro_rules! impl_ref {
         (<$param:ident> $ptr:ty, $optic:ident) => {
+            impl<Opt, $param: ?Sized> Optic<$optic<Opt>> for $ptr
+            where
+                $param: Optic<Opt>,
+            {
+                type Image = $param::Image;
+            }
+
             impl<$param: ?Sized, Tr> TraversalRef<$optic<Tr>> for $ptr
             where
                 $param: TraversalRef<Tr>,
             {
-                type To = $param::To;
-
-                fn traverse_ref(&self, optics: $optic<Tr>) -> Vec<&Self::To> {
+                fn traverse_ref(&self, optics: $optic<Tr>) -> Vec<&Self::Image> {
                     (**self).traverse_ref(optics.0)
                 }
             }
@@ -766,7 +800,7 @@ mod impl_ptr {
             where
                 $param: PrismRef<Pm>,
             {
-                fn preview_ref(&self, optics: $optic<Pm>) -> Option<&Self::To> {
+                fn preview_ref(&self, optics: $optic<Pm>) -> Option<&Self::Image> {
                     (**self).preview_ref(optics.0)
                 }
             }
@@ -775,7 +809,7 @@ mod impl_ptr {
             where
                 $param: LensRef<Ls>,
             {
-                fn view_ref(&self, optics: $optic<Ls>) -> &Self::To {
+                fn view_ref(&self, optics: $optic<Ls>) -> &Self::Image {
                     (**self).view_ref(optics.0)
                 }
             }
@@ -788,7 +822,7 @@ mod impl_ptr {
             where
                 $param: TraversalMut<Tr>,
             {
-                fn traverse_mut(&mut self, optics: $optic<Tr>) -> Vec<&mut Self::To> {
+                fn traverse_mut(&mut self, optics: $optic<Tr>) -> Vec<&mut Self::Image> {
                     (**self).traverse_mut(optics.0)
                 }
             }
@@ -797,7 +831,7 @@ mod impl_ptr {
             where
                 $param: PrismMut<Pm>,
             {
-                fn preview_mut(&mut self, optics: $optic<Pm>) -> Option<&mut Self::To> {
+                fn preview_mut(&mut self, optics: $optic<Pm>) -> Option<&mut Self::Image> {
                     (**self).preview_mut(optics.0)
                 }
             }
@@ -806,7 +840,7 @@ mod impl_ptr {
             where
                 $param: LensMut<Ls>,
             {
-                fn view_mut(&mut self, optics: $optic<Ls>) -> &mut Self::To {
+                fn view_mut(&mut self, optics: $optic<Ls>) -> &mut Self::Image {
                     (**self).view_mut(optics.0)
                 }
             }
@@ -817,9 +851,10 @@ mod impl_ptr {
     where
         T: Review<Rv>,
     {
-        type From = T::From;
-
-        fn review(optics: _box<Rv>, from: Self::From) -> Self {
+        fn review(optics: _box<Rv>, from: Self::Image) -> Self
+        where
+            Self::Image: Sized,
+        {
             Box::new(Review::review(optics.0, from))
         }
     }
@@ -828,9 +863,9 @@ mod impl_ptr {
     where
         T: Traversal<Tr>,
     {
-        fn traverse(self, optics: _box<Tr>) -> Vec<Self::To>
+        fn traverse(self, optics: _box<Tr>) -> Vec<Self::Image>
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             (*self).traverse(optics.0)
         }
@@ -840,9 +875,9 @@ mod impl_ptr {
     where
         T: Prism<Pm>,
     {
-        fn preview(self, optics: _box<Pm>) -> Option<Self::To>
+        fn preview(self, optics: _box<Pm>) -> Option<Self::Image>
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             (*self).preview(optics.0)
         }
@@ -852,32 +887,48 @@ mod impl_ptr {
     where
         T: Lens<Ls>,
     {
-        fn view(self, optics: _box<Ls>) -> Self::To
+        fn view(self, optics: _box<Ls>) -> Self::Image
         where
-            Self::To: Sized,
+            Self::Image: Sized,
         {
             (*self).view(optics.0)
         }
+    }
+
+    impl<Opt, T> Optic<_box<Opt>> for Rc<T>
+    where
+        T: Optic<Opt>,
+    {
+        type Image = T::Image;
     }
 
     impl<Rv, T> Review<_box<Rv>> for Rc<T>
     where
         T: Review<Rv>,
     {
-        type From = T::From;
-
-        fn review(optics: _box<Rv>, from: Self::From) -> Self {
+        fn review(optics: _box<Rv>, from: Self::Image) -> Self
+        where
+            Self::Image: Sized,
+        {
             Rc::new(Review::review(optics.0, from))
         }
+    }
+
+    impl<Opt, T> Optic<_box<Opt>> for Arc<T>
+    where
+        T: Optic<Opt>,
+    {
+        type Image = T::Image;
     }
 
     impl<Rv, T> Review<_box<Rv>> for Arc<T>
     where
         T: Review<Rv>,
     {
-        type From = T::From;
-
-        fn review(optics: _box<Rv>, from: Self::From) -> Self {
+        fn review(optics: _box<Rv>, from: Self::Image) -> Self
+        where
+            Self::Image: Sized,
+        {
             Arc::new(Review::review(optics.0, from))
         }
     }
@@ -905,13 +956,19 @@ mod impl_ix {
 
     macro_rules! impl_ix {
         (<$($param:ident,)? $(const $c:ident: $ct: ty)?> $t:ty[$ix:ty]: $o:ty) => {
+            impl<$($param,)? Opt, $(const $c: $ct)?> Optic<_ix<$ix, Opt>> for $t
+            where
+                $o: Optic<Opt>,
+            {
+                type Image = <$o as Optic<Opt>>::Image;
+            }
+
             impl<$($param,)? Tr, $(const $c: $ct)?> TraversalRef<_ix<$ix, Tr>> for $t
             where
                 $o: TraversalRef<Tr>,
             {
-                type To = <$o as TraversalRef<Tr>>::To;
 
-                fn traverse_ref(&self, optics: _ix<$ix, Tr>) -> Vec<&Self::To> {
+                fn traverse_ref(&self, optics: _ix<$ix, Tr>) -> Vec<&Self::Image> {
                     self[optics.1].traverse_ref(optics.0)
                 }
             }
@@ -921,7 +978,7 @@ mod impl_ix {
                 $o: TraversalMut<Tr>,
             {
 
-                fn traverse_mut(&mut self, optics: _ix<$ix, Tr>) -> Vec<&mut Self::To> {
+                fn traverse_mut(&mut self, optics: _ix<$ix, Tr>) -> Vec<&mut Self::Image> {
                     self[optics.1].traverse_mut(optics.0)
                 }
             }
@@ -930,7 +987,7 @@ mod impl_ix {
             where
                 $o: PrismRef<Pm>,
             {
-                fn preview_ref(&self, optics: _ix<$ix, Pm>) -> Option<&Self::To> {
+                fn preview_ref(&self, optics: _ix<$ix, Pm>) -> Option<&Self::Image> {
                     self[optics.1].preview_ref(optics.0)
                 }
             }
@@ -939,7 +996,7 @@ mod impl_ix {
             where
                 $o: PrismMut<Pm>,
             {
-                fn preview_mut(&mut self, optics: _ix<$ix, Pm>) -> Option<&mut Self::To> {
+                fn preview_mut(&mut self, optics: _ix<$ix, Pm>) -> Option<&mut Self::Image> {
                     self[optics.1].preview_mut(optics.0)
                 }
             }
@@ -948,7 +1005,7 @@ mod impl_ix {
             where
                 $o: LensRef<Ls>,
             {
-                fn view_ref(&self, optics: _ix<$ix, Ls>) -> &Self::To {
+                fn view_ref(&self, optics: _ix<$ix, Ls>) -> &Self::Image {
                     self[optics.1].view_ref(optics.0)
                 }
             }
@@ -957,7 +1014,7 @@ mod impl_ix {
             where
                 $o: LensMut<Pm>,
             {
-                fn view_mut(&mut self, optics: _ix<$ix, Pm>) -> &mut Self::To {
+                fn view_mut(&mut self, optics: _ix<$ix, Pm>) -> &mut Self::Image {
                     self[optics.1].view_mut(optics.0)
                 }
             }
@@ -994,15 +1051,31 @@ mod impl_ix {
     impl_ix!(<> str[RangeFrom<usize>]: str);
     impl_ix!(<> str[RangeFull]: str);
 
+    impl<K, Q: ?Sized, V, Opt> Optic<_ix<&'_ Q, Opt>> for BTreeMap<K, V>
+    where
+        K: Borrow<Q> + Ord,
+        Q: Ord,
+        V: Optic<Opt>,
+    {
+        type Image = V::Image;
+    }
+
+    impl<K, Q: ?Sized, V, Opt> Optic<_ix<&'_ Q, Opt>> for HashMap<K, V>
+    where
+        K: Eq + Hash + Borrow<Q>,
+        Q: Eq + Hash,
+        V: Optic<Opt>,
+    {
+        type Image = V::Image;
+    }
+
     impl<K, Q: ?Sized, V, Tr> TraversalRef<_ix<&'_ Q, Tr>> for BTreeMap<K, V>
     where
         K: Borrow<Q> + Ord,
         Q: Ord,
         V: TraversalRef<Tr>,
     {
-        type To = V::To;
-
-        fn traverse_ref(&self, optics: _ix<&Q, Tr>) -> Vec<&Self::To> {
+        fn traverse_ref(&self, optics: _ix<&Q, Tr>) -> Vec<&Self::Image> {
             self[optics.1].traverse_ref(optics.0)
         }
     }
@@ -1013,9 +1086,7 @@ mod impl_ix {
         Q: Eq + Hash,
         V: TraversalRef<Tr>,
     {
-        type To = V::To;
-
-        fn traverse_ref(&self, optics: _ix<&Q, Tr>) -> Vec<&Self::To> {
+        fn traverse_ref(&self, optics: _ix<&Q, Tr>) -> Vec<&Self::Image> {
             self[optics.1].traverse_ref(optics.0)
         }
     }
@@ -1026,7 +1097,7 @@ mod impl_ix {
         Q: Ord,
         V: PrismRef<Pm>,
     {
-        fn preview_ref(&self, optics: _ix<&Q, Pm>) -> Option<&Self::To> {
+        fn preview_ref(&self, optics: _ix<&Q, Pm>) -> Option<&Self::Image> {
             self[optics.1].preview_ref(optics.0)
         }
     }
@@ -1037,7 +1108,7 @@ mod impl_ix {
         Q: Eq + Hash,
         V: PrismRef<Pm>,
     {
-        fn preview_ref(&self, optics: _ix<&Q, Pm>) -> Option<&Self::To> {
+        fn preview_ref(&self, optics: _ix<&Q, Pm>) -> Option<&Self::Image> {
             self[optics.1].preview_ref(optics.0)
         }
     }
@@ -1048,7 +1119,7 @@ mod impl_ix {
         Q: Ord,
         V: LensRef<Ls>,
     {
-        fn view_ref(&self, optics: _ix<&Q, Ls>) -> &Self::To {
+        fn view_ref(&self, optics: _ix<&Q, Ls>) -> &Self::Image {
             self[optics.1].view_ref(optics.0)
         }
     }
@@ -1059,7 +1130,7 @@ mod impl_ix {
         Q: Eq + Hash,
         V: LensRef<Ls>,
     {
-        fn view_ref(&self, optics: _ix<&Q, Ls>) -> &Self::To {
+        fn view_ref(&self, optics: _ix<&Q, Ls>) -> &Self::Image {
             self[optics.1].view_ref(optics.0)
         }
     }

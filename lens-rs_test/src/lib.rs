@@ -5,7 +5,7 @@ mod tests {
     use Nat::*;
 
     // derive enum
-    #[derive(Copy, Clone, Debug, Review, Prism)]
+    #[derive(Copy, Clone, Debug, Optic, Review, Prism)]
     enum Either<L, R> {
         #[optic]
         Left(L),
@@ -13,7 +13,7 @@ mod tests {
         Right(R),
     }
 
-    #[derive(Clone, Debug, Eq, PartialEq, Review, Prism)]
+    #[derive(Clone, Debug, Eq, PartialEq, Optic, Review, Prism)]
     enum Nat {
         #[optic]
         S(Box<Nat>),
@@ -22,7 +22,7 @@ mod tests {
     }
 
     // derive struct
-    #[derive(Copy, Clone, Debug, Lens)]
+    #[derive(Copy, Clone, Debug, Optic, Lens)]
     struct Foo<A, B> {
         #[optic]
         a: A,
@@ -30,7 +30,7 @@ mod tests {
         b: B,
     }
 
-    #[derive(Clone, Debug, Lens)]
+    #[derive(Clone, Debug, Optic, Lens)]
     struct Bar {
         #[optic]
         a: String,
@@ -38,8 +38,7 @@ mod tests {
         c: i32,
     }
 
-
-    #[derive(Debug, Lens)]
+    #[derive(Debug, Optic, Lens)]
     struct Shit<'a> {
         #[optic(ref)]
         a: &'a str,
@@ -48,17 +47,17 @@ mod tests {
     }
 
     // derive tuple
-    #[derive(Copy, Clone, Debug, Lens)]
+    #[derive(Copy, Clone, Debug, Optic, Lens)]
     struct Tuple<A, B>(#[optic] A, #[optic] B);
 
     // T may have i32
-    fn may_have_i32<T: PrismRef<Pm, To = i32>, Pm>(t: &T, pm: Pm) -> Option<i32> {
+    fn may_have_i32<T: PrismRef<Pm, Image = i32>, Pm>(t: &T, pm: Pm) -> Option<i32> {
         t.preview_ref(pm).map(|x| *x)
     }
 
     fn with_field<T>(t: T) -> String
     where
-        T: Lens<Optics![a], To = String>,
+        T: Lens<Optics![a], Image = String>,
     {
         t.view(optics!(a))
     }
@@ -85,16 +84,13 @@ mod tests {
         x.preview_mut(optics!(_1.Left._1)).map(|x| *x *= 2);
         assert_eq!(x.preview_ref(optics!(_1.Left._1)), Some(&8));
 
-        x
-            .preview_mut(optics!(_1.Right))
-            .map(|x: &mut i32| *x *= 2);
+        x.preview_mut(optics!(_1.Right)).map(|x: &mut i32| *x *= 2);
         assert_eq!(x.preview_ref(optics!(_1.Right)), None);
 
         *x.view_mut(optics!(_0)) += 1;
         assert_eq!(x.0, 2);
 
-        x
-            .traverse_mut(optics!(_1.Left._0._mapped.Some.a))
+        x.traverse_mut(optics!(_1.Left._0._mapped.Some.a))
             .into_iter()
             .for_each(|s| *s = s.to_uppercase());
         assert_eq!(
@@ -153,5 +149,4 @@ mod tests {
 
         assert_eq!(x.1[0], 4);
     }
-
 }

@@ -4,8 +4,8 @@ use proc_macro::{TokenStream, TokenTree};
 use proc_macro2::Span;
 use quote::*;
 use syn::{
-    parenthesized, parse_macro_input, parse_quote,  visit::Visit, Data,
-    DeriveInput, Fields, ItemEnum, ItemStruct, Token,
+    parenthesized, parse_macro_input, parse_quote, visit::Visit, Data, DeriveInput, Fields,
+    ItemEnum, ItemStruct, Token,
 };
 
 use crate::meta_impls::*;
@@ -49,11 +49,10 @@ fn variant_with_optic_attr(var: &syn::Variant) -> bool {
 }
 
 fn variant_optic_attr(var: &syn::Variant) -> Option<syn::Attribute> {
-    var
-        .attrs
-        .clone()
-        .into_iter()
-        .find(|attr: &syn::Attribute| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+    var.attrs.clone().into_iter().find(|attr: &syn::Attribute| {
+        attr.path
+            .is_ident(&syn::Ident::new("optic", Span::call_site()))
+    })
 }
 
 fn field_with_optic_attr(field: &syn::Field) -> bool {
@@ -64,13 +63,69 @@ fn field_with_optic_attr(field: &syn::Field) -> bool {
 }
 
 fn field_optic_attr(var: &syn::Field) -> Option<syn::Attribute> {
-    var
-        .attrs
-        .clone()
-        .into_iter()
-        .find(|attr: &syn::Attribute| attr.path.is_ident(&syn::Ident::new("optic", Span::call_site())))
+    var.attrs.clone().into_iter().find(|attr: &syn::Attribute| {
+        attr.path
+            .is_ident(&syn::Ident::new("optic", Span::call_site()))
+    })
 }
 
+#[proc_macro_derive(Optic, attributes(optic))]
+pub fn derive_optic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let derive_input = parse_macro_input!(input as DeriveInput);
+    let optics: proc_macro2::TokenStream = match derive_input.data.clone() {
+        Data::Struct(syn::DataStruct {
+            fields: syn::Fields::Named(fs),
+            ..
+        }) => fs
+            .named
+            .iter()
+            .filter(|field| field_with_optic_attr(field))
+            .flat_map(|f| {
+                impl_optic4field(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    f.ident.clone().unwrap(),
+                    f.ty.clone(),
+                )
+            })
+            .collect(),
+        Data::Struct(syn::DataStruct {
+            fields: syn::Fields::Unnamed(fs),
+            ..
+        }) => fs
+            .unnamed
+            .iter()
+            .take(7)
+            .filter(|field| field_with_optic_attr(field))
+            .enumerate()
+            .flat_map(|(i, f)| {
+                impl_optic4index(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    syn::Index::from(i),
+                    f.ty.clone(),
+                )
+            })
+            .collect(),
+        Data::Enum(e) => e
+            .variants
+            .iter()
+            .filter(|v| variant_with_optic_attr(v))
+            .flat_map(|var| match var.fields.clone() {
+                Fields::Unnamed(fs) if fs.unnamed.len() == 1 => impl_optic4variant(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    var.ident.clone(),
+                    fs.unnamed[0].ty.clone(),
+                ),
+                _ => panic!("can only derive `Optic` for variant with single, unnamed variant"),
+            })
+            .collect(),
+        _ => panic!("union  can't derive the `Optic`"),
+    };
+
+    TokenStream::from(optics)
+}
 
 #[proc_macro_derive(Review, attributes(optic))]
 pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -100,7 +155,7 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
 
-    let prisms: proc_macro2::TokenStream  = match derive_input.data.clone() {
+    let prisms: proc_macro2::TokenStream = match derive_input.data.clone() {
         Data::Enum(e) => e
             .variants
             .iter()
@@ -108,20 +163,27 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
             .flat_map(|var| match var.fields.clone() {
                 Fields::Unnamed(fs) if fs.unnamed.len() == 1 => {
                     let attr: syn::Attribute = variant_optic_attr(var).unwrap();
-                    let mutability = syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
+                    let mutability =
+                        syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
                     match mutability {
-                        OpticMutability::Ref(_) => impl_ref4variant(derive_input.ident.clone(),
-                                                                    derive_input.generics.clone(),
-                                                                    var.ident.clone(),
-                                                                    fs.unnamed[0].ty.clone()),
-                        OpticMutability::Mut(_) => impl_mut4variant(derive_input.ident.clone(),
-                                                                    derive_input.generics.clone(),
-                                                                    var.ident.clone(),
-                                                                    fs.unnamed[0].ty.clone()),
-                        OpticMutability::Move => impl_mv4variant(derive_input.ident.clone(),
-                                                                  derive_input.generics.clone(),
-                                                                  var.ident.clone(),
-                                                                  fs.unnamed[0].ty.clone())
+                        OpticMutability::Ref(_) => impl_ref4variant(
+                            derive_input.ident.clone(),
+                            derive_input.generics.clone(),
+                            var.ident.clone(),
+                            fs.unnamed[0].ty.clone(),
+                        ),
+                        OpticMutability::Mut(_) => impl_mut4variant(
+                            derive_input.ident.clone(),
+                            derive_input.generics.clone(),
+                            var.ident.clone(),
+                            fs.unnamed[0].ty.clone(),
+                        ),
+                        OpticMutability::Move => impl_mv4variant(
+                            derive_input.ident.clone(),
+                            derive_input.generics.clone(),
+                            var.ident.clone(),
+                            fs.unnamed[0].ty.clone(),
+                        ),
                     }
                 }
                 _ => panic!("can only derive `Prism` for variant with single, unnamed variant"),
@@ -138,29 +200,43 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let derive_input = parse_macro_input!(input as DeriveInput);
 
     let lens: proc_macro2::TokenStream = match derive_input.data.clone() {
-        Data::Struct(syn::DataStruct { fields: syn::Fields::Named(fs), .. }) => fs
+        Data::Struct(syn::DataStruct {
+            fields: syn::Fields::Named(fs),
+            ..
+        }) => fs
             .named
             .iter()
             .filter(|field| field_with_optic_attr(field))
             .flat_map(|f| {
                 let attr: syn::Attribute = field_optic_attr(f).unwrap();
-                let mutability = syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
+                let mutability =
+                    syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
                 match mutability {
-                    OpticMutability::Ref(_) => impl_ref4field(derive_input.ident.clone(),
-                                                                derive_input.generics.clone(),
-                                                                f.ident.clone().unwrap(),
-                                                                f.ty.clone()),
-                    OpticMutability::Mut(_) => impl_mut4field(derive_input.ident.clone(),
-                                                                derive_input.generics.clone(),
-                                                                f.ident.clone().unwrap(),
-                                                                f.ty.clone()),
-                    OpticMutability::Move => impl_mv4field(derive_input.ident.clone(),
-                                                             derive_input.generics.clone(),
-                                                             f.ident.clone().unwrap(),
-                                                             f.ty.clone())
+                    OpticMutability::Ref(_) => impl_ref4field(
+                        derive_input.ident.clone(),
+                        derive_input.generics.clone(),
+                        f.ident.clone().unwrap(),
+                        f.ty.clone(),
+                    ),
+                    OpticMutability::Mut(_) => impl_mut4field(
+                        derive_input.ident.clone(),
+                        derive_input.generics.clone(),
+                        f.ident.clone().unwrap(),
+                        f.ty.clone(),
+                    ),
+                    OpticMutability::Move => impl_mv4field(
+                        derive_input.ident.clone(),
+                        derive_input.generics.clone(),
+                        f.ident.clone().unwrap(),
+                        f.ty.clone(),
+                    ),
                 }
-            }).collect(),
-        Data::Struct(syn::DataStruct { fields: syn::Fields::Unnamed(fs), .. }) => fs
+            })
+            .collect(),
+        Data::Struct(syn::DataStruct {
+            fields: syn::Fields::Unnamed(fs),
+            ..
+        }) => fs
             .unnamed
             .iter()
             .take(7)
@@ -168,23 +244,31 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
             .enumerate()
             .flat_map(|(i, f)| {
                 let attr: syn::Attribute = field_optic_attr(f).unwrap();
-                let mutability = syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
+                let mutability =
+                    syn::parse::<OpticMutability>(TokenStream::from(attr.tokens)).unwrap();
                 let field_name = syn::Index::from(i);
                 match mutability {
-                    OpticMutability::Ref(_) => impl_ref4index(derive_input.ident.clone(),
-                                                              derive_input.generics.clone(),
-                                                              field_name,
-                                                              f.ty.clone()),
-                    OpticMutability::Mut(_) => impl_mut4index(derive_input.ident.clone(),
-                                                              derive_input.generics.clone(),
-                                                              field_name,
-                                                              f.ty.clone()),
-                    OpticMutability::Move => impl_mv4index(derive_input.ident.clone(),
-                                                           derive_input.generics.clone(),
-                                                           field_name,
-                                                           f.ty.clone())
+                    OpticMutability::Ref(_) => impl_ref4index(
+                        derive_input.ident.clone(),
+                        derive_input.generics.clone(),
+                        field_name,
+                        f.ty.clone(),
+                    ),
+                    OpticMutability::Mut(_) => impl_mut4index(
+                        derive_input.ident.clone(),
+                        derive_input.generics.clone(),
+                        field_name,
+                        f.ty.clone(),
+                    ),
+                    OpticMutability::Move => impl_mv4index(
+                        derive_input.ident.clone(),
+                        derive_input.generics.clone(),
+                        field_name,
+                        f.ty.clone(),
+                    ),
                 }
-            }).collect(),
+            })
+            .collect(),
         _ => panic!("union and enum can't derive the `Lens`"),
     };
 
@@ -196,14 +280,11 @@ struct OpticCollector<'a>(&'a mut OpticMap);
 impl<'a> OpticCollector<'a> {
     fn collect_optic_fields<'f>(&mut self, fields: impl Iterator<Item = &'f syn::Field>) {
         fields.for_each(|field| {
-            if field.attrs.iter().any(|attr| {
-                attr.path
-                    .is_ident(&syn::Ident::new("optic", Span::call_site()))
-            }) {
+            if field_with_optic_attr(field) {
                 field
                     .ident
                     .as_ref()
-                    .map(|ident| format!("{}", ident.to_string()))
+                    .map(|ident| ident.to_string())
                     .map(|optic_name| self.0.insert(optic_name));
             }
         });
@@ -225,10 +306,7 @@ impl<'a> Visit<'_> for OpticCollector<'a> {
 
     fn visit_item_enum(&mut self, item_enum: &ItemEnum) {
         item_enum.variants.iter().for_each(|variant| {
-            if variant.attrs.iter().any(|attr| {
-                attr.path
-                    .is_ident(&syn::Ident::new("optic", Span::call_site()))
-            }) {
+            if variant_with_optic_attr(variant) {
                 self.0.insert(format!("{}", variant.ident));
             }
         })

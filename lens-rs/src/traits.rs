@@ -1,3 +1,7 @@
+pub trait Optic<Opt> {
+    type Image: ?Sized;
+}
+
 /**
 * A trait representing the optics describes how to construct a single value.
 * ## Example
@@ -7,9 +11,10 @@
 * assert_eq!(nested, Ok(Err(Some((1,2,3)))));
 * ```
 */
-pub trait Review<Optics> {
-    type From;
-    fn review(optics: Optics, from: Self::From) -> Self;
+pub trait Review<Opt>: Optic<Opt> {
+    fn review(optics: Opt, from: Self::Image) -> Self
+    where
+        Self::Image: Sized;
 }
 
 /**
@@ -25,19 +30,18 @@ x.traverse_mut(optics!(_1.Mapped._Some._0))
 assert_eq!(x.traverse(optics!(_1._mapped.Some._0)), vec![3]);
 ```
 */
-pub trait TraversalRef<Optics> {
-    type To: ?Sized;
-    fn traverse_ref(&self, optics: Optics) -> Vec<&Self::To>;
+pub trait TraversalRef<Opt>: Optic<Opt> {
+    fn traverse_ref(&self, optics: Opt) -> Vec<&Self::Image>;
 }
 
 pub trait TraversalMut<Optics>: TraversalRef<Optics> {
-    fn traverse_mut(&mut self, optics: Optics) -> Vec<&mut Self::To>;
+    fn traverse_mut(&mut self, optics: Optics) -> Vec<&mut Self::Image>;
 }
 
 pub trait Traversal<Optics>: TraversalMut<Optics> {
-    fn traverse(self, optics: Optics) -> Vec<Self::To>
+    fn traverse(self, optics: Optics) -> Vec<Self::Image>
     where
-        Self::To: Sized;
+        Self::Image: Sized;
 }
 
 /**
@@ -51,17 +55,17 @@ assert_eq!(x.preview(optics!(_1.Ok._1))?, 6);
 ```
 */
 pub trait PrismRef<Optics>: TraversalRef<Optics> {
-    fn preview_ref(&self, optics: Optics) -> Option<&Self::To>;
+    fn preview_ref(&self, optics: Optics) -> Option<&Self::Image>;
 }
 
 pub trait PrismMut<Optics>: PrismRef<Optics> + TraversalMut<Optics> {
-    fn preview_mut(&mut self, optics: Optics) -> Option<&mut Self::To>;
+    fn preview_mut(&mut self, optics: Optics) -> Option<&mut Self::Image>;
 }
 
 pub trait Prism<Optics>: PrismMut<Optics> + Traversal<Optics> {
-    fn preview(self, optics: Optics) -> Option<Self::To>
+    fn preview(self, optics: Optics) -> Option<Self::Image>
     where
-        Self::To: Sized;
+        Self::Image: Sized;
 }
 
 /**
@@ -76,15 +80,15 @@ assert_eq!(x.view(optics!(_1._1._1)), 8);
 ```
 */
 pub trait LensRef<Optics>: PrismRef<Optics> {
-    fn view_ref(&self, optics: Optics) -> &Self::To;
+    fn view_ref(&self, optics: Optics) -> &Self::Image;
 }
 
 pub trait LensMut<Optics>: LensRef<Optics> + PrismMut<Optics> {
-    fn view_mut(&mut self, optics: Optics) -> &mut Self::To;
+    fn view_mut(&mut self, optics: Optics) -> &mut Self::Image;
 }
 
 pub trait Lens<Optics>: LensMut<Optics> + Prism<Optics> {
-    fn view(self, optics: Optics) -> Self::To
+    fn view(self, optics: Optics) -> Self::Image
     where
-        Self::To: Sized;
+        Self::Image: Sized;
 }

@@ -2,13 +2,13 @@ pub mod optics;
 pub mod traits;
 
 pub use traits::{
-    Lens, LensMut, LensRef, Prism, PrismMut, PrismRef, Review, Traversal, TraversalMut,
+    Lens, LensMut, LensRef, Optic, Prism, PrismMut, PrismRef, Review, Traversal, TraversalMut,
     TraversalRef,
 };
 
 pub use optics::{_both, _box, _ix, _mapped, _mut, _ref, _0, _1, _2, _3, _4, _5, _6, __};
 
-pub use lens_rs_derive::{Lens, Prism, Review};
+pub use lens_rs_derive::{Lens, Optic, Prism, Review};
 
 #[macro_export]
 macro_rules! optics {
