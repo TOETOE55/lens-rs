@@ -64,7 +64,7 @@ fn test() -> Option<()> {
 
 assume a type T may have substructure that the type is `i32`.
 ```rust
-fn bar<T, Pm: Prism<T, To=i32>>(t: &mut T, pm: Pm) {
+fn bar<Pm, T: Prism<Pm, To=i32>>(t: &mut T, pm: Pm) {
     t.preview_mut(pm).map(|x| *x += 2);
 }
 

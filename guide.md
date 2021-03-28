@@ -14,7 +14,7 @@ let me show you how to play with `lens-rs`!
   `Foo { a: (Ok(/* look at me! */), "I don't care"), .. }`.
 * `optic.view()`, `.view_mut()` and `.view_ref()` 
   can visit the substructure which **must** exist (exactly one) like nested structs and tuples.
-* `pm()`, `pm_mut()` and `.pm_ref()`
+* `.preview()`, `preview_mut()` and `.preview_ref()`
   can visit the substructure which **may** exist (one or none) like nested enum variants.
 * `.traverse()`, `.traverse_mut()` and `traverse_ref()`
   can visit **multiple** substructures (zero or more) like vec or vec in vec.
@@ -38,23 +38,25 @@ let mut x = (
 And `x.0` must exist. We could modify it by `.view_mut()`.
 
 ```rust
-*optics!(_0).view_mut(&mut x) += 1; // x.0 += 1: 1 -> 2
+*x.view_mut(optics!(_0)) += 1; // x.0 += 1: 1 -> 2
 ```
-But `x.1` may be `Ok` or `Err`. We should set it by `.pm_mut()`.
+But `x.1` may be `Ok` or `Err`. We should set it by `.preview_mut()`.
 ```rust
-*optics!(_1.Ok._1).pm_mut(&mut x)? *= 2 // x.1.Ok.1? *= 2: 4 -> 8
-*optics!(_1.Err).pm_mut(&mut x)? *= 2   // do nothing
+*x.preview_mut(optics!(_1.Ok._1))? *= 2 // x.1.Ok.1? *= 2: 4 -> 8
+*x.pm_mut(optics!(_1.Err))? *= 2   // do nothing
 ```
-Then `x.1.Ok.0` is a vec. We should traverse it by `.traverse_xxx()`.
+Then `x.1.Ok.0` is a vec. We should traverse it by `.traverse_xxx()` or access it by index optics.
 
 ```rust
-optics!(_1.Ok._0._mapped.Some._0)
-        .traverse_mut(&mut x)
-        .into_iter()
-        .for_each(|s| *s = s.to_uppercase());       // "a" -> "A", "b" -> "B"
+x
+    .traverse_mut(optics!(_1.Ok._0._mapped.Some._0))
+    .into_iter()
+    .for_each(|s| *s = s.to_uppercase());       // "a" -> "A", "b" -> "B"
 
-optics!(_1.Ok._0._mapped.Some._1).traverse_ref(&x); // vec![&2, &3]
+x.traverse_ref(optics!(_1.Ok._0._mapped.Some._1)); // vec![&2, &3]
+x.preview_ref(optics!(_1.Ok._0.[2].Some._1))?; // &3
 ```
+
 
 Besides, `.review()` is used to construct a single value.
 
@@ -68,12 +70,13 @@ let y: _ = optic!(Ok.Some.Err).review((1, 2));
 `lens-rs` will scan your source code, and generate optics into `lens_rs::optics` for fields and variants where you marked it with `#[optic]`.
 
 the derive-macro
+* `Optic` is used to impl `Optic` for optics
 * `Review` is used to impl `Review` for optics
 * `Prism` is used to impl `Prism` for optics
 * `Lens` is used to impl `Lens` for optics
 
 ```rust
-#[derive(Copy, Clone, Debug, Review, Prism)]
+#[derive(Copy, Clone, Debug, Optic, Review, Prism)]
 enum Either<L, R> {
     #[optic]
     Left(L), // generate optics::Left
@@ -85,7 +88,7 @@ enum Either<L, R> {
 struct Tuple<A, B>(#[optic] A, #[optic] B); 
 // use optics::_0 or optics::_1 to access it
 
-#[derive(Copy, Clone, Debug, Lens)]
+#[derive(Copy, Clone, Debug, Optic, Lens)]
 struct Foo<A, B> {
     #[optic]
     a: A, // generate optics::a
@@ -93,7 +96,7 @@ struct Foo<A, B> {
     b: B, // generate optics::b
 }
 
-#[derive(Clone, Debug, Lens)]
+#[derive(Clone, Debug, Optic, Lens)]
 struct Bar {
     #[optic]
     a: String, // generate optics::a, same as above
@@ -108,7 +111,7 @@ the attribute
 * `#[optic]` is to mark a field/variant which its optic impl `Lens`/`Prism` trait
 
 ```rust
-#[derive(Debug, Lens)]
+#[derive(Debug, Optic, Lens)]
 struct Baz<'a, A, B, C>{
     #[optic(ref)] 
     a: &'a A,     // can only take the immutable ref by optics::a
@@ -128,9 +131,9 @@ Limitations:
 You can represent a type has values of some types
 
 ```rust
-fn may_have_i32<T, Pm: PrismMut<T, To=i32>>(t: &mut T, pm: Pm) {
-//                           ^ `T` may have a value of `i32`
-    pm.preview_mut(t).map(|x| *x+=1);
+fn may_have_i32<Pm, T: PrismMut<T, To=i32>>(t: &mut T, pm: Pm) {
+//                       ^ `T` may have a value of `i32`
+    t.preview_mut(pm).map(|x| *x+=1);
 }
 // the above x
 may_have_i32(&mut x, optics!(_0));       // 2 -> 3
@@ -140,24 +143,25 @@ may_have_i32(&mut x, optics!(_1.Err));   // do nothing
 
 or a type has some fields:
 ```rust
-fn with_field_a<T>(t: T) -> String
+fn with_field_a<T>(t: &T) -> &str
 where
-    field![a]: Lens<T, To=String> // `T` must have field `.a`
+    T: LensRef<Optics![a], Image = String>, // T must have field a
 {
-    optics!(a).view(t)
+    t.view_ref(optics!(a))
 }
+
 
 let foo = Foo {
     a: "this is Foo".to_string(),
-    b: ()
+    b: (),
 };
 let bar = Bar {
     a: "this is Bar".to_string(),
-    c: 0
+    c: 0,
 };
 
-println!("{}", with_field_a(foo)); // this is Foo
-println!("{}", with_field_a(bar)); // this is Bar
+assert_eq!(with_field_a(&foo), "this is Foo");
+assert_eq!(with_field_a(&bar), "this is Bar");
 ```
 
 ## An optic is an onion
@@ -165,51 +169,61 @@ println!("{}", with_field_a(bar)); // this is Bar
 the traits behind are:
 
 ```rust
+/// base optic
+pub trait Optic<Opt> {
+    type Image: ?Sized;
+}
+
 /// Review
-pub trait Review<T> {
-    type From;
-    fn review(&self, from: Self::From) -> T;
+pub trait Review<Opt>: Optic<Opt> {
+    fn review(optics: Opt, from: Self::Image) -> Self
+    where
+        Self::Image: Sized;
 }
 
 /// Traversal
-pub trait TraversalRef<T: ?Sized> {
-    type To;
-    fn traverse_ref<'a>(&self, source: &'a T) -> Vec<&'a Self::To>;
+pub trait TraversalRef<Opt>: Optic<Opt> {
+    fn traverse_ref(&self, optics: Opt) -> Vec<&Self::Image>;
 }
 
-pub trait TraversalMut<T: ?Sized>: TraversalRef<T> {
-    fn traverse_mut<'a>(&self, source: &'a mut T) -> Vec<&'a mut Self::To>;
+pub trait TraversalMut<Optics>: TraversalRef<Optics> {
+    fn traverse_mut(&mut self, optics: Optics) -> Vec<&mut Self::Image>;
 }
 
-pub trait Traversal<T>: TraversalMut<T> {
-    fn traverse(&self, source: T) -> Vec<Self::To>;
+pub trait Traversal<Optics>: TraversalMut<Optics> {
+    fn traverse(self, optics: Optics) -> Vec<Self::Image>
+    where
+        Self::Image: Sized;
 }
 
 /// Prism
-pub trait PrismRef<T: ?Sized>: TraversalRef<T> {
-    fn pm_ref<'a>(&self, source: &'a T) -> Option<&'a Self::To>;
+pub trait PrismRef<Optics>: TraversalRef<Optics> {
+    fn preview_ref(&self, optics: Optics) -> Option<&Self::Image>;
 }
 
-pub trait PrismMut<T: ?Sized>: PrismRef<T> + TraversalMut<T> {
-    fn pm_mut<'a>(&self, source: &'a mut T) -> Option<&'a mut Self::To>;
+pub trait PrismMut<Optics>: PrismRef<Optics> + TraversalMut<Optics> {
+    fn preview_mut(&mut self, optics: Optics) -> Option<&mut Self::Image>;
 }
 
-pub trait Prism<T>: PrismMut<T> + Traversal<T> {
-    fn pm(&self, source: T) -> Option<Self::To>;
-    // ^ pattern match
+pub trait Prism<Optics>: PrismMut<Optics> + Traversal<Optics> {
+    fn preview(self, optics: Optics) -> Option<Self::Image>
+    where
+        Self::Image: Sized;
 }
 
 /// Lens
-pub trait LensRef<T: ?Sized>: PrismRef<T> {
-    fn view_ref<'a>(&self, source: &'a T) -> &'a Self::To;
+pub trait LensRef<Optics>: PrismRef<Optics> {
+    fn view_ref(&self, optics: Optics) -> &Self::Image;
 }
 
-pub trait LensMut<T: ?Sized>: LensRef<T> + PrismMut<T> {
-    fn view_mut<'a>(&self, source: &'a mut T) -> &'a mut Self::To;
+pub trait LensMut<Optics>: LensRef<Optics> + PrismMut<Optics> {
+    fn view_mut(&mut self, optics: Optics) -> &mut Self::Image;
 }
 
-pub trait Lens<T>: LensMut<T> + Prism<T> {
-    fn view(&self, source: T) -> Self::To;
+pub trait Lens<Optics>: LensMut<Optics> + Prism<Optics> {
+    fn view(self, optics: Optics) -> Self::Image
+    where
+        Self::Image: Sized;
 }
 ```
 
@@ -230,38 +244,38 @@ struct __;
 
 the optic implementation like:
 ```rust
-impl<Pm, T, E> Prism<Result<T, E>> for optics::Ok<Pm>
+impl<Pm, T, E> Prism<optics::Ok<Pm>> for Result<T, E>
 where
-    Pm: Prism<T>,
+    T: Prism<Pm>,
 {
-    // type To = Pm::To;
-    fn pm(&self, source: Result<T, E>) -> Option<Self::To> {
-        source.ok().and_then(|t| self.0.pm(t))
+    // type Image = T::Image;
+    fn preview(self, optics: optics::Ok<Pm>) -> Option<Self::Image> {
+        self.ok().and_then(|t| optics.0.pm(t))
     }
 }
 ```
 
 so, just like an onion
 * the `optics!(_0.Ok.Some)` will convert to `optics::_0(optics::Ok(optics::Some(optics::__)))`
-* the `field![_0.Ok.Some]` will convert to `optics::_0<optics::Ok<optics::Some<optics::__>>>`
+* the `Optics![_0.Ok.Some]` will convert to `optics::_0<optics::Ok<optics::Some<optics::__>>>`
 
 ## It's just the van Laarhoven style optic
 
 it's easy to see that in a little bit of generation(may not correspond exactly):
 ```rust
-trait Traversal<T> {
-    fn traverse<F: FromIterator<Self::To>>(&self, data: T) -> F;
-    // forall F. Traversable F => T -> F Self::To 
+trait Traversal<Optics> {
+    fn traverse<F: FromIterator<Self::To>>(&self, optics: Optics) -> F;
+    // forall F. Traversable F => Self -> F Self::To 
 }
 
-trait Prism<T> {
-    fn pm<F: From<Option<Self::To>>>(&self, source: T) -> F;
-    // forall F. Pointed F => T -> F Self::To
+trait Prism<Optics> {
+    fn pm<F: From<Option<Self::To>>>(&self, optics: Optics) -> F;
+    // forall F. Pointed F => Self -> F Self::To
 }
 
 trait Lens<T> {
-    fn view<F: From<Self::To>>(&self, source: T) -> F;
-    // forall F. Functor F => T -> F Self::To
+    fn view<F: From<Self::To>>(&self, source: Optics) -> F;
+    // forall F. Functor F => Self -> F Self::To
 }
 ```
 
@@ -269,6 +283,9 @@ Hence
 * `optics::Ok` (the value constructor) can be treat as `forall f. (T -> f a) -> (Result<T, E> -> f b)`
 * `optics::_1` (the value constructor) can be treat as `forall f. (A -> f a) -> ((A, B) -> f b)`
 * `optics::_1(optics::Ok(optics::_mapped(optics::__)))` (the value) can be treat as `forall f. (A, Result<Vec<T>, E>) -> f T`
+
+> In fact, `Traversal`, `Prism` and `Lens` in `lens-rs` actually correspond to `Fold`, `AffineFold` and `Getter` in Haskell's `lens`.
+But with the mutable trait, they actually do the same as `Traversal`, `Prism` and `Lens` in `lens`. Then I named them so.
 
 ***
 

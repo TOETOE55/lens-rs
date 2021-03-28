@@ -55,11 +55,11 @@ mod tests {
         t.preview_ref(pm).map(|x| *x)
     }
 
-    fn with_field<T>(t: T) -> String
+    fn with_field_a<T>(t: &T) -> &str
     where
-        T: Lens<Optics![a], Image = String>,
+        T: LensRef<Optics![a], Image = String>,
     {
-        t.view(optics!(a))
+        t.view_ref(optics!(a))
     }
 
     fn test_nested() -> Option<()> {
@@ -116,8 +116,8 @@ mod tests {
             c: 0,
         };
 
-        assert_eq!(with_field(foo), "this is Foo".to_string());
-        assert_eq!(with_field(bar), "this is Bar".to_string());
+        assert_eq!(with_field_a(&foo), "this is Foo");
+        assert_eq!(with_field_a(&bar), "this is Bar");
     }
 
     fn test_ptr() {
