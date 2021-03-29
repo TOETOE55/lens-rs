@@ -41,6 +41,7 @@ pub trait TraversalMut<Optics>: TraversalRef<Optics> {
 pub trait Traversal<Optics>: TraversalMut<Optics> {
     fn traverse(self, optics: Optics) -> Vec<Self::Image>
     where
+        Self: Sized,
         Self::Image: Sized;
 }
 
@@ -65,6 +66,7 @@ pub trait PrismMut<Optics>: PrismRef<Optics> + TraversalMut<Optics> {
 pub trait Prism<Optics>: PrismMut<Optics> + Traversal<Optics> {
     fn preview(self, optics: Optics) -> Option<Self::Image>
     where
+        Self: Sized,
         Self::Image: Sized;
 }
 
@@ -90,5 +92,6 @@ pub trait LensMut<Optics>: LensRef<Optics> + PrismMut<Optics> {
 pub trait Lens<Optics>: LensMut<Optics> + Prism<Optics> {
     fn view(self, optics: Optics) -> Self::Image
     where
+        Self: Sized,
         Self::Image: Sized;
 }

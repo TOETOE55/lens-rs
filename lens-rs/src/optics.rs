@@ -80,7 +80,11 @@ mod impl__ {
     }
 
     impl<T> Traversal<__> for T {
-        fn traverse(self, _optics: __) -> Vec<Self::Image> {
+        fn traverse(self, _optics: __) -> Vec<Self::Image>
+        where
+            Self: Sized,
+            Self::Image: Sized,
+        {
             vec![self]
         }
     }
@@ -100,6 +104,7 @@ mod impl__ {
     impl<T> Prism<__> for T {
         fn preview(self, _: __) -> Option<Self::Image>
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             Option::Some(self)
@@ -121,6 +126,7 @@ mod impl__ {
     impl<T> Lens<__> for T {
         fn view(self, _optics: __) -> Self::Image
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             self
@@ -183,6 +189,7 @@ mod impl_result {
     {
         fn traverse(self, optics: optics::Ok<Tr>) -> Vec<Self::Image>
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             match self {
@@ -198,6 +205,7 @@ mod impl_result {
     {
         fn traverse(self, optics: optics::Err<Tr>) -> Vec<Self::Image>
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             match self {
@@ -264,6 +272,7 @@ mod impl_result {
     {
         fn preview(self, optics: optics::Ok<Pm>) -> Option<Self::Image>
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             let t = self.ok()?;
@@ -309,6 +318,7 @@ mod impl_result {
     {
         fn preview(self, optics: optics::Err<Pm>) -> Option<Self::Image>
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             let t = self.err()?;
@@ -373,6 +383,7 @@ mod impl_some {
     {
         fn traverse(self, optics: optics::Some<Tr>) -> Vec<Self::Image>
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             match self {
@@ -406,6 +417,7 @@ mod impl_some {
     {
         fn preview(self, optics: optics::Some<Pm>) -> Option<Self::Image>
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             self?.preview(optics.0)
@@ -466,7 +478,7 @@ mod impl_tuples {
                 $to: Traversal<Tr>,
             {
                 fn traverse(self, optics: $optic<Tr>) -> Vec<Self::Image>
-                where
+                where Self: Sized,
                     Self::Image: Sized,
                 {
                     self.$field.traverse(optics.0)
@@ -496,7 +508,7 @@ mod impl_tuples {
                 $to: Prism<Pm>,
             {
                 fn preview(self, optics: $optic<Pm>) -> Option<Self::Image>
-                where
+                where Self: Sized,
                     Self::Image: Sized,
                 {
                     self.$field.preview(optics.0)
@@ -526,7 +538,7 @@ mod impl_tuples {
                 $to: Lens<Ls>,
             {
                 fn view(self, optics: $optic<Ls>) -> Self::Image
-                where
+                where Self: Sized,
                     Self::Image: Sized,
                 {
                     self.$field.view(optics.0)
@@ -622,7 +634,7 @@ mod impl_tuples {
                 $param: Traversal<Tr>,
             {
                 fn traverse(self, optics: _both<Tr>) -> Vec<Self::Image>
-                where
+                where Self: Sized,
                     Self::Image: Sized,
                 {
                     let mut vec = vec![];
@@ -665,6 +677,7 @@ mod impl_tuples {
     {
         fn preview(self, optics: _both<Pm>) -> Option<Self::Image>
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             self.0.preview(optics.0)
@@ -695,6 +708,7 @@ mod impl_tuples {
     {
         fn view(self, optics: _both<Ls>) -> Self::Image
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             self.0.view(optics.0)
@@ -758,6 +772,7 @@ mod impl_collect {
             {
                 fn traverse(self, optics: _mapped<Tr>) -> Vec<Self::Image>
                 where
+                    Self: Sized,
                     Self::Image: Sized,
                 {
                     self.into_iter()
@@ -865,6 +880,7 @@ mod impl_ptr {
     {
         fn traverse(self, optics: _box<Tr>) -> Vec<Self::Image>
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             (*self).traverse(optics.0)
@@ -877,6 +893,7 @@ mod impl_ptr {
     {
         fn preview(self, optics: _box<Pm>) -> Option<Self::Image>
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             (*self).preview(optics.0)
@@ -889,6 +906,7 @@ mod impl_ptr {
     {
         fn view(self, optics: _box<Ls>) -> Self::Image
         where
+            Self: Sized,
             Self::Image: Sized,
         {
             (*self).view(optics.0)

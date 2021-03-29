@@ -794,6 +794,7 @@ fn impl_traversal4variant(
         {
             fn traverse(self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<Self::Image>
             where
+                Self: Sized,
                 Self::Image: Sized
             {
                 use #ty_name::*;
@@ -833,6 +834,7 @@ fn impl_prism4variant(
         {
             fn preview(self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<Self::Image>
             where
+                Self: Sized,
                 Self::Image: Sized
             {
                 use #ty_name::*;
@@ -1064,6 +1066,7 @@ fn impl_traversal4field(
         {
             fn traverse(self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<Self::Image>
             where
+                Self: Sized,
                 Self::Image: Sized
             {
                 <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse(self.#field_name, optics.0)
@@ -1099,6 +1102,7 @@ fn impl_prism4field(
         {
             fn preview(self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<Self::Image>
             where
+                Self: Sized,
                 Self::Image: Sized
             {
                 <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview(self.#field_name, optics.0)
@@ -1134,6 +1138,7 @@ fn impl_lens4field(
         {
             fn view(self, optics: lens_rs::optics::#field_name<#prism_param>) -> Self::Image
             where
+                Self: Sized,
                 Self::Image: Sized
             {
                 <#field_ty as lens_rs::#optics_trait<#prism_param>>::view(self.#field_name, optics.0)
@@ -1368,6 +1373,7 @@ fn impl_traversal4index(
         {
             fn traverse(self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<Self::Image>
             where
+                Self: Sized,
                 Self::Image: Sized
             {
                 <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse(self.#field_name, optics.0)
@@ -1404,6 +1410,7 @@ fn impl_prism4index(
         {
             fn preview(self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<Self::Image>
             where
+                Self: Sized,
                 Self::Image: Sized
             {
                 <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview(self.#field_name, optics.0)
@@ -1440,6 +1447,7 @@ fn impl_lens4index(
         {
             fn view(self, optics: lens_rs::optics::#optics_name<#lens_param>) -> Self::Image
             where
+                Self: Sized,
                 Self::Image: Sized
             {
                 <#field_ty as lens_rs::#optics_trait<#lens_param >>::view(self.#field_name, optics.0)
