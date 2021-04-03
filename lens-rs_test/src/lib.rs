@@ -121,7 +121,7 @@ mod tests {
     }
 
     fn test_ptr() {
-        let one: Nat = Review::review(optics!(S._box.Z), ());
+        let one: Nat = Review::review(optics!(S.lens_rs::optics::_box.Z), ());
         let mut two: Nat = Review::review(optics!(S._box.S._box.Z), ());
         let three: Nat = Review::review(optics!(S._box.S._box.Z), ());
         assert_eq!(one, S(Box::new(Z(()))));

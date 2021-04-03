@@ -1,3 +1,5 @@
+
+/// the basic optic, behave as the identity functor
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct __;
 
@@ -11,10 +13,13 @@ pub struct Some<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct None<Optic>(pub Optic);
 
+/// behaves as `x.0`, implemented `Lens`
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _0<Optic>(pub Optic);
+/// behaves as `x.1`, implemented `Lens`
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _1<Optic>(pub Optic);
+/// behaves as `x.2`, implemented `Lens`
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _2<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -25,24 +30,68 @@ pub struct _4<Optic>(pub Optic);
 pub struct _5<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _6<Optic>(pub Optic);
+
+/// to traverse all fields of tuples(0~6), implemented `Traversal`
+///
+/// ```rust
+/// assert_eq!((1, 2).view(optics!(_both)), vec![1, 2])
+/// ```
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[allow(non_camel_case_types)]
 pub struct _both<Optic>(pub Optic);
 
+/// to traverse items of collections, implemented `Traversal`
+///
+/// ```rust
+/// assert_eq!(vec![vec![1,2], vec![3,4]].traverse(_mapped._mapped), vec![1, 2, 3, 4])
+/// ```
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[allow(non_camel_case_types)]
 pub struct _mapped<Optic>(pub Optic);
 
+/// to create `Box`, `Rc` or `Arc` pointers, implemented `Review`
+///
+/// ```rust
+/// assert_eq!(Review::review(optics!(_box), 0), Box::new(0));
+/// assert_eq!(Review::review(optics!(_box), 0), Rc::new(0));
+/// assert_eq!(Review::review(optics!(_box), 0), Arc::new(0));
+/// ```
+///
+/// or to visit the data in `Box`, implemented `Lens`
+///
+/// ```rust
+/// assert_eq!(Box::new(0).view(optic!(_box)), 0);
+/// ```
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[allow(non_camel_case_types)]
 pub struct _box<Optic>(pub Optic);
+
+/// to visit the data in pointers, implemented `LensRef`
+///
+/// ```rust
+/// assert_eq!(Box::new(0).view_ref(optic!(_ref)), &0);
+/// assert_eq!(Rc::new(0).view_ref(optic!(_ref)), &0);
+///
+/// let x = Foo {
+///     a: &(1, 2),
+///     b: ()
+/// };
+/// assert_eq!(x.view_ref(optics!(a._ref._1)), &2)
+/// ```
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[allow(non_camel_case_types)]
 pub struct _ref<Optic>(pub Optic);
+/// to visit the data in pointers, implemented `LensMut`
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[allow(non_camel_case_types)]
 pub struct _mut<Optic>(pub Optic);
 
+/// behave as `xs[index]`
+///
+/// ```rust
+/// assert_eq!(vec![1,2,3].view_ref(optics!([1])), &2);
+/// assert_eq!(vec![1,2,3].view_ref(optics!([1..])), &[2, 3]);
+/// ```
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[allow(non_camel_case_types)]
 pub struct _ix<I, Optic>(pub Optic, pub I);
