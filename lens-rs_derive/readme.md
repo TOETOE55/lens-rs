@@ -38,6 +38,6 @@ fn test() -> Option<()> {
 }
 ```
 
-## Limitation
+## Limitations
 * can't derive `Lens` for enum.
 * can't derive `Prism` and `Review` for the variant has more than one argument or has named field.

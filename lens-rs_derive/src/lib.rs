@@ -12,6 +12,7 @@ use crate::meta_impls::*;
 use std::collections::HashSet;
 use std::fs;
 use syn::parse::{Parse, ParseStream, Result};
+use syn::punctuated::Punctuated;
 
 mod meta_impls;
 
@@ -275,6 +276,115 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     TokenStream::from(lens)
 }
 
+#[derive(Clone, Debug)]
+enum AnOpticExpr {
+    Default(syn::Ident),
+    Custom(syn::Path),
+    Ix {
+        _bracket_token: syn::token::Bracket,
+        ix: syn::Expr,
+    },
+}
+
+#[derive(Clone, Debug)]
+struct OpticsPathExpr {
+    path: Punctuated<AnOpticExpr, Token![.]>,
+}
+
+impl Parse for AnOpticExpr {
+    fn parse(input: ParseStream) -> Result<Self> {
+        if input.peek(syn::Ident) && !input.peek2(Token![::]) {
+            Ok(AnOpticExpr::Default(input.parse()?))
+        } else if input.peek(syn::token::Bracket) {
+            let content;
+            let _bracket_token = syn::bracketed!(content in input);
+            Ok(AnOpticExpr::Ix {
+                _bracket_token,
+                ix: content.parse()?,
+            })
+        } else {
+            Ok(AnOpticExpr::Custom(input.parse()?))
+        }
+    }
+}
+
+impl Parse for OpticsPathExpr {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Ok(OpticsPathExpr {
+            path: Punctuated::parse_terminated(input)?,
+        })
+    }
+}
+
+#[proc_macro]
+pub fn optics(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let path = parse_macro_input!(input as OpticsPathExpr);
+    path.path
+        .into_iter()
+        .rev()
+        .fold(quote! { lens_rs::optics::__ }, |opts, opt| match opt {
+            AnOpticExpr::Default(id) => quote! { lens_rs::optics::#id(#opts) },
+            AnOpticExpr::Custom(p) => quote! { #p(#opts) },
+            AnOpticExpr::Ix { ix, .. } => quote! { lens_rs::optics::_ix(#opts, #ix) },
+        })
+        .into()
+}
+
+#[derive(Clone, Debug)]
+enum AnOpticType {
+    Default(syn::Ident),
+    Custom(syn::Path),
+    Ix {
+        _bracket_token: syn::token::Bracket,
+        ix: syn::Type,
+    },
+}
+
+#[derive(Clone, Debug)]
+struct OpticsPathType {
+    path: Punctuated<AnOpticType, Token![.]>,
+}
+
+impl Parse for AnOpticType {
+    fn parse(input: ParseStream) -> Result<Self> {
+        if input.peek(syn::Ident) && !input.peek2(Token![::]) {
+            Ok(AnOpticType::Default(input.parse()?))
+        } else if input.peek(syn::token::Bracket) {
+            let content;
+            let _bracket_token = syn::bracketed!(content in input);
+            Ok(AnOpticType::Ix {
+                _bracket_token,
+                ix: content.parse()?,
+            })
+        } else {
+            Ok(AnOpticType::Custom(input.parse()?))
+        }
+    }
+}
+
+impl Parse for OpticsPathType {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Ok(OpticsPathType {
+            path: Punctuated::parse_terminated(input)?,
+        })
+    }
+}
+
+#[proc_macro]
+#[allow(non_snake_case)]
+pub fn Optics(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let path = parse_macro_input!(input as OpticsPathExpr);
+    path.path
+        .into_iter()
+        .rev()
+        .fold(quote! { lens_rs::optics::__ }, |opts, opt| match opt {
+            AnOpticExpr::Default(id) => quote! { lens_rs::optics::#id<#opts> },
+            AnOpticExpr::Custom(p) => quote! { #p::<#opts> },
+            AnOpticExpr::Ix { ix, .. } => quote! { lens_rs::optics::_ix<#ix, #opts> },
+        })
+        .into()
+}
+
 struct OpticCollector<'a>(&'a mut OpticMap);
 
 impl<'a> OpticCollector<'a> {
@@ -292,6 +402,14 @@ impl<'a> OpticCollector<'a> {
 }
 
 impl<'a> Visit<'_> for OpticCollector<'a> {
+    fn visit_item_enum(&mut self, item_enum: &ItemEnum) {
+        item_enum.variants.iter().for_each(|variant| {
+            if variant_with_optic_attr(variant) {
+                self.0.insert(format!("{}", variant.ident));
+            }
+        })
+    }
+
     fn visit_item_struct(&mut self, item_struct: &ItemStruct) {
         match &item_struct.fields {
             syn::Fields::Named(fields_named) => {
@@ -302,14 +420,6 @@ impl<'a> Visit<'_> for OpticCollector<'a> {
             }
             syn::Fields::Unit => (),
         }
-    }
-
-    fn visit_item_enum(&mut self, item_enum: &ItemEnum) {
-        item_enum.variants.iter().for_each(|variant| {
-            if variant_with_optic_attr(variant) {
-                self.0.insert(format!("{}", variant.ident));
-            }
-        })
     }
 }
 
