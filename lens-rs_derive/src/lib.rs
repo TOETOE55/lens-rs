@@ -467,7 +467,7 @@ pub fn scan_optics_from_source_files(input: TokenStream) -> TokenStream {
     let mut struct_items = Vec::<ItemStruct>::with_capacity(optcis_map.len());
 
     for optic_name in optcis_map {
-        if ["Some", "None", "Ok", "Err"].iter().any(|x| *x == &optic_name) { continue; }
+        if let "Some" | "None" | "Ok" | "Err" = &*optic_name { continue; }
         let optic_ident = syn::Ident::new(&optic_name, Span::call_site());
         struct_items.push(parse_quote! {
 
