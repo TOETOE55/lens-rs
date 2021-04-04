@@ -1,11 +1,13 @@
 #![allow(dead_code)]
 extern crate proc_macro;
-use proc_macro::{TokenStream, TokenTree};
+use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 use proc_macro2::Span;
 use quote::*;
 use syn::{
-    parenthesized, parse_macro_input, parse_quote, visit::Visit, Data, DeriveInput, Fields,
-    ItemEnum, ItemStruct, Token,
+    parenthesized, parse_macro_input, parse_quote,
+    visit::{self, Visit},
+    Data, DeriveInput, Fields, FnArg, Ident, ItemEnum, ItemFn, ItemStruct, Macro, Member, Pat,
+    PathArguments, Token,
 };
 
 use crate::meta_impls::*;
@@ -399,6 +401,30 @@ impl<'a> OpticCollector<'a> {
             }
         });
     }
+
+    fn parse_structx(&mut self, input: TokenStream) {
+        let input_pat = wrap_struct_name("structx_", input);
+
+        if let Ok(pat) = syn::parse::<Pat>(input_pat) {
+            if let Pat::Struct(pat_struct) = pat {
+                self.add_structx_field_names(join_fields(pat_struct.fields.iter().map(|field| {
+                    if let Member::Named(ident) = &field.member {
+                        ident.to_string()
+                    } else {
+                        panic!("structx!()'s fields should have names.");
+                    }
+                })));
+            } else {
+                panic!("structx!()'s supported pattern matching is struct only.");
+            }
+        }
+    }
+
+    fn add_structx_field_names(&mut self, field_names: Vec<String>) {
+        for field_name in field_names {
+            self.0.insert(field_name);
+        }
+    }
 }
 
 impl<'a> Visit<'_> for OpticCollector<'a> {
@@ -419,6 +445,46 @@ impl<'a> Visit<'_> for OpticCollector<'a> {
                 self.collect_optic_fields(fields_unnamed.unnamed.iter())
             }
             syn::Fields::Unit => (),
+        }
+    }
+
+    fn visit_macro(&mut self, mac: &Macro) {
+        visit::visit_macro(self, mac);
+
+        if mac.path.leading_colon.is_none() && mac.path.segments.len() == 1 {
+            let seg = mac.path.segments.first().unwrap();
+            if seg.arguments == PathArguments::None
+                && (seg.ident == "structx" || seg.ident == "Structx")
+            {
+                self.parse_structx(mac.tokens.clone().into());
+            }
+        }
+    }
+
+    fn visit_item_fn(&mut self, item_fn: &ItemFn) {
+        visit::visit_item_fn(self, item_fn);
+
+        for attr in &item_fn.attrs {
+            if attr.path.leading_colon.is_none() && attr.path.segments.len() == 1 {
+                if attr.path.segments.first().unwrap().ident == "named_args" {
+                    let fn_args = item_fn.sig.inputs.iter();
+                    let mut field_names = Vec::with_capacity(fn_args.len());
+                    for fn_arg in fn_args {
+                        match fn_arg {
+                            FnArg::Receiver(_) => (),
+                            FnArg::Typed(pat_type) => {
+                                if let Pat::Ident(pat_ident) = &*pat_type.pat {
+                                    field_names.push(pat_ident.ident.to_string());
+                                } else {
+                                    panic!("#[named_args] function's arguments should be either receiver or `id: Type`.");
+                                }
+                            }
+                        }
+                    }
+                    self.add_structx_field_names(field_names);
+                    return;
+                }
+            }
         }
     }
 }
@@ -478,4 +544,14 @@ pub fn scan_optics_from_source_files(input: TokenStream) -> TokenStream {
     }
 
     quote!( #( #struct_items )* ).into()
+}
+
+fn join_fields(fields: impl Iterator<Item = String>) -> Vec<String> {
+    fields.into_iter().collect()
+}
+
+fn wrap_struct_name(struct_name: &str, input: TokenStream) -> TokenStream {
+    let mut ts = TokenStream::from(Ident::new(struct_name, Span::call_site()).into_token_stream());
+    ts.extend(Some(TokenTree::Group(Group::new(Delimiter::Brace, input))));
+    ts
 }
