@@ -38,6 +38,12 @@ mod tests {
         c: i32,
     }
 
+    #[derive(Clone, Debug, Optic, Prism)]
+    enum IsSome<T> {
+        #[optic]
+        Some(T)
+    }
+
     #[derive(Debug, Optic, Lens)]
     struct Shit<'a> {
         #[optic(ref)]
