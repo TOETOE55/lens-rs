@@ -1,8 +1,3 @@
-/// the basic Optic trait.
-pub trait Optic<Opt> {
-    type Image: ?Sized;
-}
-
 /// # Review
 ///
 /// A trait representing the optics describes how to construct a single value.
@@ -15,11 +10,8 @@ pub trait Optic<Opt> {
 /// ```
 ///
 pub mod review {
-    use super::*;
-    pub trait Review<Opt>: Optic<Opt> {
-        fn review(optics: Opt, from: Self::Image) -> Self
-        where
-            Self::Image: Sized;
+    pub trait Review<Opt, Image> {
+        fn review(optics: Opt, from: Image) -> Self;
     }
 }
 
@@ -38,24 +30,21 @@ pub mod review {
 /// assert_eq!(x.traverse(optics!(_1._mapped.Some._0)), vec![3]);
 /// ```
 pub mod traversal {
-    use super::*;
-
     /// the immutable version of Traversal
-    pub trait TraversalRef<Opt>: Optic<Opt> {
-        fn traverse_ref(&self, optics: Opt) -> Vec<&Self::Image>;
+    pub trait TraversalRef<Opt, Image: ?Sized> {
+        fn traverse_ref(&self, optics: Opt) -> Vec<&Image>;
     }
 
     /// the mutable version of Traversal
-    pub trait TraversalMut<Optics>: TraversalRef<Optics> {
-        fn traverse_mut(&mut self, optics: Optics) -> Vec<&mut Self::Image>;
+    pub trait TraversalMut<Optics, Image: ?Sized>: TraversalRef<Optics, Image> {
+        fn traverse_mut(&mut self, optics: Optics) -> Vec<&mut Image>;
     }
 
     /// the movable version of Traversal
-    pub trait Traversal<Optics>: TraversalMut<Optics> {
-        fn traverse(self, optics: Optics) -> Vec<Self::Image>
+    pub trait Traversal<Optics, Image>: TraversalMut<Optics, Image> {
+        fn traverse(self, optics: Optics) -> Vec<Image>
         where
-            Self: Sized,
-            Self::Image: Sized;
+            Self: Sized;
     }
 }
 
@@ -74,21 +63,20 @@ pub mod traversal {
 pub mod prism {
     use crate::*;
     /// the immutable version of Prism
-    pub trait PrismRef<Optics>: TraversalRef<Optics> {
-        fn preview_ref(&self, optics: Optics) -> Option<&Self::Image>;
+    pub trait PrismRef<Optics, Image: ?Sized>: TraversalRef<Optics, Image> {
+        fn preview_ref(&self, optics: Optics) -> Option<&Image>;
     }
 
     /// the mutable version of Prism
-    pub trait PrismMut<Optics>: PrismRef<Optics> + TraversalMut<Optics> {
-        fn preview_mut(&mut self, optics: Optics) -> Option<&mut Self::Image>;
+    pub trait PrismMut<Optics, Image: ?Sized>: PrismRef<Optics, Image> + TraversalMut<Optics, Image> {
+        fn preview_mut(&mut self, optics: Optics) -> Option<&mut Image>;
     }
 
     /// the movable version of Prism
-    pub trait Prism<Optics>: PrismMut<Optics> + Traversal<Optics> {
-        fn preview(self, optics: Optics) -> Option<Self::Image>
+    pub trait Prism<Optics, Image>: PrismMut<Optics, Image> + Traversal<Optics, Image> {
+        fn preview(self, optics: Optics) -> Option<Image>
         where
-            Self: Sized,
-            Self::Image: Sized;
+            Self: Sized;
     }
 }
 
@@ -109,20 +97,19 @@ pub(crate) mod lens {
     use crate::*;
 
     /// the immutable version of Lens
-    pub trait LensRef<Optics>: PrismRef<Optics> {
-        fn view_ref(&self, optics: Optics) -> &Self::Image;
+    pub trait LensRef<Optics, Image: ?Sized>: PrismRef<Optics, Image> {
+        fn view_ref(&self, optics: Optics) -> &Image;
     }
 
     /// the mutable version of Lens
-    pub trait LensMut<Optics>: LensRef<Optics> + PrismMut<Optics> {
-        fn view_mut(&mut self, optics: Optics) -> &mut Self::Image;
+    pub trait LensMut<Optics, Image: ?Sized>: LensRef<Optics, Image> + PrismMut<Optics, Image> {
+        fn view_mut(&mut self, optics: Optics) -> &mut Image;
     }
 
     /// the movable version of Lens
-    pub trait Lens<Optics>: LensMut<Optics> + Prism<Optics> {
-        fn view(self, optics: Optics) -> Self::Image
+    pub trait Lens<Optics, Image>: LensMut<Optics, Image> + Prism<Optics, Image> {
+        fn view(self, optics: Optics) -> Image
         where
-            Self: Sized,
-            Self::Image: Sized;
+            Self: Sized;
     }
 }

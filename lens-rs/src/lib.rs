@@ -165,7 +165,7 @@ pub mod optics;
 /// definitions of optics traits
 pub mod traits;
 
-pub use traits::{lens::*, prism::*, review::*, traversal::*, Optic};
+pub use traits::{lens::*, prism::*, review::*, traversal::*};
 
 /// build-in optics
 pub use optics::{_both, _box, _ix, _mapped, _mut, _ref, _0, _1, _2, _3, _4, _5, _6, __};
