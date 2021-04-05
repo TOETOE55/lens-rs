@@ -41,7 +41,7 @@ mod tests {
     #[derive(Clone, Debug, Optic, Prism)]
     enum IsSome<T> {
         #[optic]
-        Some(T)
+        Some(T),
     }
 
     #[derive(Debug, Optic, Lens)]

@@ -448,6 +448,7 @@ impl<'a> Visit<'_> for OpticCollector<'a> {
         }
     }
 
+    #[cfg(feature = "structx")]
     fn visit_macro(&mut self, mac: &Macro) {
         visit::visit_macro(self, mac);
 
@@ -461,6 +462,7 @@ impl<'a> Visit<'_> for OpticCollector<'a> {
         }
     }
 
+    #[cfg(feature = "structx")]
     fn visit_item_fn(&mut self, item_fn: &ItemFn) {
         visit::visit_item_fn(self, item_fn);
 
@@ -546,10 +548,12 @@ pub fn scan_optics_from_source_files(input: TokenStream) -> TokenStream {
     quote!( #( #struct_items )* ).into()
 }
 
+#[cfg(feature = "structx")]
 fn join_fields(fields: impl Iterator<Item = String>) -> Vec<String> {
     fields.into_iter().collect()
 }
 
+#[cfg(feature = "structx")]
 fn wrap_struct_name(struct_name: &str, input: TokenStream) -> TokenStream {
     let mut ts = TokenStream::from(Ident::new(struct_name, Span::call_site()).into_token_stream());
     ts.extend(Some(TokenTree::Group(Group::new(Delimiter::Brace, input))));
