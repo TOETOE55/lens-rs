@@ -68,7 +68,9 @@ pub mod prism {
     }
 
     /// the mutable version of Prism
-    pub trait PrismMut<Optics, Image: ?Sized>: PrismRef<Optics, Image> + TraversalMut<Optics, Image> {
+    pub trait PrismMut<Optics, Image: ?Sized>:
+        PrismRef<Optics, Image> + TraversalMut<Optics, Image>
+    {
         fn preview_mut(&mut self, optics: Optics) -> Option<&mut Image>;
     }
 
@@ -102,7 +104,9 @@ pub(crate) mod lens {
     }
 
     /// the mutable version of Lens
-    pub trait LensMut<Optics, Image: ?Sized>: LensRef<Optics, Image> + PrismMut<Optics, Image> {
+    pub trait LensMut<Optics, Image: ?Sized>:
+        LensRef<Optics, Image> + PrismMut<Optics, Image>
+    {
         fn view_mut(&mut self, optics: Optics) -> &mut Image;
     }
 

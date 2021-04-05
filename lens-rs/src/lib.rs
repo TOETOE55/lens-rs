@@ -171,7 +171,7 @@ pub use traits::{lens::*, prism::*, review::*, traversal::*};
 pub use optics::{_both, _box, _ix, _mapped, _mut, _ref, _0, _1, _2, _3, _4, _5, _6, __};
 
 /// derive macro
-pub use lens_rs_derive::{Optic, Lens, Prism, Review};
+pub use lens_rs_derive::{Lens, Optic, Prism, Review};
 
 /// macro to compose optics
 ///
