@@ -57,13 +57,13 @@ mod tests {
     struct Tuple<A, B>(#[optic] A, #[optic] B);
 
     // T may have i32
-    fn may_have_i32<T: PrismRef<Pm, Image = i32>, Pm>(t: &T, pm: Pm) -> Option<i32> {
+    fn may_have_i32<T: PrismRef<Pm, i32>, Pm>(t: &T, pm: Pm) -> Option<i32> {
         t.preview_ref(pm).map(|x| *x)
     }
 
     fn with_field_a<T>(t: &T) -> &str
     where
-        T: LensRef<Optics![a], Image = String>,
+        T: LensRef<Optics![a], String>,
     {
         t.view_ref(optics!(a))
     }

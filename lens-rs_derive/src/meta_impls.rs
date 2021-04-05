@@ -103,26 +103,24 @@ pub fn impl_review4variant(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("Review", Span::call_site());
     let rv_param = syn::Ident::new("__Rv", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![rv_param.clone()]);
+    let params = Params::new(generic.clone(), vec![rv_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bound = parse_quote! { #field_ty: lens_rs::#optics_trait<#rv_param> };
+    let optics_bound = parse_quote! { #field_ty: lens_rs::#optics_trait<#rv_param, #image_param> };
     let constraints = Constraints::new(generic, vec![optics_bound]);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#rv_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#rv_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn review(optics: lens_rs::optics::#var_name<#rv_param>, from: Self::Image) -> Self
-            where
-                Self::Image: Sized
-            {
+            fn review(optics: lens_rs::optics::#var_name<#rv_param>, from: #image_param) -> Self {
                 <#ty>::#var_name(Review::review(optics.0, from))
             }
         }
@@ -639,26 +637,31 @@ fn impl_traversal_ref4variant(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("TraversalRef", Span::call_site());
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
+    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#traversal_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#traversal_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn traverse_ref(&self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<&Self::Image> {
+            fn traverse_ref(&self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<&#image_param> {
                 use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse_ref(x, optics.0),
+                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_ref(x, optics.0),
                      _ => vec![],
                 }
             }
@@ -675,26 +678,31 @@ fn impl_prism_ref4variant(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("PrismRef", Span::call_site());
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
+    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#prism_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#prism_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn preview_ref(&self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<&Self::Image> {
+            fn preview_ref(&self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<&#image_param> {
                 use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview_ref(x, optics.0),
+                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_ref(x, optics.0),
                      _ => Option::None,
                 }
             }
@@ -711,26 +719,31 @@ fn impl_traversal_mut4variant(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("TraversalMut", Span::call_site());
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
+    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#traversal_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#traversal_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn traverse_mut(&mut self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<&mut Self::Image> {
+            fn traverse_mut(&mut self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<&mut #image_param> {
                 use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse_mut(x, optics.0),
+                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_mut(x, optics.0),
                      _ => vec![],
                 }
             }
@@ -747,26 +760,31 @@ fn impl_prism_mut4variant(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("PrismMut", Span::call_site());
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
+    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#prism_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#prism_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn preview_mut(&mut self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<&mut Self::Image> {
+            fn preview_mut(&mut self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<&mut #image_param> {
                 use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview_mut(x, optics.0),
+                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_mut(x, optics.0),
                      _ => Option::None,
                 }
             }
@@ -783,30 +801,30 @@ fn impl_traversal4variant(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("Traversal", Span::call_site());
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
+    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param> }];
+    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#traversal_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#traversal_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn traverse(self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<Self::Image>
+            fn traverse(self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<#image_param>
             where
                 Self: Sized,
-                Self::Image: Sized
             {
                 use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse(x, optics.0),
+                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse(x, optics.0),
                      _ => vec![],
                 }
             }
@@ -823,30 +841,30 @@ fn impl_prism4variant(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("Prism", Span::call_site());
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
+    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param> }];
+    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#prism_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#prism_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn preview(self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<Self::Image>
+            fn preview(self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<#image_param>
             where
                 Self: Sized,
-                Self::Image: Sized
             {
                 use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview(x, optics.0),
+                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview(x, optics.0),
                      _ => Option::None,
                 }
             }
@@ -863,24 +881,29 @@ fn impl_traversal_ref4field(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("TraversalRef", Span::call_site());
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
+    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#traversal_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#traversal_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn traverse_ref(&self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<&Self::Image> {
-                <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse_ref(&self.#field_name, optics.0)
+            fn traverse_ref(&self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<&#image_param> {
+                <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_ref(&self.#field_name, optics.0)
             }
         }
     }
@@ -895,24 +918,29 @@ fn impl_prism_ref4field(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("PrismRef", Span::call_site());
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
+    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#prism_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#prism_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn preview_ref(&self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<&Self::Image> {
-                <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview_ref(&self.#field_name, optics.0)
+            fn preview_ref(&self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<&#image_param> {
+                <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_ref(&self.#field_name, optics.0)
             }
         }
     }
@@ -927,24 +955,29 @@ fn impl_lens_ref4field(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("LensRef", Span::call_site());
     let lens_param = syn::Ident::new("__Ls", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![lens_param.clone()]);
+    let params = Params::new(generic.clone(), vec![lens_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#lens_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#lens_param >> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#lens_param >, #image_param> for #ty
         where
             #constraints
         {
-            fn view_ref(&self, optics: lens_rs::optics::#field_name<#lens_param>) -> &Self::Image {
-                <#field_ty as lens_rs::#optics_trait<#lens_param>>::view_ref(&self.#field_name, optics.0)
+            fn view_ref(&self, optics: lens_rs::optics::#field_name<#lens_param>) -> & #image_param {
+                <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view_ref(&self.#field_name, optics.0)
             }
         }
     }
@@ -959,24 +992,29 @@ fn impl_traversal_mut4field(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("TraversalMut", Span::call_site());
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
+    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#traversal_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#traversal_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn traverse_mut(&mut self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<&mut Self::Image> {
-                <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse_mut(&mut self.#field_name, optics.0)
+            fn traverse_mut(&mut self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<&mut #image_param> {
+                <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_mut(&mut self.#field_name, optics.0)
             }
         }
     }
@@ -991,24 +1029,29 @@ fn impl_prism_mut4field(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("PrismMut", Span::call_site());
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
+    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#prism_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#prism_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn preview_mut(&mut self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<&mut Self::Image> {
-                <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview_mut(&mut self.#field_name, optics.0)
+            fn preview_mut(&mut self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<&mut #image_param> {
+                <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_mut(&mut self.#field_name, optics.0)
             }
         }
     }
@@ -1023,24 +1066,29 @@ fn impl_lens_mut4field(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("LensMut", Span::call_site());
     let lens_param = syn::Ident::new("__Ls", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![lens_param.clone()]);
+    let params = Params::new(generic.clone(), vec![lens_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#lens_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#lens_param >> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#lens_param >, #image_param> for #ty
         where
             #constraints
         {
-            fn view_mut(&mut self, optics: lens_rs::optics::#field_name<#lens_param>) -> &mut Self::Image {
-                <#field_ty as lens_rs::#optics_trait<#lens_param >>::view_mut(&mut self.#field_name, optics.0)
+            fn view_mut(&mut self, optics: lens_rs::optics::#field_name<#lens_param>) -> &mut #image_param {
+                <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view_mut(&mut self.#field_name, optics.0)
             }
         }
     }
@@ -1055,28 +1103,28 @@ fn impl_traversal4field(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("Traversal", Span::call_site());
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
+    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param> }];
+    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#traversal_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#traversal_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn traverse(self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<Self::Image>
+            fn traverse(self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<#image_param>
             where
                 Self: Sized,
-                Self::Image: Sized
             {
-                <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse(self.#field_name, optics.0)
+                <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse(self.#field_name, optics.0)
             }
         }
     }
@@ -1091,28 +1139,28 @@ fn impl_prism4field(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("Prism", Span::call_site());
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
+    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param> }];
+    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#prism_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#prism_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn preview(self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<Self::Image>
+            fn preview(self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<#image_param>
             where
                 Self: Sized,
-                Self::Image: Sized
             {
-                <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview(self.#field_name, optics.0)
+                <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview(self.#field_name, optics.0)
             }
         }
     }
@@ -1127,28 +1175,28 @@ fn impl_lens4field(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("Lens", Span::call_site());
     let prism_param = syn::Ident::new("__Ls", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
+    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param> }];
+    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#prism_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#prism_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn view(self, optics: lens_rs::optics::#field_name<#prism_param>) -> Self::Image
+            fn view(self, optics: lens_rs::optics::#field_name<#prism_param>) -> #image_param
             where
                 Self: Sized,
-                Self::Image: Sized
             {
-                <#field_ty as lens_rs::#optics_trait<#prism_param>>::view(self.#field_name, optics.0)
+                <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::view(self.#field_name, optics.0)
             }
         }
     }
@@ -1163,25 +1211,30 @@ fn impl_traversal_ref4index(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("TraversalRef", Span::call_site());
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
+    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#traversal_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#traversal_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn traverse_ref(&self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&Self::Image> {
-                <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse_ref(&self.#field_name, optics.0)
+            fn traverse_ref(&self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&#image_param> {
+                <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_ref(&self.#field_name, optics.0)
             }
         }
     }
@@ -1196,25 +1249,30 @@ fn impl_prism_ref4index(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("PrismRef", Span::call_site());
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
+    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#prism_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#prism_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn preview_ref(&self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&Self::Image> {
-                <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview_ref(&self.#field_name, optics.0)
+            fn preview_ref(&self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&#image_param> {
+                <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_ref(&self.#field_name, optics.0)
             }
         }
     }
@@ -1229,25 +1287,30 @@ fn impl_lens_ref4index(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("LensRef", Span::call_site());
     let lens_param = syn::Ident::new("__Ls", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![lens_param.clone()]);
+    let params = Params::new(generic.clone(), vec![lens_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#lens_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#lens_param >> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#lens_param >, #image_param> for #ty
         where
             #constraints
         {
-            fn view_ref(&self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &Self::Image {
-                <#field_ty as lens_rs::#optics_trait<#lens_param >>::view_ref(&self.#field_name, optics.0)
+            fn view_ref(&self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &#image_param {
+                <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view_ref(&self.#field_name, optics.0)
             }
         }
     }
@@ -1262,25 +1325,30 @@ fn impl_traversal_mut4index(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("TraversalMut", Span::call_site());
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
+    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#traversal_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#traversal_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn traverse_mut(&mut self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&mut Self::Image> {
-                <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse_mut(&mut self.#field_name, optics.0)
+            fn traverse_mut(&mut self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&mut #image_param> {
+                <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_mut(&mut self.#field_name, optics.0)
             }
         }
     }
@@ -1295,25 +1363,30 @@ fn impl_prism_mut4index(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("PrismMut", Span::call_site());
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
+    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#prism_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#prism_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn preview_mut(&mut self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&mut Self::Image> {
-                <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview_mut(&mut self.#field_name, optics.0)
+            fn preview_mut(&mut self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&mut #image_param> {
+                <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_mut(&mut self.#field_name, optics.0)
             }
         }
     }
@@ -1328,25 +1401,30 @@ fn impl_lens_mut4index(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("LensMut", Span::call_site());
     let lens_param = syn::Ident::new("__Ls", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![lens_param.clone()]);
+    let params = Params::new(generic.clone(), vec![lens_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#lens_param> }];
+    let optics_bounds = vec![parse_quote! {
+        #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
+    }, parse_quote! {
+        #image_param: ?Sized
+    }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#lens_param >> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#lens_param >, #image_param> for #ty
         where
             #constraints
         {
-            fn view_mut(&mut self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &mut Self::Image {
-                <#field_ty as lens_rs::#optics_trait<#lens_param >>::view_mut(&mut self.#field_name, optics.0)
+            fn view_mut(&mut self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &mut #image_param {
+                <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view_mut(&mut self.#field_name, optics.0)
             }
         }
     }
@@ -1361,29 +1439,29 @@ fn impl_traversal4index(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("Traversal", Span::call_site());
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
+    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param> }];
+    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#traversal_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#traversal_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn traverse(self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<Self::Image>
+            fn traverse(self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<#image_param>
             where
                 Self: Sized,
-                Self::Image: Sized
             {
-                <#field_ty as lens_rs::#optics_trait<#traversal_param>>::traverse(self.#field_name, optics.0)
+                <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse(self.#field_name, optics.0)
             }
         }
     }
@@ -1398,29 +1476,29 @@ fn impl_prism4index(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("Prism", Span::call_site());
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
+    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param> }];
+    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#prism_param>> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#prism_param>, #image_param> for #ty
         where
             #constraints
         {
-            fn preview(self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<Self::Image>
+            fn preview(self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<#image_param>
             where
                 Self: Sized,
-                Self::Image: Sized
             {
-                <#field_ty as lens_rs::#optics_trait<#prism_param>>::preview(self.#field_name, optics.0)
+                <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview(self.#field_name, optics.0)
             }
         }
     }
@@ -1435,29 +1513,29 @@ fn impl_lens4index(
 ) -> proc_macro2::TokenStream {
     let optics_trait = syn::Ident::new("Lens", Span::call_site());
     let lens_param = syn::Ident::new("__Ls", Span::call_site());
+    let image_param = syn::Ident::new("__Image", Span::call_site());
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![lens_param.clone()]);
+    let params = Params::new(generic.clone(), vec![lens_param.clone(), image_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#lens_param> }];
+    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#lens_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#lens_param >> for #ty
+        impl #params lens_rs::#optics_trait<lens_rs::optics::#optics_name<#lens_param >, #image_param> for #ty
         where
             #constraints
         {
-            fn view(self, optics: lens_rs::optics::#optics_name<#lens_param>) -> Self::Image
+            fn view(self, optics: lens_rs::optics::#optics_name<#lens_param>) -> #image_param
             where
                 Self: Sized,
-                Self::Image: Sized
             {
-                <#field_ty as lens_rs::#optics_trait<#lens_param >>::view(self.#field_name, optics.0)
+                <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view(self.#field_name, optics.0)
             }
         }
     }
