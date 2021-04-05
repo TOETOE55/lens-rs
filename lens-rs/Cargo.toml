@@ -10,6 +10,9 @@ keywords = [ "pattern", "traversing", "lens"]
 repository = "https://github.com/TOETOE55/lens-rs"
 description = "lens implemented in rust"
 
+[features]
+structx = [ "lens-rs_derive/structx" ]
+
 [build-dependencies]
 inwelling = "0.3"
 

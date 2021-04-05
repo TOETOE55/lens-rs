@@ -10,6 +10,9 @@ keywords = [ "pattern", "traversing", "lens"]
 repository = "https://github.com/TOETOE55/lens-rs"
 description = "macro to derive lens for data type"
 
+[features]
+structx = []
+
 [lib]
 proc-macro = true
 
