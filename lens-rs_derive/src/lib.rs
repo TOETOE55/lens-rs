@@ -71,61 +71,61 @@ fn field_optic_attr(var: &syn::Field) -> Option<syn::Attribute> {
 }
 
 #[proc_macro_derive(Optic, attributes(optic))]
-pub fn derive_optic(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let derive_input = parse_macro_input!(input as DeriveInput);
-    let optics: proc_macro2::TokenStream = match derive_input.data.clone() {
-        Data::Struct(syn::DataStruct {
-            fields: syn::Fields::Named(fs),
-            ..
-        }) => fs
-            .named
-            .iter()
-            .filter(|field| field_with_optic_attr(field))
-            .flat_map(|f| {
-                impl_optic4field(
-                    derive_input.ident.clone(),
-                    derive_input.generics.clone(),
-                    f.ident.clone().unwrap(),
-                    f.ty.clone(),
-                )
-            })
-            .collect(),
-        Data::Struct(syn::DataStruct {
-            fields: syn::Fields::Unnamed(fs),
-            ..
-        }) => fs
-            .unnamed
-            .iter()
-            .take(7)
-            .filter(|field| field_with_optic_attr(field))
-            .enumerate()
-            .flat_map(|(i, f)| {
-                impl_optic4index(
-                    derive_input.ident.clone(),
-                    derive_input.generics.clone(),
-                    syn::Index::from(i),
-                    f.ty.clone(),
-                )
-            })
-            .collect(),
-        Data::Enum(e) => e
-            .variants
-            .iter()
-            .filter(|v| variant_with_optic_attr(v))
-            .flat_map(|var| match var.fields.clone() {
-                Fields::Unnamed(fs) if fs.unnamed.len() == 1 => impl_optic4variant(
-                    derive_input.ident.clone(),
-                    derive_input.generics.clone(),
-                    var.ident.clone(),
-                    fs.unnamed[0].ty.clone(),
-                ),
-                _ => panic!("can only derive `Optic` for variant with single, unnamed variant"),
-            })
-            .collect(),
-        _ => panic!("union  can't derive the `Optic`"),
-    };
+pub fn derive_optic(_input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    // let derive_input = parse_macro_input!(input as DeriveInput);
+    // let optics: proc_macro2::TokenStream = match derive_input.data.clone() {
+    //     Data::Struct(syn::DataStruct {
+    //         fields: syn::Fields::Named(fs),
+    //         ..
+    //     }) => fs
+    //         .named
+    //         .iter()
+    //         .filter(|field| field_with_optic_attr(field))
+    //         .flat_map(|f| {
+    //             impl_optic4field(
+    //                 derive_input.ident.clone(),
+    //                 derive_input.generics.clone(),
+    //                 f.ident.clone().unwrap(),
+    //                 f.ty.clone(),
+    //             )
+    //         })
+    //         .collect(),
+    //     Data::Struct(syn::DataStruct {
+    //         fields: syn::Fields::Unnamed(fs),
+    //         ..
+    //     }) => fs
+    //         .unnamed
+    //         .iter()
+    //         .take(7)
+    //         .filter(|field| field_with_optic_attr(field))
+    //         .enumerate()
+    //         .flat_map(|(i, f)| {
+    //             impl_optic4index(
+    //                 derive_input.ident.clone(),
+    //                 derive_input.generics.clone(),
+    //                 syn::Index::from(i),
+    //                 f.ty.clone(),
+    //             )
+    //         })
+    //         .collect(),
+    //     Data::Enum(e) => e
+    //         .variants
+    //         .iter()
+    //         .filter(|v| variant_with_optic_attr(v))
+    //         .flat_map(|var| match var.fields.clone() {
+    //             Fields::Unnamed(fs) if fs.unnamed.len() == 1 => impl_optic4variant(
+    //                 derive_input.ident.clone(),
+    //                 derive_input.generics.clone(),
+    //                 var.ident.clone(),
+    //                 fs.unnamed[0].ty.clone(),
+    //             ),
+    //             _ => panic!("can only derive `Optic` for variant with single, unnamed variant"),
+    //         })
+    //         .collect(),
+    //     _ => panic!("union  can't derive the `Optic`"),
+    // };
 
-    TokenStream::from(optics)
+    TokenStream::new()
 }
 
 #[proc_macro_derive(Review, attributes(optic))]
@@ -467,7 +467,9 @@ pub fn scan_optics_from_source_files(input: TokenStream) -> TokenStream {
     let mut struct_items = Vec::<ItemStruct>::with_capacity(optcis_map.len());
 
     for optic_name in optcis_map {
-        if let "Some" | "None" | "Ok" | "Err" = &*optic_name { continue; }
+        if let "Some" | "None" | "Ok" | "Err" = &*optic_name {
+            continue;
+        }
         let optic_ident = syn::Ident::new(&optic_name, Span::call_site());
         struct_items.push(parse_quote! {
 

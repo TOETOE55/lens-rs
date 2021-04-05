@@ -3,96 +3,96 @@ use proc_macro2::{Span, TokenStream};
 use quote::*;
 use syn::{parse_quote, punctuated::Punctuated, GenericParam, Token};
 
-pub fn impl_optic4variant(
-    ty_name: syn::Ident,
-    generic: syn::Generics,
+// pub fn impl_optic4variant(
+//     ty_name: syn::Ident,
+//     generic: syn::Generics,
+//
+//     var_name: syn::Ident,
+//     field_ty: syn::Type,
+// ) -> proc_macro2::TokenStream {
+//     let optics_trait = syn::Ident::new("Optic", Span::call_site());
+//     let opt_param = syn::Ident::new("__Opt", Span::call_site());
+//
+//     // <...>
+//     let params = Params::new(generic.clone(), opt_param.clone());
+//
+//     // ty<...>
+//     let ty = Type::new(ty_name, generic.clone());
+//
+//     // where ...
+//     let optics_bound = parse_quote! { #field_ty: lens_rs::#optics_trait<#opt_param> };
+//     let constraints = Constraints::new(generic, vec![optics_bound]);
+//
+//     quote! {
+//         impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#opt_param >> for #ty
+//         where
+//             #constraints
+//         {
+//             type Image = <#field_ty as lens_rs::#optics_trait<#opt_param>>::Image;
+//         }
+//     }
+// }
 
-    var_name: syn::Ident,
-    field_ty: syn::Type,
-) -> proc_macro2::TokenStream {
-    let optics_trait = syn::Ident::new("Optic", Span::call_site());
-    let opt_param = syn::Ident::new("__Opt", Span::call_site());
+// pub fn impl_optic4field(
+//     ty_name: syn::Ident,
+//     generic: syn::Generics,
+//
+//     field_name: syn::Ident,
+//     field_ty: syn::Type,
+// ) -> proc_macro2::TokenStream {
+//     let optics_trait = syn::Ident::new("Optic", Span::call_site());
+//     let opt_param = syn::Ident::new("__Opt", Span::call_site());
+//
+//     // <...>
+//     let params = Params::new(generic.clone(), opt_param.clone());
+//
+//     // ty<...>
+//     let ty = Type::new(ty_name, generic.clone());
+//
+//     // where ...
+//     let optics_bound = parse_quote! { #field_ty: lens_rs::#optics_trait<#opt_param> };
+//     let constraints = Constraints::new(generic, vec![optics_bound]);
+//
+//     quote! {
+//         impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#opt_param >> for #ty
+//         where
+//             #constraints
+//         {
+//             type Image = <#field_ty as lens_rs::#optics_trait<#opt_param>>::Image;
+//         }
+//     }
+// }
 
-    // <...>
-    let params = Params::new(generic.clone(), opt_param.clone());
-
-    // ty<...>
-    let ty = Type::new(ty_name, generic.clone());
-
-    // where ...
-    let optics_bound = parse_quote! { #field_ty: lens_rs::#optics_trait<#opt_param> };
-    let constraints = Constraints::new(generic, vec![optics_bound]);
-
-    quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#var_name<#opt_param >> for #ty
-        where
-            #constraints
-        {
-            type Image = <#field_ty as lens_rs::#optics_trait<#opt_param>>::Image;
-        }
-    }
-}
-
-pub fn impl_optic4field(
-    ty_name: syn::Ident,
-    generic: syn::Generics,
-
-    field_name: syn::Ident,
-    field_ty: syn::Type,
-) -> proc_macro2::TokenStream {
-    let optics_trait = syn::Ident::new("Optic", Span::call_site());
-    let opt_param = syn::Ident::new("__Opt", Span::call_site());
-
-    // <...>
-    let params = Params::new(generic.clone(), opt_param.clone());
-
-    // ty<...>
-    let ty = Type::new(ty_name, generic.clone());
-
-    // where ...
-    let optics_bound = parse_quote! { #field_ty: lens_rs::#optics_trait<#opt_param> };
-    let constraints = Constraints::new(generic, vec![optics_bound]);
-
-    quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#field_name<#opt_param >> for #ty
-        where
-            #constraints
-        {
-            type Image = <#field_ty as lens_rs::#optics_trait<#opt_param>>::Image;
-        }
-    }
-}
-
-pub fn impl_optic4index(
-    ty_name: syn::Ident,
-    generic: syn::Generics,
-
-    field_name: syn::Index,
-    field_ty: syn::Type,
-) -> proc_macro2::TokenStream {
-    let optics_trait = syn::Ident::new("Optic", Span::call_site());
-    let opt_param = syn::Ident::new("__Opt", Span::call_site());
-    let opt_name = format_ident!("_{}", field_name);
-
-    // <...>
-    let params = Params::new(generic.clone(), opt_param.clone());
-
-    // ty<...>
-    let ty = Type::new(ty_name, generic.clone());
-
-    // where ...
-    let optics_bound = parse_quote! { #field_ty: lens_rs::#optics_trait<#opt_param> };
-    let constraints = Constraints::new(generic, vec![optics_bound]);
-
-    quote! {
-        impl #params lens_rs::#optics_trait<lens_rs::optics::#opt_name<#opt_param >> for #ty
-        where
-            #constraints
-        {
-            type Image = <#field_ty as lens_rs::#optics_trait<#opt_param>>::Image;
-        }
-    }
-}
+// pub fn impl_optic4index(
+//     ty_name: syn::Ident,
+//     generic: syn::Generics,
+//
+//     field_name: syn::Index,
+//     field_ty: syn::Type,
+// ) -> proc_macro2::TokenStream {
+//     let optics_trait = syn::Ident::new("Optic", Span::call_site());
+//     let opt_param = syn::Ident::new("__Opt", Span::call_site());
+//     let opt_name = format_ident!("_{}", field_name);
+//
+//     // <...>
+//     let params = Params::new(generic.clone(), opt_param.clone());
+//
+//     // ty<...>
+//     let ty = Type::new(ty_name, generic.clone());
+//
+//     // where ...
+//     let optics_bound = parse_quote! { #field_ty: lens_rs::#optics_trait<#opt_param> };
+//     let constraints = Constraints::new(generic, vec![optics_bound]);
+//
+//     quote! {
+//         impl #params lens_rs::#optics_trait<lens_rs::optics::#opt_name<#opt_param >> for #ty
+//         where
+//             #constraints
+//         {
+//             type Image = <#field_ty as lens_rs::#optics_trait<#opt_param>>::Image;
+//         }
+//     }
+// }
 
 pub fn impl_review4variant(
     ty_name: syn::Ident,
@@ -105,7 +105,7 @@ pub fn impl_review4variant(
     let rv_param = syn::Ident::new("__Rv", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), rv_param.clone());
+    let params = Params::new(generic.clone(), vec![rv_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -514,7 +514,7 @@ struct Params {
 }
 
 impl Params {
-    fn new(generics: syn::Generics, optics_param: syn::Ident) -> Self {
+    fn new(generics: syn::Generics, other_param: Vec<syn::Ident>) -> Self {
         let mut params = Punctuated::new();
         let mut generics_iter = generics.params.into_iter();
 
@@ -530,14 +530,17 @@ impl Params {
                     }));
                 }
                 GenericParam::Type(ty) => {
-                    params.push(syn::GenericParam::Type(syn::TypeParam {
-                        attrs: vec![],
-                        ident: optics_param.clone(),
-                        colon_token: None,
-                        bounds: Default::default(),
-                        eq_token: None,
-                        default: None,
-                    }));
+                    for param in other_param.iter() {
+                        params.push(syn::GenericParam::Type(syn::TypeParam {
+                            attrs: vec![],
+                            ident: param.clone(),
+                            colon_token: None,
+                            bounds: Default::default(),
+                            eq_token: None,
+                            default: None,
+                        }));
+                    }
+
                     added = true;
                     params.push(syn::GenericParam::Type(syn::TypeParam {
                         attrs: vec![],
@@ -550,14 +553,16 @@ impl Params {
                     break;
                 }
                 c @ GenericParam::Const(_) => {
-                    params.push(syn::GenericParam::Type(syn::TypeParam {
-                        attrs: vec![],
-                        ident: optics_param.clone(),
-                        colon_token: None,
-                        bounds: Default::default(),
-                        eq_token: None,
-                        default: None,
-                    }));
+                    for param in other_param.iter() {
+                        params.push(syn::GenericParam::Type(syn::TypeParam {
+                            attrs: vec![],
+                            ident: param.clone(),
+                            colon_token: None,
+                            bounds: Default::default(),
+                            eq_token: None,
+                            default: None,
+                        }));
+                    }
                     added = true;
                     params.push(c);
                     break;
@@ -566,14 +571,16 @@ impl Params {
         }
 
         if !added {
-            params.push(syn::GenericParam::Type(syn::TypeParam {
-                attrs: vec![],
-                ident: optics_param,
-                colon_token: None,
-                bounds: Default::default(),
-                eq_token: None,
-                default: None,
-            }));
+            for param in other_param {
+                params.push(syn::GenericParam::Type(syn::TypeParam {
+                    attrs: vec![],
+                    ident: param,
+                    colon_token: None,
+                    bounds: Default::default(),
+                    eq_token: None,
+                    default: None,
+                }));
+            }
         }
 
         for p in generics_iter {
@@ -634,7 +641,7 @@ fn impl_traversal_ref4variant(
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), traversal_param.clone());
+    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
@@ -670,7 +677,7 @@ fn impl_prism_ref4variant(
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), prism_param.clone());
+    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
@@ -706,7 +713,7 @@ fn impl_traversal_mut4variant(
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), traversal_param.clone());
+    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
@@ -742,7 +749,7 @@ fn impl_prism_mut4variant(
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), prism_param.clone());
+    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
@@ -778,7 +785,7 @@ fn impl_traversal4variant(
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), traversal_param.clone());
+    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
@@ -818,7 +825,7 @@ fn impl_prism4variant(
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), prism_param.clone());
+    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
@@ -858,7 +865,7 @@ fn impl_traversal_ref4field(
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), traversal_param.clone());
+    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -890,7 +897,7 @@ fn impl_prism_ref4field(
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), prism_param.clone());
+    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -922,7 +929,7 @@ fn impl_lens_ref4field(
     let lens_param = syn::Ident::new("__Ls", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), lens_param.clone());
+    let params = Params::new(generic.clone(), vec![lens_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -954,7 +961,7 @@ fn impl_traversal_mut4field(
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), traversal_param.clone());
+    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -986,7 +993,7 @@ fn impl_prism_mut4field(
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), prism_param.clone());
+    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1018,7 +1025,7 @@ fn impl_lens_mut4field(
     let lens_param = syn::Ident::new("__Ls", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), lens_param.clone());
+    let params = Params::new(generic.clone(), vec![lens_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1050,7 +1057,7 @@ fn impl_traversal4field(
     let traversal_param = syn::Ident::new("__Tr", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), traversal_param.clone());
+    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1086,7 +1093,7 @@ fn impl_prism4field(
     let prism_param = syn::Ident::new("__Pm", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), prism_param.clone());
+    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1122,7 +1129,7 @@ fn impl_lens4field(
     let prism_param = syn::Ident::new("__Ls", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), prism_param.clone());
+    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1159,7 +1166,7 @@ fn impl_traversal_ref4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), traversal_param.clone());
+    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1192,7 +1199,7 @@ fn impl_prism_ref4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), prism_param.clone());
+    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1225,7 +1232,7 @@ fn impl_lens_ref4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), lens_param.clone());
+    let params = Params::new(generic.clone(), vec![lens_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1258,7 +1265,7 @@ fn impl_traversal_mut4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), traversal_param.clone());
+    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1291,7 +1298,7 @@ fn impl_prism_mut4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), prism_param.clone());
+    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1324,7 +1331,7 @@ fn impl_lens_mut4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), lens_param.clone());
+    let params = Params::new(generic.clone(), vec![lens_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1357,7 +1364,7 @@ fn impl_traversal4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), traversal_param.clone());
+    let params = Params::new(generic.clone(), vec![traversal_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1394,7 +1401,7 @@ fn impl_prism4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), prism_param.clone());
+    let params = Params::new(generic.clone(), vec![prism_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
@@ -1431,7 +1438,7 @@ fn impl_lens4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), lens_param.clone());
+    let params = Params::new(generic.clone(), vec![lens_param.clone()]);
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
