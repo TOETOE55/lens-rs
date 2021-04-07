@@ -640,17 +640,23 @@ fn impl_traversal_ref4variant(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![traversal_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -681,17 +687,23 @@ fn impl_prism_ref4variant(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![prism_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -722,17 +734,23 @@ fn impl_traversal_mut4variant(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![traversal_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -763,17 +781,23 @@ fn impl_prism_mut4variant(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![prism_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -804,13 +828,17 @@ fn impl_traversal4variant(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![traversal_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param> }];
+    let optics_bounds =
+        vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -844,13 +872,17 @@ fn impl_prism4variant(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![prism_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name.clone(), generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
+    let optics_bounds =
+        vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -884,17 +916,23 @@ fn impl_traversal_ref4field(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![traversal_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -921,17 +959,23 @@ fn impl_prism_ref4field(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![prism_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -958,17 +1002,23 @@ fn impl_lens_ref4field(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![lens_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![lens_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -995,17 +1045,23 @@ fn impl_traversal_mut4field(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![traversal_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1032,17 +1088,23 @@ fn impl_prism_mut4field(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![prism_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1069,17 +1131,23 @@ fn impl_lens_mut4field(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![lens_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![lens_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1106,13 +1174,17 @@ fn impl_traversal4field(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![traversal_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param> }];
+    let optics_bounds =
+        vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1142,13 +1214,17 @@ fn impl_prism4field(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![prism_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
+    let optics_bounds =
+        vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1178,13 +1254,17 @@ fn impl_lens4field(
     let image_param = syn::Ident::new("__Image", Span::call_site());
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![prism_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
+    let optics_bounds =
+        vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1215,17 +1295,23 @@ fn impl_traversal_ref4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![traversal_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1253,17 +1339,23 @@ fn impl_prism_ref4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![prism_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1291,17 +1383,23 @@ fn impl_lens_ref4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![lens_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![lens_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1329,17 +1427,23 @@ fn impl_traversal_mut4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![traversal_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1367,17 +1471,23 @@ fn impl_prism_mut4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![prism_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1405,17 +1515,23 @@ fn impl_lens_mut4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![lens_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![lens_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! {
-        #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
-    }, parse_quote! {
-        #image_param: ?Sized
-    }];
+    let optics_bounds = vec![
+        parse_quote! {
+            #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
+        },
+        parse_quote! {
+            #image_param: ?Sized
+        },
+    ];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1443,13 +1559,17 @@ fn impl_traversal4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![traversal_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![traversal_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param> }];
+    let optics_bounds =
+        vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1480,13 +1600,17 @@ fn impl_prism4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![prism_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![prism_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
+    let optics_bounds =
+        vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#prism_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {
@@ -1517,13 +1641,17 @@ fn impl_lens4index(
     let optics_name = format_ident!("_{}", field_name);
 
     // <...>
-    let params = Params::new(generic.clone(), vec![lens_param.clone(), image_param.clone()]);
+    let params = Params::new(
+        generic.clone(),
+        vec![lens_param.clone(), image_param.clone()],
+    );
 
     // ty<...>
     let ty = Type::new(ty_name, generic.clone());
 
     // where ...
-    let optics_bounds = vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#lens_param, #image_param> }];
+    let optics_bounds =
+        vec![parse_quote! { #field_ty: lens_rs::#optics_trait<#lens_param, #image_param> }];
     let constraints = Constraints::new(generic, optics_bounds);
 
     quote! {

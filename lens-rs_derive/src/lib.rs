@@ -429,7 +429,7 @@ type OpticMap = HashSet<String>;
 #[proc_macro]
 pub fn scan_optics_from_source_files(input: TokenStream) -> TokenStream {
     let mut iter = input.into_iter();
-    let mut optcis_map = OpticMap::new();
+    let mut optics_map = OpticMap::new();
 
     loop {
         let token_tree = iter.next();
@@ -441,7 +441,7 @@ pub fn scan_optics_from_source_files(input: TokenStream) -> TokenStream {
                     String::from_utf8(fs::read(std::path::Path::new(file_name)).unwrap()).unwrap();
                 let syntax = syn::parse_file(&contents)
                     .expect(".rs files should contain valid Rust source code.");
-                OpticCollector(&mut optcis_map).visit_file(&syntax);
+                OpticCollector(&mut optics_map).visit_file(&syntax);
 
                 if let Some(token_tree) = iter.next() {
                     if let TokenTree::Punct(punct) = token_tree {
@@ -464,9 +464,9 @@ pub fn scan_optics_from_source_files(input: TokenStream) -> TokenStream {
         }
     }
 
-    let mut struct_items = Vec::<ItemStruct>::with_capacity(optcis_map.len());
+    let mut struct_items = Vec::<ItemStruct>::with_capacity(optics_map.len());
 
-    for optic_name in optcis_map {
+    for optic_name in optics_map {
         if let "Some" | "None" | "Ok" | "Err" = &*optic_name {
             continue;
         }

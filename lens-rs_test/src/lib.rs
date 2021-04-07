@@ -5,7 +5,7 @@ mod tests {
     use Nat::*;
 
     // derive enum
-    #[derive(Copy, Clone, Debug, Optic, Review, Prism)]
+    #[derive(Copy, Clone, Debug, Review, Prism, Optic)]
     enum Either<L, R> {
         #[optic]
         Left(L),
@@ -13,7 +13,7 @@ mod tests {
         Right(R),
     }
 
-    #[derive(Clone, Debug, Eq, PartialEq, Optic, Review, Prism)]
+    #[derive(Clone, Debug, Eq, PartialEq, Review, Prism)]
     enum Nat {
         #[optic]
         S(Box<Nat>),
@@ -22,7 +22,7 @@ mod tests {
     }
 
     // derive struct
-    #[derive(Copy, Clone, Debug, Optic, Lens)]
+    #[derive(Copy, Clone, Debug, Lens)]
     struct Foo<A, B> {
         #[optic]
         a: A,
@@ -30,7 +30,7 @@ mod tests {
         b: B,
     }
 
-    #[derive(Clone, Debug, Optic, Lens)]
+    #[derive(Clone, Debug, Lens)]
     struct Bar {
         #[optic]
         a: String,
@@ -38,13 +38,13 @@ mod tests {
         c: i32,
     }
 
-    #[derive(Clone, Debug, Optic, Prism)]
+    #[derive(Clone, Debug, Prism)]
     enum IsSome<T> {
         #[optic]
-        Some(T)
+        Some(T),
     }
 
-    #[derive(Debug, Optic, Lens)]
+    #[derive(Debug, Lens)]
     struct Shit<'a> {
         #[optic(ref)]
         a: &'a str,
@@ -53,7 +53,7 @@ mod tests {
     }
 
     // derive tuple
-    #[derive(Copy, Clone, Debug, Optic, Lens)]
+    #[derive(Copy, Clone, Debug, Lens)]
     struct Tuple<A, B>(#[optic] A, #[optic] B);
 
     // T may have i32

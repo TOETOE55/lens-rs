@@ -10,8 +10,6 @@ keywords = [ "pattern", "traversing", "lens"]
 repository = "https://github.com/TOETOE55/lens-rs"
 description = "lens implemented in rust"
 
-[build-dependencies]
-inwelling = "0.3"
-
 [dependencies]
 lens-rs_derive = { path = "../lens-rs_derive", version = "0.2" }
+lens-rs_generator = { path = "../lens-rs_generator", version = "0.1" }
