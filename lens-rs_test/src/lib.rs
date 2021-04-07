@@ -18,7 +18,23 @@ mod tests {
         #[optic]
         S(Box<Nat>),
         #[optic]
-        Z(()),
+        Z,
+    }
+
+    #[derive(Clone, Debug, Prism, Review)]
+    enum IsSome<T> {
+        #[optic]
+        Some(T),
+    }
+
+    #[derive(Clone, Debug, Prism, Review)]
+    enum Unit {
+        #[optic]
+        Unit,
+        #[optic]
+        Unnamed(),
+        #[optic]
+        Named {}
     }
 
     // derive struct
@@ -38,11 +54,7 @@ mod tests {
         c: i32,
     }
 
-    #[derive(Clone, Debug, Prism)]
-    enum IsSome<T> {
-        #[optic]
-        Some(T),
-    }
+
 
     #[derive(Debug, Lens)]
     struct Shit<'a> {
@@ -55,6 +67,9 @@ mod tests {
     // derive tuple
     #[derive(Copy, Clone, Debug, Lens)]
     struct Tuple<A, B>(#[optic] A, #[optic] B);
+
+    #[derive(Copy, Clone, Debug, Lens)]
+    struct Empty;
 
     // T may have i32
     fn may_have_i32<T: PrismRef<Pm, i32>, Pm>(t: &T, pm: Pm) -> Option<i32> {
@@ -130,7 +145,7 @@ mod tests {
         let one: Nat = Review::review(optics!(S.lens_rs::optics::_box.Z), ());
         let mut two: Nat = Review::review(optics!(S._box.S._box.Z), ());
         let three: Nat = Review::review(optics!(S._box.S._box.Z), ());
-        assert_eq!(one, S(Box::new(Z(()))));
+        assert_eq!(one, S(Box::new(Z)));
         two.preview_mut(optics!(S._box)).map(move |x| *x = one); // 2+1
         assert_eq!(two, three);
 
@@ -144,15 +159,42 @@ mod tests {
         assert_eq!(*foo1, "foo1");
     }
 
+    fn test_index() {
+        let mut x = (1, vec![2, 3]);
+        *x.view_mut(optics!(_1.[0])) *= 2;
+
+        assert_eq!(x.1[0], 4);
+    }
+
+    fn test_absent() {
+        fn may_has_c<T>(t: T) -> Option<i32>
+        where
+            T: Prism<Optics![c], i32>
+        {
+            t.preview(optics!(c))
+        }
+
+        let foo = Foo {
+            a: "this is Foo".to_string(),
+            b: (),
+        };
+        let bar = Bar {
+            a: "this is Bar".to_string(),
+            c: 0,
+        };
+        let left: Either<i32, i32> = Left(0);
+
+        assert_eq!(may_has_c(foo), None);
+        assert_eq!(may_has_c(bar), Some(0));
+        assert_eq!(may_has_c(left), None);
+    }
+
     #[test]
     fn it_works() {
         test_nested();
         test_row();
         test_ptr();
-
-        let mut x = (1, vec![2, 3]);
-        *x.view_mut(optics!(_1.[0])) *= 2;
-
-        assert_eq!(x.1[0], 4);
+        test_index();
+        test_absent();
     }
 }

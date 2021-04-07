@@ -17,4 +17,4 @@ proc-macro = true
 proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "1.0", features = ["extra-traits","full","visit", "printing"] }
-lazy_static = "1.4.0"
+lens-rs_generator = { path = "../lens-rs_generator", version = "0.1" }

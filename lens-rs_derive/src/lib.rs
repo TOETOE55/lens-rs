@@ -9,6 +9,7 @@ use syn::{
 };
 
 use crate::meta_impls::*;
+use lens_rs_generator::all_optics;
 use std::collections::HashSet;
 use std::fs;
 use syn::parse::{Parse, ParseStream, Result};
@@ -50,10 +51,13 @@ fn variant_with_optic_attr(var: &syn::Variant) -> bool {
 }
 
 fn variant_optic_attr(var: &syn::Variant) -> Option<syn::Attribute> {
-    var.attrs.clone().into_iter().find(|attr: &syn::Attribute| {
-        attr.path
-            .is_ident(&syn::Ident::new("optic", Span::call_site()))
-    })
+    var.attrs
+        .iter()
+        .find(|attr: &&syn::Attribute| {
+            attr.path
+                .is_ident(&syn::Ident::new("optic", Span::call_site()))
+        })
+        .cloned()
 }
 
 fn field_with_optic_attr(field: &syn::Field) -> bool {
@@ -64,10 +68,13 @@ fn field_with_optic_attr(field: &syn::Field) -> bool {
 }
 
 fn field_optic_attr(var: &syn::Field) -> Option<syn::Attribute> {
-    var.attrs.clone().into_iter().find(|attr: &syn::Attribute| {
-        attr.path
-            .is_ident(&syn::Ident::new("optic", Span::call_site()))
-    })
+    var.attrs
+        .iter()
+        .find(|attr: &&syn::Attribute| {
+            attr.path
+                .is_ident(&syn::Ident::new("optic", Span::call_site()))
+        })
+        .cloned()
 }
 
 #[proc_macro_derive(Optic, attributes(optic))]
@@ -144,6 +151,21 @@ pub fn derive_review(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
                     var.ident.clone(),
                     fs.unnamed[0].ty.clone(),
                 ),
+                Fields::Unnamed(fs) if fs.unnamed.len() == 0 => impl_empty_review_unnamed(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    var.ident.clone(),
+                ),
+                Fields::Named(fs) if fs.named.len() == 0 => impl_empty_review_named(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    var.ident.clone(),
+                ),
+                Fields::Unit => impl_empty_review_unit(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    var.ident.clone(),
+                ),
                 _ => panic!("can only derive `Review` for variant with single, unnamed variant"),
             })
             .collect(),
@@ -187,8 +209,37 @@ pub fn derive_prism(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                         ),
                     }
                 }
-                _ => panic!("can only derive `Prism` for variant with single, unnamed variant"),
+                Fields::Unnamed(fs) if fs.unnamed.len() == 0 => impl_empty(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    var.ident.clone(),
+                ),
+                Fields::Named(fs) if fs.named.len() == 0 => impl_empty(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    var.ident.clone(),
+                ),
+                Fields::Unit => impl_empty(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    var.ident.clone(),
+                ),
+                _ => panic!(
+                    "can only derive `Prism` for variant with single and unnamed, or unit variant"
+                ),
             })
+            .chain(
+                all_optics()
+                    .into_iter()
+                    .filter(|ident| !e.variants.iter().any(|v| &v.ident == ident))
+                    .flat_map(|ident| {
+                        impl_empty(
+                            derive_input.ident.clone(),
+                            derive_input.generics.clone(),
+                            ident,
+                        )
+                    }),
+            )
             .collect(),
         _ => panic!("union and struct can't derive the `Prism`"),
     };
@@ -233,6 +284,18 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     ),
                 }
             })
+            .chain(
+                all_optics()
+                    .into_iter()
+                    .filter(|ident| !fs.named.iter().any(|f| f.ident.as_ref().unwrap() == ident))
+                    .flat_map(|ident| {
+                        impl_empty(
+                            derive_input.ident.clone(),
+                            derive_input.generics.clone(),
+                            ident,
+                        )
+                    }),
+            )
             .collect(),
         Data::Struct(syn::DataStruct {
             fields: syn::Fields::Unnamed(fs),
@@ -269,8 +332,35 @@ pub fn derive_lens(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     ),
                 }
             })
+            .chain(
+                all_optics()
+                    .into_iter()
+                    .filter(|ident| {
+                        !fs.unnamed
+                            .iter()
+                            .enumerate()
+                            .any(|(i, _)| format!("_{}", i) == ident.to_string())
+                    })
+                    .flat_map(|ident| {
+                        impl_empty(
+                            derive_input.ident.clone(),
+                            derive_input.generics.clone(),
+                            ident,
+                        )
+                    }),
+            )
             .collect(),
-        _ => panic!("union and enum can't derive the `Lens`"),
+        Data::Struct(_) => all_optics()
+            .into_iter()
+            .flat_map(|ident| {
+                impl_empty(
+                    derive_input.ident.clone(),
+                    derive_input.generics.clone(),
+                    ident,
+                )
+            })
+            .collect(),
+        _ => panic!("can only derive `Lens` for struct"),
     };
 
     TokenStream::from(lens)
