@@ -9,6 +9,7 @@ categories = [ "rust-patterns" ]
 keywords = [ "pattern", "traversing", "lens"]
 repository = "https://github.com/TOETOE55/lens-rs"
 description = "generating optics for source files"
+documentation = "https://docs.rs/lens-rs_generator/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

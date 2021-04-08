@@ -13,10 +13,10 @@
 //!
 //! ```toml
 //! [dependencies]
-//! lens-rs = "0.2"
+//! lens-rs = "0.3"
 //!
 //! [package.metadata.inwelling]
-//! lens-rs = true
+//! lens-rs_generator = true
 //! ```
 //!
 //! Add the following in your .rs files
@@ -85,7 +85,7 @@
 //! Derive Lens for fields to use `.view_xx()`. (derive(Optic) is necessary)
 //!
 //! ```rust
-//! #[derive(Optic, Lens)]
+//! #[derive(Lens)]
 //! struct Foo<A, B> {
 //!     #[optic]
 //!     a: A, // generate optics::a
@@ -93,7 +93,7 @@
 //!     b: B, // generate optics::b
 //! }
 //!
-//! #[derive(Optic, Lens)]
+//! #[derive(Lens)]
 //! struct Tuple<A, B>(#[optic] A, #[optic] B);
 //! // use optics::_0 or optics::_1 to access it
 //! ```
@@ -101,7 +101,7 @@
 //! Derive Review/Prism for variants to use `Review::review`/`.preview_xx()`:
 //!
 //! ```rust
-//! #[derive(Optic, Review, Prism)]
+//! #[derive(Review, Prism)]
 //! enum Either<L, R> {
 //!     #[optic]
 //!     Left(L), // generate optics::Left
@@ -113,7 +113,7 @@
 //! Control the mutability:
 //!
 //! ```rust
-//! #[derive(Debug, Optic, Lens)]
+//! #[derive(Debug, Lens)]
 //! struct Bar<C>{
 //!     #[optic(ref)]
 //!     a: String,    // can only take the immutable ref of .a by optics::a
@@ -131,11 +131,17 @@
 //! ```rust
 //! fn with_field_a<T>(t: &T) -> &str
 //! where
-//!     T: LensRef<Optics![a], Image = String>, // T must have field a
+//!     T: LensRef<Optics![a], String>, // T must have field a
 //! {
 //!     t.view_ref(optics!(a))
 //! }
 //!
+//! fn may_has_c<T>(t: T) -> Option<i32>
+//! where
+//!     T: PrismRef<Optics![c], i32>,  // T may have field c
+//! {
+//!     Some(*t.preview_ref(optics!(c))?)
+//! }
 //!
 //! let foo = Foo {
 //!     a: "this is Foo".to_string(),
@@ -148,6 +154,41 @@
 //!
 //! assert_eq!(with_field_a(&foo), "this is Foo");
 //! assert_eq!(with_field_a(&bar), "this is Bar");
+//!
+//! assert_eq!(may_has_c(foo), None);
+//! assert_eq!(may_has_c(bar), Some(0));
+//! assert_eq!(may_has_c(Left(0)), None);
+//! assert_eq!(may_has_c((1, 2, 3)), None);
+//! ```
+//!
+//! ## Play with structx
+//!
+//! Now, `Lens` has implemented for [`structx`](https://crates.io/crates/structx)
+//!
+//! Add the following in your Cargo.toml
+//!
+//! ```toml
+//! [dependencies]
+//! lens-rs = { version = "0.3", features = [ "structx" ] }
+//! structx = { version = "0.1", features = [ "lens-rs" ] }
+//!
+//! [package.metadata.inwelling]
+//! lens-rs_generator = true
+//! structx = true
+//! ```
+//!
+//! Enjoy it!
+//!
+//! ```rust
+//! use structx::*;
+//! use lens_rs::*;
+//! let s1 = structx! { height: 1, width: 2 };
+//! let s2 = structx! { height: 3, length: 4 };
+//! assert_eq!(s1.view_ref(optics!(height)), &1);
+//! assert_eq!(s2.view_ref(optics!(height)), &3);
+//!
+//! assert_eq!(s1.preview_ref(optics!(width)), Some(&2));
+//! assert_eq!(s2.preview_ref(optics!(width)), None);
 //! ```
 //!
 //! # Limitations
@@ -159,7 +200,7 @@
 //!
 //! Under Apache License 2.0 or MIT License, at your will.
 
-/// definitions of optics (including derived optic)
+/// definitions of optics (including generated optic)
 pub mod optics;
 
 /// definitions of optics traits

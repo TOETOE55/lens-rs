@@ -16,4 +16,4 @@ lens-rs_generator = true
 structx = true
 
 [features]
-test_structx = [ "structx", "lens-rs/structx" ]
+test_structx = [ "structx", "structx/lens-rs", "lens-rs/structx" ]

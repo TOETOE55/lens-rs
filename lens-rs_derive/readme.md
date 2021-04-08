@@ -15,7 +15,7 @@ struct Baz<'a, A, B, C>{
     c: C          // can mv it out by by optics::c
 }
 
-#[derive(Optic, Review, Prism, Debug)]
+#[derive(Review, Prism, Debug)]
 enum AnEnum<T> {
     A(T, i32), // couldn't derive Prism or Review
     #[optic] 
@@ -28,7 +28,7 @@ enum AnEnum<T> {
     E {},
 }
 
-#[derive(Optic, Lens, Debug)]
+#[derive(Lens, Debug)]
 struct Foo {
     #[optic] a: i32,
     #[optic] b: i32,
