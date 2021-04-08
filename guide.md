@@ -131,7 +131,7 @@ Limitations:
 You can represent a type has values of some types
 
 ```rust
-fn may_have_i32<Pm, T: PrismMut<T, To=i32>>(t: &mut T, pm: Pm) {
+fn may_have_i32<Pm, T: PrismMut<T, i32>>(t: &mut T, pm: Pm) {
 //                       ^ `T` may have a value of `i32`
     t.preview_mut(pm).map(|x| *x+=1);
 }
@@ -145,7 +145,7 @@ or a type has some fields:
 ```rust
 fn with_field_a<T>(t: &T) -> &str
 where
-    T: LensRef<Optics![a], Image = String>, // T must have field a
+    T: LensRef<Optics![a], String>, // T must have field a
 {
     t.view_ref(optics!(a))
 }
@@ -162,6 +162,32 @@ let bar = Bar {
 
 assert_eq!(with_field_a(&foo), "this is Foo");
 assert_eq!(with_field_a(&bar), "this is Bar");
+```
+
+or a type *may* have some fields:
+
+```rust
+fn may_has_c<T>(t: T) -> Option<i32>
+where
+    T: Prism<Optics![c], i32>,
+{
+    t.preview(optics!(c))
+}
+
+let foo = Foo {
+    a: "this is Foo".to_string(),
+    b: (),
+};
+let bar = Bar {
+    a: "this is Bar".to_string(),
+    c: 0,
+};
+let left: Either<i32, i32> = Left(0);
+
+assert_eq!(may_has_c(foo), None);
+assert_eq!(may_has_c(bar), Some(0));
+assert_eq!(may_has_c(left), None);
+assert_eq!(may_has_c((1, 2, 3)), None);
 ```
 
 ## An optic is an onion
@@ -244,12 +270,11 @@ struct __;
 
 the optic implementation like:
 ```rust
-impl<Pm, T, E> Prism<optics::Ok<Pm>> for Result<T, E>
+impl<Pm, Image, T, E> Prism<optics::Ok<Pm>, Image> for Result<T, E>
 where
-    T: Prism<Pm>,
+    T: Prism<Pm, Image>,
 {
-    // type Image = T::Image;
-    fn preview(self, optics: optics::Ok<Pm>) -> Option<Self::Image> {
+    fn preview(self, optics: optics::Ok<Pm>) -> Option<Image> {
         self.ok().and_then(|t| optics.0.pm(t))
     }
 }
@@ -263,18 +288,18 @@ so, just like an onion
 
 it's easy to see that in a little bit of generation(may not correspond exactly):
 ```rust
-trait Traversal<Optics> {
-    fn traverse<F: FromIterator<Self::To>>(&self, optics: Optics) -> F;
+trait Traversal<Optics, Image> {
+    fn traverse<F: FromIterator<Image>>(&self, optics: Optics) -> F;
     // forall F. Traversable F => Self -> F Self::To 
 }
 
-trait Prism<Optics> {
-    fn pm<F: From<Option<Self::To>>>(&self, optics: Optics) -> F;
+trait Prism<Optics, Image> {
+    fn pm<F: From<Option<Image>>>(&self, optics: Optics) -> F;
     // forall F. Pointed F => Self -> F Self::To
 }
 
-trait Lens<T> {
-    fn view<F: From<Self::To>>(&self, source: Optics) -> F;
+trait Lens<T, Image> {
+    fn view<F: From<Image>>(&self, source: Optics) -> F;
     // forall F. Functor F => Self -> F Self::To
 }
 ```
@@ -295,7 +320,7 @@ I would be glad someone is using this library!
 oh, don't forget to add this in `Cargo.toml`
 ```toml
 [package.metadata.inwelling]
-lens-rs = true
+lens-rs_generator = true
 ```
 
-Finally, I must thank @oooutlk, he helped me a lot in developing `lens-rs_derive`(generating optics in `lens_rs::optics` using [`inwelling`](https://github.com/oooutlk/inwelling)).
+Finally, I must thank @oooutlk, he helped me a lot in developing `lens-rs_derive`(generating optics in `lens_rs_generator::*` using [`inwelling`](https://github.com/oooutlk/inwelling)).

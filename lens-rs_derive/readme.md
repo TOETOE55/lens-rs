@@ -5,7 +5,7 @@ see [the guide](https://github.com/TOETOE55/lens-rs/blob/master/guide.md)
 
 ## Example
 ```rust
-#[derive(Debug, Optic, Lens)]
+#[derive(Debug, Lens)]
 struct Baz<'a, A, B, C>{
     #[optic(ref)] 
     a: &'a A,     // can only take the immutable ref by optics::a
@@ -17,8 +17,15 @@ struct Baz<'a, A, B, C>{
 
 #[derive(Optic, Review, Prism, Debug)]
 enum AnEnum<T> {
-    A(T, i32),
-    #[optic] B(T),
+    A(T, i32), // couldn't derive Prism or Review
+    #[optic] 
+    B(T),
+    #[optic]
+    C,
+    #[optic]
+    D(),
+    #[optic]
+    E {},
 }
 
 #[derive(Optic, Lens, Debug)]

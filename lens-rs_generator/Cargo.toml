@@ -1,0 +1,27 @@
+[package]
+name = "lens-rs_generator"
+version = "0.1.0"
+authors = ["Xyzt Toe <584605539@qq.com>"]
+edition = "2018"
+license = "MIT/Apache-2.0"
+readme = "readme.md"
+categories = [ "rust-patterns" ]
+keywords = [ "pattern", "traversing", "lens"]
+repository = "https://github.com/TOETOE55/lens-rs"
+description = "generating optics for source files"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+inwelling = "0.3"
+proc-macro2 = "1.0"
+quote = { version = "1.0", optional = true }
+syn = { version = "1.0", features = ["extra-traits","full","visit", "printing"] }
+
+[dependencies]
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "1.0", features = ["extra-traits","full","visit", "printing"] }
+
+[features]
+structx = [ "quote" ]

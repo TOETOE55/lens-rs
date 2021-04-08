@@ -5,7 +5,7 @@ mod tests {
     use Nat::*;
 
     // derive enum
-    #[derive(Copy, Clone, Debug, Optic, Review, Prism)]
+    #[derive(Copy, Clone, Debug, Review, Prism)]
     enum Either<L, R> {
         #[optic]
         Left(L),
@@ -13,16 +13,32 @@ mod tests {
         Right(R),
     }
 
-    #[derive(Clone, Debug, Eq, PartialEq, Optic, Review, Prism)]
+    #[derive(Clone, Debug, Eq, PartialEq, Review, Prism)]
     enum Nat {
         #[optic]
         S(Box<Nat>),
         #[optic]
-        Z(()),
+        Z,
+    }
+
+    #[derive(Clone, Debug, Prism, Review)]
+    enum IsSome<T> {
+        #[optic]
+        Some(T),
+    }
+
+    #[derive(Clone, Debug, Prism, Review)]
+    enum Unit {
+        #[optic]
+        Unit,
+        #[optic]
+        Unnamed(),
+        #[optic]
+        Named {},
     }
 
     // derive struct
-    #[derive(Copy, Clone, Debug, Optic, Lens)]
+    #[derive(Copy, Clone, Debug, Lens)]
     struct Foo<A, B> {
         #[optic]
         a: A,
@@ -30,7 +46,7 @@ mod tests {
         b: B,
     }
 
-    #[derive(Clone, Debug, Optic, Lens)]
+    #[derive(Clone, Debug, Lens)]
     struct Bar {
         #[optic]
         a: String,
@@ -38,13 +54,7 @@ mod tests {
         c: i32,
     }
 
-    #[derive(Clone, Debug, Optic, Prism)]
-    enum IsSome<T> {
-        #[optic]
-        Some(T),
-    }
-
-    #[derive(Debug, Optic, Lens)]
+    #[derive(Debug, Lens)]
     struct Shit<'a> {
         #[optic(ref)]
         a: &'a str,
@@ -53,17 +63,20 @@ mod tests {
     }
 
     // derive tuple
-    #[derive(Copy, Clone, Debug, Optic, Lens)]
+    #[derive(Copy, Clone, Debug, Lens)]
     struct Tuple<A, B>(#[optic] A, #[optic] B);
 
+    #[derive(Copy, Clone, Debug, Lens)]
+    struct Empty;
+
     // T may have i32
-    fn may_have_i32<T: PrismRef<Pm, Image = i32>, Pm>(t: &T, pm: Pm) -> Option<i32> {
+    fn may_have_i32<T: PrismRef<Pm, i32>, Pm>(t: &T, pm: Pm) -> Option<i32> {
         t.preview_ref(pm).map(|x| *x)
     }
 
     fn with_field_a<T>(t: &T) -> &str
     where
-        T: LensRef<Optics![a], Image = String>,
+        T: LensRef<Optics![a], String>,
     {
         t.view_ref(optics!(a))
     }
@@ -130,7 +143,7 @@ mod tests {
         let one: Nat = Review::review(optics!(S.lens_rs::optics::_box.Z), ());
         let mut two: Nat = Review::review(optics!(S._box.S._box.Z), ());
         let three: Nat = Review::review(optics!(S._box.S._box.Z), ());
-        assert_eq!(one, S(Box::new(Z(()))));
+        assert_eq!(one, S(Box::new(Z)));
         two.preview_mut(optics!(S._box)).map(move |x| *x = one); // 2+1
         assert_eq!(two, three);
 
@@ -144,15 +157,56 @@ mod tests {
         assert_eq!(*foo1, "foo1");
     }
 
+    fn test_index() {
+        let mut x = (1, vec![2, 3]);
+        *x.view_mut(optics!(_1.[0])) *= 2;
+
+        assert_eq!(x.1[0], 4);
+    }
+
+    fn test_absent() {
+        fn may_has_c<T>(t: T) -> Option<i32>
+        where
+            T: Prism<Optics![c], i32>,
+        {
+            t.preview(optics!(c))
+        }
+
+        let foo = Foo {
+            a: "this is Foo".to_string(),
+            b: (),
+        };
+        let bar = Bar {
+            a: "this is Bar".to_string(),
+            c: 0,
+        };
+        let left: Either<i32, i32> = Left(0);
+
+        assert_eq!(may_has_c(foo), None);
+        assert_eq!(may_has_c(bar), Some(0));
+        assert_eq!(may_has_c(left), None);
+        assert_eq!(may_has_c((1, 2, 3)), None);
+    }
+
     #[test]
     fn it_works() {
         test_nested();
         test_row();
         test_ptr();
+        test_index();
+        test_absent();
+    }
 
-        let mut x = (1, vec![2, 3]);
-        *x.view_mut(optics!(_1.[0])) *= 2;
-
-        assert_eq!(x.1[0], 4);
+    #[test]
+    #[cfg(feature = "test_structx")]
+    fn test_structx() {
+        use structx::*;
+        let s1 = structx! { height: 1, width: 2 };
+        let s2 = structx! { height: 3, length: 4 };
+        // assert_eq!(s1.view_ref(optics!(height)), &1);
+        // assert_eq!(s2.view_ref(optics!(height)), &3);
+        //
+        // assert_eq!(s1.preview_ref(optics!(width)), Some(&2));
+        // assert_eq!(s2.preview_ref(optics!(width)), None);
     }
 }

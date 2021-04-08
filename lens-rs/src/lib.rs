@@ -165,13 +165,16 @@ pub mod optics;
 /// definitions of optics traits
 pub mod traits;
 
-pub use traits::{lens::*, prism::*, review::*, traversal::*, Optic};
+pub use traits::{lens::*, prism::*, review::*, traversal::*};
 
 /// build-in optics
-pub use optics::{_both, _box, _ix, _mapped, _mut, _ref, _0, _1, _2, _3, _4, _5, _6, __};
+pub use optics::{
+    _both, _box, _ix, _mapped, _mut, _ref, _0, _1, _10, _11, _12, _13, _14, _15, _16, _2, _3, _4,
+    _5, _6, _7, _8, _9, __,
+};
 
 /// derive macro
-pub use lens_rs_derive::{Optic, Lens, Prism, Review};
+pub use lens_rs_derive::{Lens, Prism, Review};
 
 /// macro to compose optics
 ///

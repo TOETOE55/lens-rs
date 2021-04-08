@@ -66,7 +66,7 @@ fn test() -> Option<()> {
 
 assume a type T may have substructure that the type is `i32`.
 ```rust
-fn bar<Pm, T: Prism<Pm, To=i32>>(t: &mut T, pm: Pm) {
+fn bar<Pm, T: Prism<Pm, i32>>(t: &mut T, pm: Pm) {
     t.preview_mut(pm).map(|x| *x += 2);
 }
 
@@ -85,7 +85,7 @@ assume a type T must have a field `.a`.
 ```rust
 fn with_field_a<T>(t: &T) -> &str
 where
-    T: LensRef<field![a], To=String>
+    T: LensRef<Optics![a], String>
 {
     t.view_ref(optics!(a))
 }
@@ -109,6 +109,6 @@ add it in Cargo.toml
 
 ```toml
 [package.metadata.inwelling]
-lens-rs = true
+lens-rs_generator = true
 ```
 

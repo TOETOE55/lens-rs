@@ -1,6 +1,6 @@
 [package]
 name = "lens-rs_derive"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["Xyzt Toe <584605539@qq.com>"]
 edition = "2018"
 license = "MIT/Apache-2.0"
@@ -20,4 +20,4 @@ proc-macro = true
 proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "1.0", features = ["extra-traits","full","visit", "printing"] }
-lazy_static = "1.4.0"
+lens-rs_generator = { path = "../lens-rs_generator", version = "0.1" }
