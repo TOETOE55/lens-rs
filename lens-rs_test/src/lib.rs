@@ -5,7 +5,7 @@ mod tests {
     use Nat::*;
 
     // derive enum
-    #[derive(Copy, Clone, Debug, Review, Prism, Optic)]
+    #[derive(Copy, Clone, Debug, Review, Prism)]
     enum Either<L, R> {
         #[optic]
         Left(L),
@@ -34,7 +34,7 @@ mod tests {
         #[optic]
         Unnamed(),
         #[optic]
-        Named {}
+        Named {},
     }
 
     // derive struct
@@ -53,8 +53,6 @@ mod tests {
         #[optic]
         c: i32,
     }
-
-
 
     #[derive(Debug, Lens)]
     struct Shit<'a> {
@@ -169,7 +167,7 @@ mod tests {
     fn test_absent() {
         fn may_has_c<T>(t: T) -> Option<i32>
         where
-            T: Prism<Optics![c], i32>
+            T: Prism<Optics![c], i32>,
         {
             t.preview(optics!(c))
         }
@@ -187,6 +185,7 @@ mod tests {
         assert_eq!(may_has_c(foo), None);
         assert_eq!(may_has_c(bar), Some(0));
         assert_eq!(may_has_c(left), None);
+        assert_eq!(may_has_c((1, 2, 3)), None);
     }
 
     #[test]

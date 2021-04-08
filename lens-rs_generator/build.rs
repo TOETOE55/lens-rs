@@ -60,15 +60,12 @@ impl<'a> Visit<'_> for OpticsCollector<'a> {
     }
 
     fn visit_item_struct(&mut self, item_struct: &ItemStruct) {
-        match &item_struct.fields {
-            syn::Fields::Named(fields_named) => {
-                for field in &fields_named.named {
-                    if field_with_optic_attr(field) {
-                        self.0.insert(format!("{}", field.ident.clone().unwrap()));
-                    }
+        if let syn::Fields::Named(fields_named) = &item_struct.fields {
+            for field in &fields_named.named {
+                if field_with_optic_attr(field) {
+                    self.0.insert(format!("{}", field.ident.clone().unwrap()));
                 }
             }
-            _ => {}
         }
     }
 }

@@ -24,7 +24,7 @@ pub mod review {
 /// ```
 /// use lens_rs::*;
 /// let mut x = (1, vec![Some((2, 3)), None]);
-/// x.traverse_mut(optics!(_1.Mapped._Some._0))
+/// x.traverse_mut(optics!(_1._mapped._Some._0))
 ///     .into_iter()
 ///     .for_each(|i| *i += 1);
 /// assert_eq!(x.traverse(optics!(_1._mapped.Some._0)), vec![3]);

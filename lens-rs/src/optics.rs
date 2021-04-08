@@ -76,267 +76,267 @@ mod impl__ {
         }
     }
 }
-
-mod impl_result {
-    /***********************************************************
-     * impl for Result
-     ************************************************************/
-    use crate::*;
-
-    impl<Rv, Image, T, E> Review<optics::Ok<Rv>, Image> for Result<T, E>
-    where
-        T: Review<Rv, Image>,
-    {
-        fn review(optics: optics::Ok<Rv>, from: Image) -> Self {
-            Result::Ok(Review::review(optics.0, from))
-        }
-    }
-
-    impl<Tr, Image: ?Sized, T, E> TraversalRef<optics::Ok<Tr>, Image> for Result<T, E>
-    where
-        T: TraversalRef<Tr, Image>,
-    {
-        fn traverse_ref(&self, optics: optics::Ok<Tr>) -> Vec<&Image> {
-            match self {
-                Result::Ok(t) => t.traverse_ref(optics.0),
-                _ => vec![],
-            }
-        }
-    }
-
-    impl<Tr, Image: ?Sized, T, E> TraversalMut<optics::Ok<Tr>, Image> for Result<T, E>
-    where
-        T: TraversalMut<Tr, Image>,
-    {
-        fn traverse_mut(&mut self, optics: optics::Ok<Tr>) -> Vec<&mut Image> {
-            match self {
-                Result::Ok(t) => t.traverse_mut(optics.0),
-                _ => vec![],
-            }
-        }
-    }
-
-    impl<Tr, Image, T, E> Traversal<optics::Ok<Tr>, Image> for Result<T, E>
-    where
-        T: Traversal<Tr, Image>,
-    {
-        fn traverse(self, optics: optics::Ok<Tr>) -> Vec<Image>
-        where
-            Self: Sized,
-        {
-            match self {
-                Result::Ok(t) => t.traverse(optics.0),
-                _ => vec![],
-            }
-        }
-    }
-
-    impl<Tr, Image, T, E> Traversal<optics::Err<Tr>, Image> for Result<T, E>
-    where
-        E: Traversal<Tr, Image>,
-    {
-        fn traverse(self, optics: optics::Err<Tr>) -> Vec<Image>
-        where
-            Self: Sized,
-        {
-            match self {
-                Result::Err(e) => e.traverse(optics.0),
-                _ => vec![],
-            }
-        }
-    }
-
-    impl<Tr, Image: ?Sized, T, E> TraversalRef<optics::Err<Tr>, Image> for Result<T, E>
-    where
-        E: TraversalRef<Tr, Image>,
-    {
-        fn traverse_ref(&self, optics: optics::Err<Tr>) -> Vec<&Image> {
-            match self {
-                Result::Err(e) => e.traverse_ref(optics.0),
-                _ => vec![],
-            }
-        }
-    }
-
-    impl<Tr, Image: ?Sized, T, E> TraversalMut<optics::Err<Tr>, Image> for Result<T, E>
-    where
-        E: TraversalMut<Tr, Image>,
-    {
-        fn traverse_mut(&mut self, optics: optics::Err<Tr>) -> Vec<&mut Image> {
-            match self {
-                Result::Err(e) => e.traverse_mut(optics.0),
-                _ => vec![],
-            }
-        }
-    }
-
-    impl<Pm, Image: ?Sized, T, E> PrismRef<optics::Ok<Pm>, Image> for Result<T, E>
-    where
-        T: PrismRef<Pm, Image>,
-    {
-        fn preview_ref(&self, optics: optics::Ok<Pm>) -> Option<&Image> {
-            let t = self.as_ref().ok()?;
-            t.preview_ref(optics.0)
-        }
-    }
-
-    impl<Pm, Image: ?Sized, T, E> PrismMut<optics::Ok<Pm>, Image> for Result<T, E>
-    where
-        T: PrismMut<Pm, Image>,
-    {
-        fn preview_mut(&mut self, optics: optics::Ok<Pm>) -> Option<&mut Image> {
-            let t = self.as_mut().ok()?;
-            t.preview_mut(optics.0)
-        }
-    }
-
-    impl<Pm, Image, T, E> Prism<optics::Ok<Pm>, Image> for Result<T, E>
-    where
-        T: Prism<Pm, Image>,
-    {
-        fn preview(self, optics: optics::Ok<Pm>) -> Option<Image>
-        where
-            Self: Sized,
-        {
-            let t = self.ok()?;
-            t.preview(optics.0)
-        }
-    }
-
-    impl<Rv, Image, T, E> Review<optics::Err<Rv>, Image> for Result<T, E>
-    where
-        E: Review<Rv, Image>,
-    {
-        fn review(optics: optics::Err<Rv>, from: Image) -> Self {
-            Result::Err(Review::review(optics.0, from))
-        }
-    }
-
-    impl<Pm, Image: ?Sized, T, E> PrismRef<optics::Err<Pm>, Image> for Result<T, E>
-    where
-        E: PrismRef<Pm, Image>,
-    {
-        fn preview_ref(&self, optics: optics::Err<Pm>) -> Option<&Image> {
-            let t = self.as_ref().err()?;
-            t.preview_ref(optics.0)
-        }
-    }
-
-    impl<Pm, Image: ?Sized, T, E> PrismMut<optics::Err<Pm>, Image> for Result<T, E>
-    where
-        E: PrismMut<Pm, Image>,
-    {
-        fn preview_mut(&mut self, optics: optics::Err<Pm>) -> Option<&mut Image> {
-            let t = self.as_mut().err()?;
-            t.preview_mut(optics.0)
-        }
-    }
-
-    impl<Pm, Image, T, E> Prism<optics::Err<Pm>, Image> for Result<T, E>
-    where
-        E: Prism<Pm, Image>,
-    {
-        fn preview(self, optics: optics::Err<Pm>) -> Option<Image>
-        where
-            Self: Sized,
-        {
-            let t = self.err()?;
-            t.preview(optics.0)
-        }
-    }
-}
-
-mod impl_some {
-    /***********************************************************
-     * impl for Option
-     ************************************************************/
-
-    use crate::*;
-
-    impl<Rv, Image, T> Review<optics::Some<Rv>, Image> for Option<T>
-    where
-        T: Review<Rv, Image>,
-    {
-        fn review(optics: optics::Some<Rv>, from: Image) -> Self {
-            Some(Review::review(optics.0, from))
-        }
-    }
-
-    impl<Tr, Image: ?Sized, T> TraversalRef<optics::Some<Tr>, Image> for Option<T>
-    where
-        T: TraversalRef<Tr, Image>,
-    {
-        fn traverse_ref(&self, optics: optics::Some<Tr>) -> Vec<&Image> {
-            match self {
-                Some(t) => t.traverse_ref(optics.0),
-                _ => vec![],
-            }
-        }
-    }
-
-    impl<Tr, Image: ?Sized, T> TraversalMut<optics::Some<Tr>, Image> for Option<T>
-    where
-        T: TraversalMut<Tr, Image>,
-    {
-        fn traverse_mut(&mut self, optics: optics::Some<Tr>) -> Vec<&mut Image> {
-            match self {
-                Some(t) => t.traverse_mut(optics.0),
-                _ => vec![],
-            }
-        }
-    }
-
-    impl<Tr, Image, T> Traversal<optics::Some<Tr>, Image> for Option<T>
-    where
-        T: Traversal<Tr, Image>,
-    {
-        fn traverse(self, optics: optics::Some<Tr>) -> Vec<Image>
-        where
-            Self: Sized,
-        {
-            match self {
-                Some(t) => t.traverse(optics.0),
-                _ => vec![],
-            }
-        }
-    }
-
-    impl<Pm, Image: ?Sized, T> PrismRef<optics::Some<Pm>, Image> for Option<T>
-    where
-        T: PrismRef<Pm, Image>,
-    {
-        fn preview_ref(&self, optics: optics::Some<Pm>) -> Option<&Image> {
-            self.as_ref()?.preview_ref(optics.0)
-        }
-    }
-
-    impl<Pm, Image: ?Sized, T> PrismMut<optics::Some<Pm>, Image> for Option<T>
-    where
-        T: PrismMut<Pm, Image>,
-    {
-        fn preview_mut(&mut self, optics: optics::Some<Pm>) -> Option<&mut Image> {
-            self.as_mut()?.preview_mut(optics.0)
-        }
-    }
-
-    impl<Pm, Image, T> Prism<optics::Some<Pm>, Image> for Option<T>
-    where
-        T: Prism<Pm, Image>,
-    {
-        fn preview(self, optics: optics::Some<Pm>) -> Option<Image>
-        where
-            Self: Sized,
-        {
-            self?.preview(optics.0)
-        }
-    }
-
-    impl<Rv, Image, T> Review<optics::None<Rv>, Image> for Option<T> {
-        fn review(_optics: optics::None<Rv>, _from: Image) -> Self {
-            None
-        }
-    }
-}
+//
+// mod impl_result {
+//     /***********************************************************
+//      * impl for Result
+//      ************************************************************/
+//     use crate::*;
+//
+//     impl<Rv, Image, T, E> Review<optics::Ok<Rv>, Image> for Result<T, E>
+//     where
+//         T: Review<Rv, Image>,
+//     {
+//         fn review(optics: optics::Ok<Rv>, from: Image) -> Self {
+//             Result::Ok(Review::review(optics.0, from))
+//         }
+//     }
+//
+//     impl<Tr, Image: ?Sized, T, E> TraversalRef<optics::Ok<Tr>, Image> for Result<T, E>
+//     where
+//         T: TraversalRef<Tr, Image>,
+//     {
+//         fn traverse_ref(&self, optics: optics::Ok<Tr>) -> Vec<&Image> {
+//             match self {
+//                 Result::Ok(t) => t.traverse_ref(optics.0),
+//                 _ => vec![],
+//             }
+//         }
+//     }
+//
+//     impl<Tr, Image: ?Sized, T, E> TraversalMut<optics::Ok<Tr>, Image> for Result<T, E>
+//     where
+//         T: TraversalMut<Tr, Image>,
+//     {
+//         fn traverse_mut(&mut self, optics: optics::Ok<Tr>) -> Vec<&mut Image> {
+//             match self {
+//                 Result::Ok(t) => t.traverse_mut(optics.0),
+//                 _ => vec![],
+//             }
+//         }
+//     }
+//
+//     impl<Tr, Image, T, E> Traversal<optics::Ok<Tr>, Image> for Result<T, E>
+//     where
+//         T: Traversal<Tr, Image>,
+//     {
+//         fn traverse(self, optics: optics::Ok<Tr>) -> Vec<Image>
+//         where
+//             Self: Sized,
+//         {
+//             match self {
+//                 Result::Ok(t) => t.traverse(optics.0),
+//                 _ => vec![],
+//             }
+//         }
+//     }
+//
+//     impl<Tr, Image, T, E> Traversal<optics::Err<Tr>, Image> for Result<T, E>
+//     where
+//         E: Traversal<Tr, Image>,
+//     {
+//         fn traverse(self, optics: optics::Err<Tr>) -> Vec<Image>
+//         where
+//             Self: Sized,
+//         {
+//             match self {
+//                 Result::Err(e) => e.traverse(optics.0),
+//                 _ => vec![],
+//             }
+//         }
+//     }
+//
+//     impl<Tr, Image: ?Sized, T, E> TraversalRef<optics::Err<Tr>, Image> for Result<T, E>
+//     where
+//         E: TraversalRef<Tr, Image>,
+//     {
+//         fn traverse_ref(&self, optics: optics::Err<Tr>) -> Vec<&Image> {
+//             match self {
+//                 Result::Err(e) => e.traverse_ref(optics.0),
+//                 _ => vec![],
+//             }
+//         }
+//     }
+//
+//     impl<Tr, Image: ?Sized, T, E> TraversalMut<optics::Err<Tr>, Image> for Result<T, E>
+//     where
+//         E: TraversalMut<Tr, Image>,
+//     {
+//         fn traverse_mut(&mut self, optics: optics::Err<Tr>) -> Vec<&mut Image> {
+//             match self {
+//                 Result::Err(e) => e.traverse_mut(optics.0),
+//                 _ => vec![],
+//             }
+//         }
+//     }
+//
+//     impl<Pm, Image: ?Sized, T, E> PrismRef<optics::Ok<Pm>, Image> for Result<T, E>
+//     where
+//         T: PrismRef<Pm, Image>,
+//     {
+//         fn preview_ref(&self, optics: optics::Ok<Pm>) -> Option<&Image> {
+//             let t = self.as_ref().ok()?;
+//             t.preview_ref(optics.0)
+//         }
+//     }
+//
+//     impl<Pm, Image: ?Sized, T, E> PrismMut<optics::Ok<Pm>, Image> for Result<T, E>
+//     where
+//         T: PrismMut<Pm, Image>,
+//     {
+//         fn preview_mut(&mut self, optics: optics::Ok<Pm>) -> Option<&mut Image> {
+//             let t = self.as_mut().ok()?;
+//             t.preview_mut(optics.0)
+//         }
+//     }
+//
+//     impl<Pm, Image, T, E> Prism<optics::Ok<Pm>, Image> for Result<T, E>
+//     where
+//         T: Prism<Pm, Image>,
+//     {
+//         fn preview(self, optics: optics::Ok<Pm>) -> Option<Image>
+//         where
+//             Self: Sized,
+//         {
+//             let t = self.ok()?;
+//             t.preview(optics.0)
+//         }
+//     }
+//
+//     impl<Rv, Image, T, E> Review<optics::Err<Rv>, Image> for Result<T, E>
+//     where
+//         E: Review<Rv, Image>,
+//     {
+//         fn review(optics: optics::Err<Rv>, from: Image) -> Self {
+//             Result::Err(Review::review(optics.0, from))
+//         }
+//     }
+//
+//     impl<Pm, Image: ?Sized, T, E> PrismRef<optics::Err<Pm>, Image> for Result<T, E>
+//     where
+//         E: PrismRef<Pm, Image>,
+//     {
+//         fn preview_ref(&self, optics: optics::Err<Pm>) -> Option<&Image> {
+//             let t = self.as_ref().err()?;
+//             t.preview_ref(optics.0)
+//         }
+//     }
+//
+//     impl<Pm, Image: ?Sized, T, E> PrismMut<optics::Err<Pm>, Image> for Result<T, E>
+//     where
+//         E: PrismMut<Pm, Image>,
+//     {
+//         fn preview_mut(&mut self, optics: optics::Err<Pm>) -> Option<&mut Image> {
+//             let t = self.as_mut().err()?;
+//             t.preview_mut(optics.0)
+//         }
+//     }
+//
+//     impl<Pm, Image, T, E> Prism<optics::Err<Pm>, Image> for Result<T, E>
+//     where
+//         E: Prism<Pm, Image>,
+//     {
+//         fn preview(self, optics: optics::Err<Pm>) -> Option<Image>
+//         where
+//             Self: Sized,
+//         {
+//             let t = self.err()?;
+//             t.preview(optics.0)
+//         }
+//     }
+// }
+//
+// mod impl_some {
+//     /***********************************************************
+//      * impl for Option
+//      ************************************************************/
+//
+//     use crate::*;
+//
+//     impl<Rv, Image, T> Review<optics::Some<Rv>, Image> for Option<T>
+//     where
+//         T: Review<Rv, Image>,
+//     {
+//         fn review(optics: optics::Some<Rv>, from: Image) -> Self {
+//             Some(Review::review(optics.0, from))
+//         }
+//     }
+//
+//     impl<Tr, Image: ?Sized, T> TraversalRef<optics::Some<Tr>, Image> for Option<T>
+//     where
+//         T: TraversalRef<Tr, Image>,
+//     {
+//         fn traverse_ref(&self, optics: optics::Some<Tr>) -> Vec<&Image> {
+//             match self {
+//                 Some(t) => t.traverse_ref(optics.0),
+//                 _ => vec![],
+//             }
+//         }
+//     }
+//
+//     impl<Tr, Image: ?Sized, T> TraversalMut<optics::Some<Tr>, Image> for Option<T>
+//     where
+//         T: TraversalMut<Tr, Image>,
+//     {
+//         fn traverse_mut(&mut self, optics: optics::Some<Tr>) -> Vec<&mut Image> {
+//             match self {
+//                 Some(t) => t.traverse_mut(optics.0),
+//                 _ => vec![],
+//             }
+//         }
+//     }
+//
+//     impl<Tr, Image, T> Traversal<optics::Some<Tr>, Image> for Option<T>
+//     where
+//         T: Traversal<Tr, Image>,
+//     {
+//         fn traverse(self, optics: optics::Some<Tr>) -> Vec<Image>
+//         where
+//             Self: Sized,
+//         {
+//             match self {
+//                 Some(t) => t.traverse(optics.0),
+//                 _ => vec![],
+//             }
+//         }
+//     }
+//
+//     impl<Pm, Image: ?Sized, T> PrismRef<optics::Some<Pm>, Image> for Option<T>
+//     where
+//         T: PrismRef<Pm, Image>,
+//     {
+//         fn preview_ref(&self, optics: optics::Some<Pm>) -> Option<&Image> {
+//             self.as_ref()?.preview_ref(optics.0)
+//         }
+//     }
+//
+//     impl<Pm, Image: ?Sized, T> PrismMut<optics::Some<Pm>, Image> for Option<T>
+//     where
+//         T: PrismMut<Pm, Image>,
+//     {
+//         fn preview_mut(&mut self, optics: optics::Some<Pm>) -> Option<&mut Image> {
+//             self.as_mut()?.preview_mut(optics.0)
+//         }
+//     }
+//
+//     impl<Pm, Image, T> Prism<optics::Some<Pm>, Image> for Option<T>
+//     where
+//         T: Prism<Pm, Image>,
+//     {
+//         fn preview(self, optics: optics::Some<Pm>) -> Option<Image>
+//         where
+//             Self: Sized,
+//         {
+//             self?.preview(optics.0)
+//         }
+//     }
+//
+//     impl<Rv, Image, T> Review<optics::None<Rv>, Image> for Option<T> {
+//         fn review(_optics: optics::None<Rv>, _from: Image) -> Self {
+//             None
+//         }
+//     }
+// }
 
 mod impl_tuples {
 
@@ -344,136 +344,31 @@ mod impl_tuples {
      * impl for tuple
      ************************************************************/
     use crate::*;
-
-    macro_rules! impl_tuple {
-        ({$($param:ident)*}, $field:tt, $optic:ident, $to:ident) => {
-            impl<Tr, Image: ?Sized, $($param,)*> TraversalRef<$optic<Tr>, Image> for ($($param,)*)
-            where
-                $to: TraversalRef<Tr, Image>,
-            {
-
-                fn traverse_ref(&self, optics: $optic<Tr>) -> Vec<&Image> {
-                    self.$field.traverse_ref(optics.0)
-                }
-            }
-
-            impl<Tr, Image: ?Sized, $($param,)*> TraversalMut<$optic<Tr>, Image> for ($($param,)*)
-            where
-                $to: TraversalMut<Tr, Image>,
-            {
-                fn traverse_mut(&mut self, optics: $optic<Tr>) -> Vec<&mut Image> {
-                    self.$field.traverse_mut(optics.0)
-                }
-            }
-
-            impl<Tr, Image, $($param,)*> Traversal<$optic<Tr>, Image> for ($($param,)*)
-            where
-                $to: Traversal<Tr, Image>,
-            {
-                fn traverse(self, optics: $optic<Tr>) -> Vec<Image>
-                where
-                    Self: Sized,
-                {
-                    self.$field.traverse(optics.0)
-                }
-            }
-
-            impl<Pm, Image: ?Sized, $($param,)*> PrismRef<$optic<Pm>, Image> for ($($param,)*)
-            where
-                $to: PrismRef<Pm, Image>,
-            {
-                fn preview_ref(&self, optics: $optic<Pm>) -> Option<&Image> {
-                    self.$field.preview_ref(optics.0)
-                }
-            }
-
-            impl<Pm, Image: ?Sized, $($param,)*> PrismMut<$optic<Pm>, Image> for ($($param,)*)
-            where
-                $to: PrismMut<Pm, Image>,
-            {
-                fn preview_mut(&mut self, optics: $optic<Pm>) -> Option<&mut Image> {
-                    self.$field.preview_mut(optics.0)
-                }
-            }
-
-            impl<Pm, Image, $($param,)*> Prism<$optic<Pm>, Image> for ($($param,)*)
-            where
-                $to: Prism<Pm, Image>,
-            {
-                fn preview(self, optics: $optic<Pm>) -> Option<Image>
-                where
-                    Self: Sized,
-                {
-                    self.$field.preview(optics.0)
-                }
-            }
-
-            impl<Ls, Image: ?Sized, $($param,)*> LensRef<$optic<Ls>, Image> for ($($param,)*)
-            where
-                $to: LensRef<Ls, Image>,
-            {
-                fn view_ref(&self, optics: $optic<Ls>) -> &Image {
-                    self.$field.view_ref(optics.0)
-                }
-            }
-
-            impl<Ls, Image: ?Sized, $($param,)*> LensMut<$optic<Ls>, Image> for ($($param,)*)
-            where
-                $to: LensMut<Ls, Image>,
-            {
-                fn view_mut(&mut self, optics: $optic<Ls>) -> &mut Image {
-                    self.$field.view_mut(optics.0)
-                }
-            }
-
-            impl<Ls, Image, $($param,)*> Lens<$optic<Ls>, Image> for ($($param,)*)
-            where
-                $to: Lens<Ls, Image>,
-            {
-                fn view(self, optics: $optic<Ls>) -> Image
-                where
-                    Self: Sized,
-                {
-                    self.$field.view(optics.0)
-                }
-            }
+    use lens_rs_derive::derive_lens_for_tuple;
+    mod lens_rs {
+        pub use crate::*;
+        pub mod optics {
+            pub use lens_rs_generator::*;
         }
     }
 
-    impl_tuple!({ A }, 0, _0, A);
-
-    impl_tuple!({A B}, 0, _0, A);
-    impl_tuple!({A B}, 1, _1, B);
-
-    impl_tuple!({A B C}, 0, _0, A);
-    impl_tuple!({A B C}, 1, _1, B);
-    impl_tuple!({A B C}, 2, _2, C);
-
-    impl_tuple!({A B C D}, 0, _0, A);
-    impl_tuple!({A B C D}, 1, _1, B);
-    impl_tuple!({A B C D}, 2, _2, C);
-    impl_tuple!({A B C D}, 3, _3, D);
-
-    impl_tuple!({A B C D E}, 0, _0, A);
-    impl_tuple!({A B C D E}, 1, _1, B);
-    impl_tuple!({A B C D E}, 2, _2, C);
-    impl_tuple!({A B C D E}, 3, _3, D);
-    impl_tuple!({A B C D E}, 4, _4, E);
-
-    impl_tuple!({A B C D E F}, 0, _0, A);
-    impl_tuple!({A B C D E F}, 1, _1, B);
-    impl_tuple!({A B C D E F}, 2, _2, C);
-    impl_tuple!({A B C D E F}, 3, _3, D);
-    impl_tuple!({A B C D E F}, 4, _4, E);
-    impl_tuple!({A B C D E F}, 5, _5, F);
-
-    impl_tuple!({A B C D E F G}, 0, _0, A);
-    impl_tuple!({A B C D E F G}, 1, _1, B);
-    impl_tuple!({A B C D E F G}, 2, _2, C);
-    impl_tuple!({A B C D E F G}, 3, _3, D);
-    impl_tuple!({A B C D E F G}, 4, _4, E);
-    impl_tuple!({A B C D E F G}, 5, _5, F);
-    impl_tuple!({A B C D E F G}, 6, _6, G);
+    derive_lens_for_tuple!((A,));
+    derive_lens_for_tuple!((A, B));
+    derive_lens_for_tuple!((A, B, C));
+    derive_lens_for_tuple!((A, B, C, D));
+    derive_lens_for_tuple!((A, B, C, D, E));
+    derive_lens_for_tuple!((A, B, C, D, E, F));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G, H));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G, H, I));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G, H, I, J));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G, H, I, J, K));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G, H, I, J, K, L));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G, H, I, J, K, L, M));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G, H, I, J, K, L, M, N));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G, H, I, J, K, L, M, N, O));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P));
+    derive_lens_for_tuple!((A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q));
 
     impl<Rv, Image, A> Review<_0<Rv>, Image> for (A,)
     where
@@ -535,6 +430,16 @@ mod impl_tuples {
     impl_both!(<A> (A, A, A, A, A), 0, 1, 2, 3, 4);
     impl_both!(<A> (A, A, A, A, A, A), 0, 1, 2, 3, 4, 5);
     impl_both!(<A> (A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6);
+    impl_both!(<A> (A, A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6, 7);
+    impl_both!(<A> (A, A, A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6, 7, 8);
+    impl_both!(<A> (A, A, A, A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    impl_both!(<A> (A, A, A, A, A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    impl_both!(<A> (A, A, A, A, A, A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+    impl_both!(<A> (A, A, A, A, A, A, A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+    impl_both!(<A> (A, A, A, A, A, A, A, A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+    impl_both!(<A> (A, A, A, A, A, A, A, A, A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
+    impl_both!(<A> (A, A, A, A, A, A, A, A, A, A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+    impl_both!(<A> (A, A, A, A, A, A, A, A, A, A, A, A, A, A, A, A, A), 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
 
     impl<Pm: Clone, Image: ?Sized, A> PrismRef<_both<Pm>, Image> for (A,)
     where
@@ -967,131 +872,47 @@ mod impl_ix {
     }
 }
 
-mod impl_empty {
-    use crate::*;
-
-    macro_rules! impl_empty {
-        (<$($life:lifetime),* $($gen:ident),* $(const $c:ident : $t:ident)?> $optic:ident for $ty:ty) => {
-            impl<$($life),* Tr, Image: ?Sized, $($gen),* $(const $c: $t)?> TraversalRef<optics::$optic<Tr>, Image> for $ty {
-                fn traverse_ref(&self, _optics: optics::$optic<Tr>) -> Vec<&Image> {
-                    vec![]
-                }
-            }
-
-            impl<$($life),* Tr, Image: ?Sized, $($gen),* $(const $c: $t)?> TraversalMut<optics::$optic<Tr>, Image> for $ty {
-                fn traverse_mut(&mut self, _optics: optics::$optic<Tr>) -> Vec<&mut Image> {
-                    vec![]
-                }
-            }
-
-            impl<$($life),* Tr, Image, $($gen),* $(const $c: $t)?> Traversal<optics::$optic<Tr>, Image> for $ty {
-                fn traverse(self, _optics: optics::$optic<Tr>) -> Vec<Image>
-                where
-                    Self: Sized,
-                {
-                    vec![]
-                }
-            }
-
-            impl<$($life),* Pm, Image: ?Sized, $($gen),* $(const $c: $t)?> PrismRef<optics::$optic<Pm>, Image> for $ty {
-                fn preview_ref(&self, _optics: optics::$optic<Pm>) -> Option<&Image> {
-                    None
-                }
-            }
-
-            impl<$($life),* Pm, Image: ?Sized, $($gen),* $(const $c: $t)?> PrismMut<optics::$optic<Pm>, Image> for $ty {
-                fn preview_mut(&mut self, _optics: optics::$optic<Pm>) -> Option<&mut Image> {
-                    None
-                }
-            }
-
-            impl<$($life),* Pm, Image, $($gen),* $(const $c: $t)?> Prism<optics::$optic<Pm>, Image> for $ty {
-                fn preview(self, _optics: optics::$optic<Pm>) -> Option<Image>
-                where
-                    Self: Sized,
-                {
-                    None
-                }
-            }
+mod impl_builtin {
+    mod lens_rs {
+        pub use crate::*;
+        pub mod optics {
+            pub use lens_rs_generator::*;
         }
     }
 
-    impl_empty!(<T> None for Option<T>);
-    impl_empty!(<T> Ok   for Option<T>);
-    impl_empty!(<T> Err  for Option<T>);
-    impl_empty!(<T> _0   for Option<T>);
-    impl_empty!(<T> _1   for Option<T>);
-    impl_empty!(<T> _2   for Option<T>);
-    impl_empty!(<T> _3   for Option<T>);
-    impl_empty!(<T> _4   for Option<T>);
-    impl_empty!(<T> _5   for Option<T>);
-    impl_empty!(<T> _6   for Option<T>);
+    lens_rs_derive::derive_review_for_builtin! {
+        enum Option<T> {
+            #[optic]
+            Some(T),
+            #[optic]
+            None,
+        }
+    }
 
-    impl_empty!(<T, E> None for Result<T, E>);
-    impl_empty!(<T, E> Some for Result<T, E>);
-    impl_empty!(<T, E> _0   for Result<T, E>);
-    impl_empty!(<T, E> _1   for Result<T, E>);
-    impl_empty!(<T, E> _2   for Result<T, E>);
-    impl_empty!(<T, E> _3   for Result<T, E>);
-    impl_empty!(<T, E> _4   for Result<T, E>);
-    impl_empty!(<T, E> _5   for Result<T, E>);
-    impl_empty!(<T, E> _6   for Result<T, E>);
+    lens_rs_derive::derive_prism_for_builtin! {
+        enum Option<T> {
+            #[optic]
+            Some(T),
+            #[optic]
+            None,
+        }
+    }
 
-    impl_empty!(<A> Ok   for (A,));
-    impl_empty!(<A> Err  for (A,));
-    impl_empty!(<A> Some for (A,));
-    impl_empty!(<A> None for (A,));
-    impl_empty!(<A> _1   for (A,));
-    impl_empty!(<A> _2   for (A,));
-    impl_empty!(<A> _3   for (A,));
-    impl_empty!(<A> _4   for (A,));
-    impl_empty!(<A> _5   for (A,));
-    impl_empty!(<A> _6   for (A,));
+    lens_rs_derive::derive_review_for_builtin! {
+        enum Result<T, E> {
+            #[optic]
+            Ok(T),
+            #[optic]
+            Err(E),
+        }
+    }
 
-    impl_empty!(<A, B> Ok   for (A, B));
-    impl_empty!(<A, B> Err  for (A, B));
-    impl_empty!(<A, B> Some for (A, B));
-    impl_empty!(<A, B> None for (A, B));
-    impl_empty!(<A, B> _2   for (A, B));
-    impl_empty!(<A, B> _3   for (A, B));
-    impl_empty!(<A, B> _4   for (A, B));
-    impl_empty!(<A, B> _5   for (A, B));
-    impl_empty!(<A, B> _6   for (A, B));
-
-    impl_empty!(<A, B, C> Ok   for (A, B, C));
-    impl_empty!(<A, B, C> Err  for (A, B, C));
-    impl_empty!(<A, B, C> Some for (A, B, C));
-    impl_empty!(<A, B, C> None for (A, B, C));
-    impl_empty!(<A, B, C> _3   for (A, B, C));
-    impl_empty!(<A, B, C> _4   for (A, B, C));
-    impl_empty!(<A, B, C> _5   for (A, B, C));
-    impl_empty!(<A, B, C> _6   for (A, B, C));
-
-    impl_empty!(<A, B, C, D> Ok   for (A, B, C, D));
-    impl_empty!(<A, B, C, D> Err  for (A, B, C, D));
-    impl_empty!(<A, B, C, D> Some for (A, B, C, D));
-    impl_empty!(<A, B, C, D> None for (A, B, C, D));
-    impl_empty!(<A, B, C, D> _4   for (A, B, C, D));
-    impl_empty!(<A, B, C, D> _5   for (A, B, C, D));
-    impl_empty!(<A, B, C, D> _6   for (A, B, C, D));
-
-    impl_empty!(<A, B, C, D, E> Ok   for (A, B, C, D, E));
-    impl_empty!(<A, B, C, D, E> Err  for (A, B, C, D, E));
-    impl_empty!(<A, B, C, D, E> Some for (A, B, C, D, E));
-    impl_empty!(<A, B, C, D, E> None for (A, B, C, D, E));
-    impl_empty!(<A, B, C, D, E> _5   for (A, B, C, D, E));
-    impl_empty!(<A, B, C, D, E> _6   for (A, B, C, D, E));
-
-    impl_empty!(<A, B, C, D, E, F> Ok   for (A, B, C, D, E, F));
-    impl_empty!(<A, B, C, D, E, F> Err  for (A, B, C, D, E, F));
-    impl_empty!(<A, B, C, D, E, F> Some for (A, B, C, D, E, F));
-    impl_empty!(<A, B, C, D, E, F> None for (A, B, C, D, E, F));
-    impl_empty!(<A, B, C, D, E, F> _6   for (A, B, C, D, E, F));
-
-    impl_empty!(<A, B, C, D, E, F, G> Ok   for (A, B, C, D, E, F, G));
-    impl_empty!(<A, B, C, D, E, F, G> Err  for (A, B, C, D, E, F, G));
-    impl_empty!(<A, B, C, D, E, F, G> Some for (A, B, C, D, E, F, G));
-    impl_empty!(<A, B, C, D, E, F, G> None for (A, B, C, D, E, F, G));
+    lens_rs_derive::derive_prism_for_builtin! {
+        enum Result<T, E> {
+            #[optic]
+            Ok(T),
+            #[optic]
+            Err(E),
+        }
+    }
 }
-
-// include!(concat!(env!("OUT_DIR"), "/optics.rs"));

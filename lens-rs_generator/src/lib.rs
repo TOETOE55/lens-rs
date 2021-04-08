@@ -33,6 +33,26 @@ pub struct _4<Optic>(pub Optic);
 pub struct _5<Optic>(pub Optic);
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct _6<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _7<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _8<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _9<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _10<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _11<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _12<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _13<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _14<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _15<Optic>(pub Optic);
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct _16<Optic>(pub Optic);
 
 /// to traverse all fields of tuples(0~6), implemented `Traversal`
 ///
@@ -119,7 +139,8 @@ pub fn all_optics() -> Vec<syn::Ident> {
     collector.visit_file(&syntax);
     optics.extend(
         vec![
-            "Ok", "Err", "Some", "None", "_0", "_1", "_2", "_3", "_4", "_5", "_6",
+            "Ok", "Err", "Some", "None", "_0", "_1", "_2", "_3", "_4", "_5", "_6", "_7", "_8",
+            "_9", "_10", "_11", "_12", "_13", "_14", "_15", "_16",
         ]
         .into_iter()
         .map(|name| syn::Ident::new(name, Span::call_site())),
