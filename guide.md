@@ -76,7 +76,7 @@ the derive-macro
 * `Lens` is used to impl `Lens` for optics
 
 ```rust
-#[derive(Copy, Clone, Debug, Optic, Review, Prism)]
+#[derive(Copy, Clone, Debug, Review, Prism)]
 enum Either<L, R> {
     #[optic]
     Left(L), // generate optics::Left
@@ -88,7 +88,7 @@ enum Either<L, R> {
 struct Tuple<A, B>(#[optic] A, #[optic] B); 
 // use optics::_0 or optics::_1 to access it
 
-#[derive(Copy, Clone, Debug, Optic, Lens)]
+#[derive(Copy, Clone, Debug, Lens)]
 struct Foo<A, B> {
     #[optic]
     a: A, // generate optics::a
@@ -96,7 +96,7 @@ struct Foo<A, B> {
     b: B, // generate optics::b
 }
 
-#[derive(Clone, Debug, Optic, Lens)]
+#[derive(Clone, Debug, Lens)]
 struct Bar {
     #[optic]
     a: String, // generate optics::a, same as above
@@ -111,7 +111,7 @@ the attribute
 * `#[optic]` is to mark a field/variant which its optic impl `Lens`/`Prism` trait
 
 ```rust
-#[derive(Debug, Optic, Lens)]
+#[derive(Debug, Lens)]
 struct Baz<'a, A, B, C>{
     #[optic(ref)] 
     a: &'a A,     // can only take the immutable ref by optics::a
