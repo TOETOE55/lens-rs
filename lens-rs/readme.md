@@ -40,13 +40,13 @@ derive lens for data types
 ```rust
 use lens_rs::*;
 
-#[derive(Optic, Review, Prism, Debug)]
+#[derive(Review, Prism, Debug)]
 enum AnEnum<T> {
     A(T, i32),
     #[optic] B(T),
 }
 
-#[derive(Optic, Lens, Debug)]
+#[derive(Lens, Debug)]
 struct Foo {
     #[optic] a: i32,
     #[optic] b: i32,
