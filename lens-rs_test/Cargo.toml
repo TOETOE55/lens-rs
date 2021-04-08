@@ -8,7 +8,12 @@ edition = "2018"
 
 [dependencies]
 lens-rs = { path = "../lens-rs" }
+structx = { version = "0.1", optional = true }
 
 
 [package.metadata.inwelling]
 lens-rs_generator = true
+structx = true
+
+[features]
+test_structx = [ "structx", "lens-rs/structx" ]
