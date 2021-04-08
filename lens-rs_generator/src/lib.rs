@@ -129,6 +129,7 @@ impl<'a> Visit<'_> for OpticDefinitionsCollector<'a> {
     }
 }
 
+/// return all generated optics
 pub fn all_optics() -> Vec<syn::Ident> {
     let contents = include_str!(concat!(env!("OUT_DIR"), "/optics.rs"));
     let syntax =

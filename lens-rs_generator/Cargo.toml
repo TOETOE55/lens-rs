@@ -3,6 +3,12 @@ name = "lens-rs_generator"
 version = "0.1.0"
 authors = ["Xyzt Toe <584605539@qq.com>"]
 edition = "2018"
+license = "MIT/Apache-2.0"
+readme = "readme.md"
+categories = [ "rust-patterns" ]
+keywords = [ "pattern", "traversing", "lens"]
+repository = "https://github.com/TOETOE55/lens-rs"
+description = "generating optics for source files"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
