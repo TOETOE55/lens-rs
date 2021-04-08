@@ -25,6 +25,15 @@ fn main() {
         }
     }
 
+    #[cfg(feature = "structx")]
+    {
+        let out_path = PathBuf::from(env::var("OUT_DIR").expect("$OUT_DIR should exist."));
+        let contents = String::from_utf8(fs::read(out_path.join("bindings.rs")).unwrap()).unwrap();
+        let syntax = syn::parse_file(&contents)
+            .expect(".rs files should contain valid Rust source code.");
+        optics_collector.visit_file(&syntax);
+    }
+
     let mut output = String::new();
     for optic_name in optics_set {
         if let "Some" | "None" | "Ok" | "Err" = &*optic_name {
