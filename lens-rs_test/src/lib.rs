@@ -207,6 +207,6 @@ mod tests {
         assert_eq!(*s2.view_ref(optics!(height)), 3);
 
         assert_eq!(s1.preview_ref(optics!(width)), Some(&2));
-        assert_eq!(s2.preview_ref(optics!(width)), None);
+        assert_eq!(s2.preview_ref(optics!(width)), Option::<&i32>::None);
     }
 }
