@@ -69,6 +69,11 @@ mod tests {
     #[derive(Copy, Clone, Debug, Lens)]
     struct Empty;
 
+    #[derive(Clone, Debug, Lens)]
+    struct Ambiguous {
+        #[optic] all_optics: String,
+    }
+
     // T may have i32
     fn may_have_i32<T: PrismRef<Pm, i32>, Pm>(t: &T, pm: Pm) -> Option<i32> {
         t.preview_ref(pm).map(|x| *x)

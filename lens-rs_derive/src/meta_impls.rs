@@ -578,7 +578,7 @@ fn impl_traversal_ref4variant(
         where
             #constraints
         {
-            fn traverse_ref(&self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<&#image_param> {
+            #[inline] fn traverse_ref(&self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<&#image_param> {
                 use #ty_name::*;
                 match self {
                     #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_ref(x, optics.0),
@@ -625,7 +625,7 @@ fn impl_prism_ref4variant(
         where
             #constraints
         {
-            fn preview_ref(&self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<&#image_param> {
+            #[inline] fn preview_ref(&self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<&#image_param> {
                 use #ty_name::*;
                 match self {
                     #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_ref(x, optics.0),
@@ -672,7 +672,7 @@ fn impl_traversal_mut4variant(
         where
             #constraints
         {
-            fn traverse_mut(&mut self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<&mut #image_param> {
+            #[inline] fn traverse_mut(&mut self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<&mut #image_param> {
                 use #ty_name::*;
                 match self {
                     #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_mut(x, optics.0),
@@ -719,7 +719,7 @@ fn impl_prism_mut4variant(
         where
             #constraints
         {
-            fn preview_mut(&mut self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<&mut #image_param> {
+            #[inline] fn preview_mut(&mut self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<&mut #image_param> {
                 use #ty_name::*;
                 match self {
                     #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_mut(x, optics.0),
@@ -760,7 +760,7 @@ fn impl_traversal4variant(
         where
             #constraints
         {
-            fn traverse(self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<#image_param>
+            #[inline] fn traverse(self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<#image_param>
             where
                 Self: Sized,
             {
@@ -804,7 +804,7 @@ fn impl_prism4variant(
         where
             #constraints
         {
-            fn preview(self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<#image_param>
+            #[inline] fn preview(self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<#image_param>
             where
                 Self: Sized,
             {
@@ -854,7 +854,7 @@ fn impl_traversal_ref4field(
         where
             #constraints
         {
-            fn traverse_ref(&self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<&#image_param> {
+            #[inline] fn traverse_ref(&self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<&#image_param> {
                 <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_ref(&self.#field_name, optics.0)
             }
         }
@@ -897,7 +897,7 @@ fn impl_prism_ref4field(
         where
             #constraints
         {
-            fn preview_ref(&self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<&#image_param> {
+            #[inline] fn preview_ref(&self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<&#image_param> {
                 <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_ref(&self.#field_name, optics.0)
             }
         }
@@ -940,7 +940,7 @@ fn impl_lens_ref4field(
         where
             #constraints
         {
-            fn view_ref(&self, optics: lens_rs::optics::#field_name<#lens_param>) -> & #image_param {
+            #[inline] fn view_ref(&self, optics: lens_rs::optics::#field_name<#lens_param>) -> & #image_param {
                 <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view_ref(&self.#field_name, optics.0)
             }
         }
@@ -983,7 +983,7 @@ fn impl_traversal_mut4field(
         where
             #constraints
         {
-            fn traverse_mut(&mut self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<&mut #image_param> {
+            #[inline] fn traverse_mut(&mut self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<&mut #image_param> {
                 <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_mut(&mut self.#field_name, optics.0)
             }
         }
@@ -1026,7 +1026,7 @@ fn impl_prism_mut4field(
         where
             #constraints
         {
-            fn preview_mut(&mut self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<&mut #image_param> {
+            #[inline] fn preview_mut(&mut self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<&mut #image_param> {
                 <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_mut(&mut self.#field_name, optics.0)
             }
         }
@@ -1069,7 +1069,7 @@ fn impl_lens_mut4field(
         where
             #constraints
         {
-            fn view_mut(&mut self, optics: lens_rs::optics::#field_name<#lens_param>) -> &mut #image_param {
+            #[inline] fn view_mut(&mut self, optics: lens_rs::optics::#field_name<#lens_param>) -> &mut #image_param {
                 <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view_mut(&mut self.#field_name, optics.0)
             }
         }
@@ -1106,7 +1106,7 @@ fn impl_traversal4field(
         where
             #constraints
         {
-            fn traverse(self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<#image_param>
+            #[inline] fn traverse(self, optics: lens_rs::optics::#field_name<#traversal_param>) -> Vec<#image_param>
             where
                 Self: Sized,
             {
@@ -1146,7 +1146,7 @@ fn impl_prism4field(
         where
             #constraints
         {
-            fn preview(self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<#image_param>
+            #[inline] fn preview(self, optics: lens_rs::optics::#field_name<#prism_param>) -> Option<#image_param>
             where
                 Self: Sized,
             {
@@ -1186,7 +1186,7 @@ fn impl_lens4field(
         where
             #constraints
         {
-            fn view(self, optics: lens_rs::optics::#field_name<#prism_param>) -> #image_param
+            #[inline] fn view(self, optics: lens_rs::optics::#field_name<#prism_param>) -> #image_param
             where
                 Self: Sized,
             {
@@ -1233,7 +1233,7 @@ fn impl_traversal_ref4index(
         where
             #constraints
         {
-            fn traverse_ref(&self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&#image_param> {
+            #[inline] fn traverse_ref(&self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&#image_param> {
                 <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_ref(&self.#field_name, optics.0)
             }
         }
@@ -1277,7 +1277,7 @@ fn impl_prism_ref4index(
         where
             #constraints
         {
-            fn preview_ref(&self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&#image_param> {
+            #[inline] fn preview_ref(&self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&#image_param> {
                 <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_ref(&self.#field_name, optics.0)
             }
         }
@@ -1321,7 +1321,7 @@ fn impl_lens_ref4index(
         where
             #constraints
         {
-            fn view_ref(&self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &#image_param {
+            #[inline] fn view_ref(&self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &#image_param {
                 <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view_ref(&self.#field_name, optics.0)
             }
         }
@@ -1365,7 +1365,7 @@ fn impl_traversal_mut4index(
         where
             #constraints
         {
-            fn traverse_mut(&mut self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&mut #image_param> {
+            #[inline] fn traverse_mut(&mut self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&mut #image_param> {
                 <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_mut(&mut self.#field_name, optics.0)
             }
         }
@@ -1409,7 +1409,7 @@ fn impl_prism_mut4index(
         where
             #constraints
         {
-            fn preview_mut(&mut self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&mut #image_param> {
+            #[inline] fn preview_mut(&mut self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&mut #image_param> {
                 <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_mut(&mut self.#field_name, optics.0)
             }
         }
@@ -1453,7 +1453,7 @@ fn impl_lens_mut4index(
         where
             #constraints
         {
-            fn view_mut(&mut self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &mut #image_param {
+            #[inline] fn view_mut(&mut self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &mut #image_param {
                 <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view_mut(&mut self.#field_name, optics.0)
             }
         }
@@ -1491,7 +1491,7 @@ fn impl_traversal4index(
         where
             #constraints
         {
-            fn traverse(self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<#image_param>
+            #[inline] fn traverse(self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<#image_param>
             where
                 Self: Sized,
             {
@@ -1532,7 +1532,7 @@ fn impl_prism4index(
         where
             #constraints
         {
-            fn preview(self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<#image_param>
+            #[inline] fn preview(self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<#image_param>
             where
                 Self: Sized,
             {
@@ -1573,7 +1573,7 @@ fn impl_lens4index(
         where
             #constraints
         {
-            fn view(self, optics: lens_rs::optics::#optics_name<#lens_param>) -> #image_param
+            #[inline] fn view(self, optics: lens_rs::optics::#optics_name<#lens_param>) -> #image_param
             where
                 Self: Sized,
             {
@@ -1608,7 +1608,7 @@ pub fn impl_empty(
             #constraints
 
         {
-            fn traverse_ref(&self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<& #image_param> {
+            #[inline] fn traverse_ref(&self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<& #image_param> {
                 vec![]
             }
         }
@@ -1619,7 +1619,7 @@ pub fn impl_empty(
             #constraints
 
         {
-            fn traverse_mut(&mut self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<&mut #image_param> {
+            #[inline] fn traverse_mut(&mut self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<&mut #image_param> {
                 vec![]
             }
         }
@@ -1628,7 +1628,7 @@ pub fn impl_empty(
         where
             #constraints
         {
-            fn traverse(self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<#image_param>
+            #[inline] fn traverse(self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<#image_param>
             where
                 Self: Sized,
             {
@@ -1641,7 +1641,7 @@ pub fn impl_empty(
             #image_param: ?Sized,
             #constraints
         {
-            fn preview_ref(&self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<& #image_param> {
+            #[inline] fn preview_ref(&self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<& #image_param> {
                 None
             }
         }
@@ -1651,7 +1651,7 @@ pub fn impl_empty(
             #image_param: ?Sized,
             #constraints
         {
-            fn preview_mut(&mut self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<&mut #image_param> {
+            #[inline] fn preview_mut(&mut self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<&mut #image_param> {
                 None
             }
         }
@@ -1660,7 +1660,7 @@ pub fn impl_empty(
         where
             #constraints
         {
-            fn preview(self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<#image_param>
+            #[inline] fn preview(self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<#image_param>
             where
                 Self: Sized,
             {
@@ -1831,7 +1831,7 @@ fn impl_traversal_ref4tuple(
             #image_param: ?Sized,
             #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
         {
-            fn traverse_ref(&self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&#image_param> {
+            #[inline] fn traverse_ref(&self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&#image_param> {
                 <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_ref(&self.#field_name, optics.0)
             }
         }
@@ -1856,7 +1856,7 @@ fn impl_prism_ref4tuple(
             #image_param: ?Sized,
             #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
         {
-            fn preview_ref(&self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&#image_param> {
+            #[inline] fn preview_ref(&self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&#image_param> {
                 <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_ref(&self.#field_name, optics.0)
             }
         }
@@ -1881,7 +1881,7 @@ fn impl_lens_ref4tuple(
             #image_param: ?Sized,
             #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
         {
-            fn view_ref(&self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &#image_param {
+            #[inline] fn view_ref(&self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &#image_param {
                 <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view_ref(&self.#field_name, optics.0)
             }
         }
@@ -1906,7 +1906,7 @@ fn impl_traversal_mut4tuple(
             #image_param: ?Sized,
             #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
         {
-            fn traverse_mut(&mut self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&mut #image_param> {
+            #[inline] fn traverse_mut(&mut self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<&mut #image_param> {
                 <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_mut(&mut self.#field_name, optics.0)
             }
         }
@@ -1931,7 +1931,7 @@ fn impl_prism_mut4tuple(
             #image_param: ?Sized,
             #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
         {
-            fn preview_mut(&mut self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&mut #image_param> {
+            #[inline] fn preview_mut(&mut self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<&mut #image_param> {
                 <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_mut(&mut self.#field_name, optics.0)
             }
         }
@@ -1956,7 +1956,7 @@ fn impl_lens_mut4tuple(
             #image_param: ?Sized,
             #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
         {
-            fn view_mut(&mut self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &mut #image_param {
+            #[inline] fn view_mut(&mut self, optics: lens_rs::optics::#optics_name<#lens_param>) -> &mut #image_param {
                 <#field_ty as lens_rs::#optics_trait<#lens_param, #image_param>>::view_mut(&mut self.#field_name, optics.0)
             }
         }
@@ -1980,7 +1980,7 @@ fn impl_traversal4tuple(
         where
             #field_ty: lens_rs::#optics_trait<#traversal_param, #image_param>
         {
-            fn traverse(self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<#image_param>
+            #[inline] fn traverse(self, optics: lens_rs::optics::#optics_name<#traversal_param>) -> Vec<#image_param>
             where
                 Self: Sized,
             {
@@ -2007,7 +2007,7 @@ fn impl_prism4tuple(
         where
             #field_ty: lens_rs::#optics_trait<#prism_param, #image_param>
         {
-            fn preview(self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<#image_param>
+            #[inline] fn preview(self, optics: lens_rs::optics::#optics_name<#prism_param>) -> Option<#image_param>
             where
                 Self: Sized,
             {
@@ -2034,7 +2034,7 @@ fn impl_lens4tuple(
         where
             #field_ty: lens_rs::#optics_trait<#lens_param, #image_param>
         {
-            fn view(self, optics: lens_rs::optics::#optics_name<#lens_param>) -> #image_param
+            #[inline] fn view(self, optics: lens_rs::optics::#optics_name<#lens_param>) -> #image_param
             where
                 Self: Sized,
             {
@@ -2055,7 +2055,7 @@ pub fn impl_empty4tuple(tuple: crate::Tuple, field_name: syn::Ident) -> proc_mac
             #image_param: ?Sized,
 
         {
-            fn traverse_ref(&self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<& #image_param> {
+            #[inline] fn traverse_ref(&self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<& #image_param> {
                 vec![]
             }
         }
@@ -2065,14 +2065,14 @@ pub fn impl_empty4tuple(tuple: crate::Tuple, field_name: syn::Ident) -> proc_mac
             #image_param: ?Sized,
 
         {
-            fn traverse_mut(&mut self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<&mut #image_param> {
+            #[inline] fn traverse_mut(&mut self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<&mut #image_param> {
                 vec![]
             }
         }
 
         impl<#image_param, #lens_param, #params> lens_rs::Traversal<lens_rs::optics::#field_name<#lens_param >, #image_param> for (#params)
         {
-            fn traverse(self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<#image_param>
+            #[inline] fn traverse(self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Vec<#image_param>
             where
                 Self: Sized,
             {
@@ -2084,7 +2084,7 @@ pub fn impl_empty4tuple(tuple: crate::Tuple, field_name: syn::Ident) -> proc_mac
         where
             #image_param: ?Sized,
         {
-            fn preview_ref(&self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<& #image_param> {
+            #[inline] fn preview_ref(&self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<& #image_param> {
                 None
             }
         }
@@ -2093,14 +2093,14 @@ pub fn impl_empty4tuple(tuple: crate::Tuple, field_name: syn::Ident) -> proc_mac
         where
             #image_param: ?Sized,
         {
-            fn preview_mut(&mut self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<&mut #image_param> {
+            #[inline] fn preview_mut(&mut self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<&mut #image_param> {
                 None
             }
         }
 
         impl<#image_param, #lens_param, #params> lens_rs::Prism<lens_rs::optics::#field_name<#lens_param >, #image_param> for (#params)
         {
-            fn preview(self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<#image_param>
+            #[inline] fn preview(self, _optics: lens_rs::optics::#field_name<#lens_param >) -> Option<#image_param>
             where
                 Self: Sized,
             {

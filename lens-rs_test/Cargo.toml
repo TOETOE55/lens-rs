@@ -8,7 +8,7 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lens-rs = "0.3"
+lens-rs = { path = "../lens-rs", version = "0.3" }
 structx = { version = "0.1", optional = true }
 
 

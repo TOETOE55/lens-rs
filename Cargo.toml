@@ -5,3 +5,6 @@ members = [
     "lens-rs_derive",
     "lens-rs_test"
 ]
+
+[patch.crates-io]
+lens-rs = { path = "lens-rs" }

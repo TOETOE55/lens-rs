@@ -82,7 +82,7 @@
 //!
 //! ## Derive Optics
 //!
-//! Derive Lens for fields to use `.view_xx()`. (derive(Optic) is necessary)
+//! Derive Lens for fields to use `.view_xx()`.
 //!
 //! ```rust
 //! #[derive(Lens)]
