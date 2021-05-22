@@ -19,15 +19,18 @@ fn main() {
     {
         for rs_path in section.rs_paths.unwrap() {
             let contents = String::from_utf8(fs::read(rs_path).unwrap()).unwrap();
-            let syntax = syn::parse_file(&contents)
-                .expect(".rs files should contain valid Rust source code.");
-            optics_collector.visit_file(&syntax);
+            if let Ok(syntax) = syn::parse_file(&contents) {
+                optics_collector.visit_file(&syntax);
+            }
         }
     }
 
     let mut output = String::new();
     for optic_name in optics_set {
-        if let "Some" | "None" | "Ok" | "Err" = &*optic_name {
+        if let "Some" | "None" | "Ok" | "Err" | "_0" | "_1" | "_2" | "_3" | "_4" | "_5" | "_6"
+        | "_7" | "_8" | "_9" | "_10" | "_11" | "_12" | "_13" | "_14" | "_15" | "_16" =
+            &*optic_name
+        {
             continue;
         }
         output += &format!(
@@ -160,9 +163,16 @@ fn join_fields(fields: impl Iterator<Item = String>) -> Vec<String> {
 }
 
 #[cfg(feature = "structx")]
-fn wrap_struct_name(struct_name: &str, input: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
+fn wrap_struct_name(
+    struct_name: &str,
+    input: proc_macro2::TokenStream,
+) -> proc_macro2::TokenStream {
     use quote::ToTokens;
-    let mut ts = proc_macro2::TokenStream::from(syn::Ident::new(struct_name, Span::call_site()).into_token_stream());
-    ts.extend(Some(proc_macro2::TokenTree::Group(proc_macro2::Group::new(proc_macro2::Delimiter::Brace, input))));
+    let mut ts = proc_macro2::TokenStream::from(
+        syn::Ident::new(struct_name, Span::call_site()).into_token_stream(),
+    );
+    ts.extend(Some(proc_macro2::TokenTree::Group(
+        proc_macro2::Group::new(proc_macro2::Delimiter::Brace, input),
+    )));
     ts
 }
