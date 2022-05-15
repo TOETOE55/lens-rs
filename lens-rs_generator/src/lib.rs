@@ -57,7 +57,7 @@ pub mod generated {
 
     /// to traverse all fields of tuples(0~6), implemented `Traversal`
     ///
-    /// ```rust
+    /// ```ignore
     /// assert_eq!((1, 2).view(optics!(_both)), vec![1, 2])
     /// ```
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -66,7 +66,7 @@ pub mod generated {
 
     /// to traverse items of collections, implemented `Traversal`
     ///
-    /// ```rust
+    /// ```ignore
     /// assert_eq!(vec![vec![1,2], vec![3,4]].traverse(_mapped._mapped), vec![1, 2, 3, 4])
     /// ```
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -75,7 +75,7 @@ pub mod generated {
 
     /// to create `Box`, `Rc` or `Arc` pointers, implemented `Review`
     ///
-    /// ```rust
+    /// ```ignore
     /// assert_eq!(Review::review(optics!(_box), 0), Box::new(0));
     /// assert_eq!(Review::review(optics!(_box), 0), Rc::new(0));
     /// assert_eq!(Review::review(optics!(_box), 0), Arc::new(0));
@@ -83,7 +83,7 @@ pub mod generated {
     ///
     /// or to visit the data in `Box`, implemented `Lens`
     ///
-    /// ```rust
+    /// ```ignore
     /// assert_eq!(Box::new(0).view(optic!(_box)), 0);
     /// ```
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -92,7 +92,7 @@ pub mod generated {
 
     /// to visit the data in pointers, implemented `LensRef`
     ///
-    /// ```rust
+    /// ```ignore
     /// assert_eq!(Box::new(0).view_ref(optic!(_ref)), &0);
     /// assert_eq!(Rc::new(0).view_ref(optic!(_ref)), &0);
     ///
@@ -112,7 +112,7 @@ pub mod generated {
 
     /// behave as `xs[index]`
     ///
-    /// ```rust
+    /// ```ignore
     /// assert_eq!(vec![1,2,3].view_ref(optics!([1])), &2);
     /// assert_eq!(vec![1,2,3].view_ref(optics!([1..])), &[2, 3]);
     /// ```

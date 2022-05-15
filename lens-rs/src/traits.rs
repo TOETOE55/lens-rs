@@ -3,7 +3,7 @@
 /// A trait representing the optics describes how to construct a single value.
 ///
 /// ## Example
-/// ```
+/// ```ignore
 /// use lens_rs::*;
 /// let nested: Result<Result<(), _>, ()> = Review::review(optics!(Ok.Err.Some), (1,2,3));
 /// assert_eq!(nested, Ok(Err(Some((1,2,3)))));
@@ -21,7 +21,7 @@ pub mod review {
 /// A `TraversalXX` can access the multiple substructures.
 ///
 /// ## Example
-/// ```
+/// ```ignore
 /// use lens_rs::*;
 /// let mut x = (1, vec![Some((2, 3)), None]);
 /// x.traverse_mut(optics!(_1._mapped._Some._0))
@@ -53,7 +53,7 @@ pub mod traversal {
 /// Traits representing the optics behaves as the first-class pattern.
 /// A `PrismXX` can access the substructure may exist.
 ///
-/// ```
+/// ```ignore
 /// use lens_rs::*;
 /// let mut x: (_, Result<_, ()>) = (1, Ok((2, 3)));
 /// *x.preview_mut(optics!(_1.Ok._1))? *= 2;
@@ -88,7 +88,7 @@ pub mod prism {
 /// A `LensXX` can access the substructure must exist.
 ///
 /// ## Example
-/// ```
+/// ```ignore
 /// use lens_rs::*;
 /// let mut x = (1, (2, (3, 4)));
 /// *x.view_mut(optics!(_1._1._1)) *= 2;
