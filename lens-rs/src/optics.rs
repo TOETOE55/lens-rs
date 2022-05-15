@@ -1,5 +1,189 @@
 pub use lens_rs_generator::generated::*;
 
+mod impl4clone_optics {
+    use crate::*;
+    
+    impl<Tr: Clone, Source: ?Sized, Image: ?Sized> TraversalRef<&Tr, Image> for Source 
+    where
+        Source: TraversalRef<Tr, Image>,
+    {
+        fn traverse_ref<'a>(&'a self, optics: &Tr) -> Vec<&'a Image> {
+            self.traverse_ref(optics.clone())
+        }
+    }
+
+    impl<Tr: Clone, Source: ?Sized, Image: ?Sized> TraversalMut<&Tr, Image> for Source 
+    where
+        Source: TraversalMut<Tr, Image>,
+    {
+        fn traverse_mut<'a>(&'a mut self, optics: &Tr) -> Vec<&'a mut Image> {
+            self.traverse_mut(optics.clone())
+        }
+    }
+
+    impl<Tr: Clone, Source, Image> Traversal<&Tr, Image> for Source 
+    where
+        Source: Traversal<Tr, Image>,
+    {
+        fn traverse(self, optics: &Tr) -> Vec<Image> {
+            self.traverse(optics.clone())
+        }
+    }
+
+    impl<Pm: Clone, Source: ?Sized, Image: ?Sized> PrismRef<&Pm, Image> for Source 
+    where
+        Source: PrismRef<Pm, Image>,
+    {
+        fn preview_ref<'a>(&'a self, optics: &Pm) -> Option<&'a Image> {
+            self.preview_ref(optics.clone())
+        }
+    }
+
+    impl<Pm: Clone, Source: ?Sized, Image: ?Sized> PrismMut<&Pm, Image> for Source 
+    where
+        Source: PrismMut<Pm, Image>,
+    {
+        fn preview_mut<'a>(&'a mut self, optics: &Pm) -> Option<&'a mut Image> {
+            self.preview_mut(optics.clone())
+        }
+    }
+
+    impl<Pm: Clone, Source, Image> Prism<&Pm, Image> for Source 
+    where
+        Source: Prism<Pm, Image>,
+    {
+        fn preview(self, optics: &Pm) -> Option<Image> {
+            self.preview(optics.clone())
+        }
+    }
+
+    impl<Ls: Clone, Source: ?Sized, Image: ?Sized> LensRef<&Ls, Image> for Source 
+    where
+        Source: LensRef<Ls, Image>,
+    {
+        fn view_ref<'a>(&'a self, optics: &Ls) -> &'a Image {
+            self.view_ref(optics.clone())
+        }
+    }
+
+    impl<Ls: Clone, Source: ?Sized, Image: ?Sized> LensMut<&Ls, Image> for Source 
+    where
+        Source: LensMut<Ls, Image>,
+    {
+        fn view_mut<'a>(&'a mut self, optics: &Ls) -> &'a mut Image {
+            self.view_mut(optics.clone())
+        }
+    }
+
+    impl<Ls: Clone, Source, Image> Lens<&Ls, Image> for Source 
+    where
+        Source: Lens<Ls, Image>,
+    {
+        fn view(self, optics: &Ls) -> Image {
+            self.view(optics.clone())
+        }
+    }
+
+    impl<Rv: Clone, Source, Image> Review<&Rv, Image> for Source 
+    where
+        Source: Review<Rv, Image>,
+    {
+        fn review(optics: &Rv, from: Image) -> Self {
+            Self::review(optics.clone(), from)
+        }
+    }
+
+    impl<Tr: Clone, Source: ?Sized, Image: ?Sized> TraversalRef<&mut Tr, Image> for Source 
+    where
+        Source: TraversalRef<Tr, Image>,
+    {
+        fn traverse_ref<'a>(&'a self, optics: &mut Tr) -> Vec<&'a Image> {
+            self.traverse_ref(optics.clone())
+        }
+    }
+
+    impl<Tr: Clone, Source: ?Sized, Image: ?Sized> TraversalMut<&mut Tr, Image> for Source 
+    where
+        Source: TraversalMut<Tr, Image>,
+    {
+        fn traverse_mut<'a>(&'a mut self, optics: &mut Tr) -> Vec<&'a mut Image> {
+            self.traverse_mut(optics.clone())
+        }
+    }
+
+    impl<Tr: Clone, Source, Image> Traversal<&mut Tr, Image> for Source 
+    where
+        Source: Traversal<Tr, Image>,
+    {
+        fn traverse(self, optics: &mut Tr) -> Vec<Image> {
+            self.traverse(optics.clone())
+        }
+    }
+
+    impl<Pm: Clone, Source: ?Sized, Image: ?Sized> PrismRef<&mut Pm, Image> for Source 
+    where
+        Source: PrismRef<Pm, Image>,
+    {
+        fn preview_ref<'a>(&'a self, optics: &mut Pm) -> Option<&'a Image> {
+            self.preview_ref(optics.clone())
+        }
+    }
+
+    impl<Pm: Clone, Source: ?Sized, Image: ?Sized> PrismMut<&mut Pm, Image> for Source 
+    where
+        Source: PrismMut<Pm, Image>,
+    {
+        fn preview_mut<'a>(&'a mut self, optics: &mut Pm) -> Option<&'a mut Image> {
+            self.preview_mut(optics.clone())
+        }
+    }
+
+    impl<Pm: Clone, Source, Image> Prism<&mut Pm, Image> for Source 
+    where
+        Source: Prism<Pm, Image>,
+    {
+        fn preview(self, optics: &mut Pm) -> Option<Image> {
+            self.preview(optics.clone())
+        }
+    }
+
+    impl<Ls: Clone, Source: ?Sized, Image: ?Sized> LensRef<&mut Ls, Image> for Source 
+    where
+        Source: LensRef<Ls, Image>,
+    {
+        fn view_ref<'a>(&'a self, optics: &mut Ls) -> &'a Image {
+            self.view_ref(optics.clone())
+        }
+    }
+
+    impl<Ls: Clone, Source: ?Sized, Image: ?Sized> LensMut<&mut Ls, Image> for Source 
+    where
+        Source: LensMut<Ls, Image>,
+    {
+        fn view_mut<'a>(&'a mut self, optics: &mut Ls) -> &'a mut Image {
+            self.view_mut(optics.clone())
+        }
+    }
+
+    impl<Ls: Clone, Source, Image> Lens<&mut Ls, Image> for Source 
+    where
+        Source: Lens<Ls, Image>,
+    {
+        fn view(self, optics: &mut Ls) -> Image {
+            self.view(optics.clone())
+        }
+    }
+
+    impl<Rv: Clone, Source, Image> Review<&mut Rv, Image> for Source 
+    where
+        Source: Review<Rv, Image>,
+    {
+        fn review(optics: &mut Rv, from: Image) -> Self {
+            Self::review(optics.clone(), from)
+        }
+    }
+}
+
 //impls
 mod impl__ {
     /***********************************************************

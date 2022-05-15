@@ -21,7 +21,7 @@
 //!
 //! Add the following in your .rs files
 //!
-//! ```rust
+//! ```ignore
 //! use lens_rs::*;
 //! ```
 //!
@@ -32,7 +32,7 @@
 //!
 //! visit field in struct:
 //!
-//! ```rust
+//! ```ignore
 //! let mut x = Foo { a: String::from(".a in Foo"), b: 0 };
 //! assert_eq!(x.view_ref(optics!(a)), ".a in Foo");
 //!
@@ -42,7 +42,7 @@
 //!
 //! visit variant in enum:
 //!
-//! ```rust
+//! ```ignore
 //! let mut x = Ok(0);
 //! *x.preview_ref(optics!(Ok))? += 1;
 //! assert_eq!(x.preview_ref(optics!(Ok))?, &1);
@@ -51,7 +51,7 @@
 //!
 //! visit items in collection:
 //!
-//! ```rust
+//! ```ignore
 //! let mut x = vec![1, 2, 3];
 //! x.traverse_mut(optics!(_mapped)).into_iter().for_each(|x| *x += 1);
 //! assert_eq!(x.traverse_ref(optics!(_mapped)), vec![&2, &3, &4]);
@@ -60,7 +60,7 @@
 //!
 //! build a structure:
 //!
-//! ```rust
+//! ```ignore
 //! let x = Review::review(optics!(Ok.Some), 1);
 //! assert_eq!(x, Ok(Some(1)));
 //! ```
@@ -69,7 +69,7 @@
 //!
 //! macro `optics!()` and `Optics![]` is to compose optics:
 //!
-//! ```rust
+//! ```ignore
 //! let optics: Optics![_1.a.Some._mapped.[1]] = optics!(_1.a.Some._mapped.[1]);
 //!
 //! let x = (0, Foo {
@@ -84,7 +84,7 @@
 //!
 //! Derive Lens for fields to use `.view_xx()`.
 //!
-//! ```rust
+//! ```ignore
 //! #[derive(Lens)]
 //! struct Foo<A, B> {
 //!     #[optic]
@@ -100,7 +100,7 @@
 //!
 //! Derive Review/Prism for variants to use `Review::review`/`.preview_xx()`:
 //!
-//! ```rust
+//! ```ignore
 //! #[derive(Review, Prism)]
 //! enum Either<L, R> {
 //!     #[optic]
@@ -112,7 +112,7 @@
 //!
 //! Control the mutability:
 //!
-//! ```rust
+//! ```ignore
 //! #[derive(Debug, Lens)]
 //! struct Bar<C>{
 //!     #[optic(ref)]
@@ -128,7 +128,7 @@
 //!
 //! restrict a type has some fields:
 //!
-//! ```rust
+//! ```ignore
 //! fn with_field_a<T>(t: &T) -> &str
 //! where
 //!     T: LensRef<Optics![a], String>, // T must have field a
@@ -179,7 +179,7 @@
 //!
 //! Enjoy it!
 //!
-//! ```rust
+//! ```ignore
 //! use structx::*;
 //! use lens_rs::*;
 //! let s1 = structx! { height: 1, width: 2 };
@@ -206,6 +206,9 @@ pub mod optics;
 /// definitions of optics traits
 pub mod traits;
 
+/// definition of `DynLens`, `DynPrism`, `DynTraverse` and `DynReview`.
+pub mod dyn_optics;
+
 pub use traits::{lens::*, prism::*, review::*, traversal::*};
 
 /// build-in optics
@@ -219,7 +222,7 @@ pub use lens_rs_derive::{Lens, Prism, Review};
 
 /// macro to compose optics
 ///
-/// ```rust
+/// ```ignore
 /// let optics: Optics![a.Some.[0]._0] = optics!(a.Some.[0]._0);
 /// // equivalent to optics!(lens_rs::optics::a.lens_rs::optics::Some.[0].lens_rs::optics::_0)
 /// // the default optics path is `lens_rs::optics`.
