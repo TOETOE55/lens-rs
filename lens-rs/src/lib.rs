@@ -12,11 +12,22 @@
 //! Add the following in your Cargo.toml
 //!
 //! ```toml
+//! [build-dependencies]
+//! inwelling = "0.4"
+//!
 //! [dependencies]
 //! lens-rs = "0.3"
 //!
 //! [package.metadata.inwelling]
 //! lens-rs_generator = true
+//! ```
+//!
+//! Add the following in your build.rs
+//!
+//! ```ignore
+//! fn main() {
+//!     inwelling::register();
+//! }
 //! ```
 //!
 //! Add the following in your .rs files

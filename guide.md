@@ -319,8 +319,18 @@ I would be glad someone is using this library!
 
 oh, don't forget to add this in `Cargo.toml`
 ```toml
+[build-dependencies]
+inwelling = "0.4"
+
 [package.metadata.inwelling]
 lens-rs_generator = true
+```
+
+and add this in `build.rs`
+```rust
+fn main() {
+  inwelling::register();
+}
 ```
 
 Finally, I must thank @oooutlk, he helped me a lot in developing `lens-rs_derive`(generating optics in `lens_rs_generator::*` using [`inwelling`](https://github.com/oooutlk/inwelling)).

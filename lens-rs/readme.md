@@ -6,7 +6,7 @@ lens implemented in rust
 * A `Prism` can access the substructure may exist.
 * A `Lens` can access the substructure must exist.
 
-see [the guide](https://github.com/TOETOE55/lens-rs/blob/master/guide.md)
+see [the guide](../guide.md)
 
 ## Example
 
@@ -151,12 +151,22 @@ assert_eq!(s1.preview_ref(optics!(width)), Some(&2));
 assert_eq!(s2.preview_ref(optics!(width)), None);
 ```
 
-## Cargo.toml
+## Cargo.toml/build.rs
 
 add it in Cargo.toml
 
 ```toml
+[build-dependencies]
+inwelling = "0.4"
+
 [package.metadata.inwelling]
 lens-rs_generator = true
 ```
 
+and add this in your build.rs
+
+```rust
+fn main() {
+    inwelling::register();
+}
+```

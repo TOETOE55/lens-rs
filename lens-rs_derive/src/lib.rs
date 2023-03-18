@@ -366,13 +366,13 @@ enum AnOpticType {
     Custom(syn::Path),
     Ix {
         _bracket_token: syn::token::Bracket,
-        ix: syn::Type,
+        _ix: syn::Type,
     },
 }
 
 #[derive(Clone, Debug)]
 struct OpticsPathType {
-    path: Punctuated<AnOpticType, Token![.]>,
+    _path: Punctuated<AnOpticType, Token![.]>,
 }
 
 impl Parse for AnOpticType {
@@ -384,7 +384,7 @@ impl Parse for AnOpticType {
             let _bracket_token = syn::bracketed!(content in input);
             Ok(AnOpticType::Ix {
                 _bracket_token,
-                ix: content.parse()?,
+                _ix: content.parse()?,
             })
         } else {
             Ok(AnOpticType::Custom(input.parse()?))
@@ -395,7 +395,7 @@ impl Parse for AnOpticType {
 impl Parse for OpticsPathType {
     fn parse(input: ParseStream) -> Result<Self> {
         Ok(OpticsPathType {
-            path: Punctuated::parse_terminated(input)?,
+            _path: Punctuated::parse_terminated(input)?,
         })
     }
 }

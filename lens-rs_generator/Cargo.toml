@@ -14,7 +14,7 @@ documentation = "https://docs.rs/lens-rs_generator/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-inwelling = "0.3"
+inwelling = "0.4"
 proc-macro2 = "1.0"
 quote = { version = "1.0", optional = true }
 syn = { version = "1.0", features = ["extra-traits","full","visit", "printing"] }
