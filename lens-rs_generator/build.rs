@@ -1,4 +1,7 @@
-use inwelling::*;
+use inwelling::{
+    collect_downstream,
+    Opts,
+};
 
 use proc_macro2::Span;
 use std::collections::HashSet;
@@ -10,14 +13,14 @@ fn main() {
     let mut optics_set = OpticsSet::new();
     let mut optics_collector = OpticsCollector(&mut optics_set);
 
-    for section in inwelling(Opts {
+    for package in collect_downstream(Opts {
         watch_manifest: true,
         watch_rs_files: true,
         dump_rs_paths: true,
     })
-    .sections
+    .packages
     {
-        for rs_path in section.rs_paths.unwrap() {
+        for rs_path in package.rs_paths.unwrap() {
             let contents = String::from_utf8(fs::read(rs_path).unwrap()).unwrap();
             if let Ok(syntax) = syn::parse_file(&contents) {
                 optics_collector.visit_file(&syntax);
