@@ -10,13 +10,16 @@ fn main() {
     let mut optics_set = OpticsSet::new();
     let mut optics_collector = OpticsCollector(&mut optics_set);
 
+    let mut manifests = vec![];
+
     for section in inwelling(Opts {
-        watch_manifest: true,
-        watch_rs_files: true,
+        watch_manifest: false,
+        watch_rs_files: false,
         dump_rs_paths: true,
     })
     .sections
     {
+        manifests.push(section.manifest);
         for rs_path in section.rs_paths.unwrap() {
             let contents = String::from_utf8(fs::read(rs_path).unwrap()).unwrap();
             if let Ok(syntax) = syn::parse_file(&contents) {
@@ -25,14 +28,39 @@ fn main() {
         }
     }
 
+    let mut optics_set: Vec<_> = optics_set
+        .into_iter()
+        .filter(|o| {
+            !matches!(
+                o.as_str(),
+                "Some"
+                    | "None"
+                    | "Ok"
+                    | "Err"
+                    | "_0"
+                    | "_1"
+                    | "_2"
+                    | "_3"
+                    | "_4"
+                    | "_5"
+                    | "_6"
+                    | "_7"
+                    | "_8"
+                    | "_9"
+                    | "_10"
+                    | "_11"
+                    | "_12"
+                    | "_13"
+                    | "_14"
+                    | "_15"
+                    | "_16"
+            )
+        })
+        .collect();
+    optics_set.sort();
+
     let mut output = String::new();
     for optic_name in optics_set {
-        if let "Some" | "None" | "Ok" | "Err" | "_0" | "_1" | "_2" | "_3" | "_4" | "_5" | "_6"
-        | "_7" | "_8" | "_9" | "_10" | "_11" | "_12" | "_13" | "_14" | "_15" | "_16" =
-            &*optic_name
-        {
-            continue;
-        }
         output += &format!(
             r"
 
@@ -40,13 +68,27 @@ fn main() {
 #[allow(non_camel_case_types)]
 pub struct {}<Optics>(pub Optics);
 
-        ",
+",
             optic_name
         );
     }
 
-    let out_path = PathBuf::from(env::var("OUT_DIR").expect("$OUT_DIR should exist."));
-    std::fs::write(out_path.join("optics.rs"), output).expect("optics.rs should be generated.");
+    let out_path =
+        PathBuf::from(env::var("OUT_DIR").expect("$OUT_DIR should exist.")).join("optics.rs");
+
+    // Check if the derived optics are the same between this run and the previous run.
+    // If so, don't rerun the build script. If not, run as normal.
+    if let Ok(file) = std::fs::read_to_string(&out_path) {
+        if file == output {
+            // Output is the same as existing file, so don't rebuild
+            // unless a manifest has changed
+            for manifest in manifests {
+                println!("cargo:rerun-if-changed={}", manifest.display());
+            }
+        }
+    }
+
+    std::fs::write(out_path, output).expect("optics.rs should be generated.");
 }
 
 type OpticsSet = HashSet<String>;
