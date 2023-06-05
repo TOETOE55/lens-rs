@@ -579,9 +579,8 @@ fn impl_traversal_ref4variant(
             #constraints
         {
             #[inline] fn traverse_ref(&self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<&#image_param> {
-                use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_ref(x, optics.0),
+                    #ty_name::#var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_ref(x, optics.0),
                      _ => vec![],
                 }
             }
@@ -626,9 +625,8 @@ fn impl_prism_ref4variant(
             #constraints
         {
             #[inline] fn preview_ref(&self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<&#image_param> {
-                use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_ref(x, optics.0),
+                    #ty_name::#var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_ref(x, optics.0),
                      _ => Option::None,
                 }
             }
@@ -673,9 +671,8 @@ fn impl_traversal_mut4variant(
             #constraints
         {
             #[inline] fn traverse_mut(&mut self, optics: lens_rs::optics::#var_name<#traversal_param>) -> Vec<&mut #image_param> {
-                use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_mut(x, optics.0),
+                    #ty_name::#var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse_mut(x, optics.0),
                      _ => vec![],
                 }
             }
@@ -720,9 +717,8 @@ fn impl_prism_mut4variant(
             #constraints
         {
             #[inline] fn preview_mut(&mut self, optics: lens_rs::optics::#var_name<#prism_param>) -> Option<&mut #image_param> {
-                use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_mut(x, optics.0),
+                    #ty_name::#var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview_mut(x, optics.0),
                      _ => Option::None,
                 }
             }
@@ -764,9 +760,8 @@ fn impl_traversal4variant(
             where
                 Self: Sized,
             {
-                use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse(x, optics.0),
+                    #ty_name::#var_name(x) => <#field_ty as lens_rs::#optics_trait<#traversal_param, #image_param>>::traverse(x, optics.0),
                      _ => vec![],
                 }
             }
@@ -808,9 +803,8 @@ fn impl_prism4variant(
             where
                 Self: Sized,
             {
-                use #ty_name::*;
                 match self {
-                    #var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview(x, optics.0),
+                    #ty_name::#var_name(x) => <#field_ty as lens_rs::#optics_trait<#prism_param, #image_param>>::preview(x, optics.0),
                      _ => Option::None,
                 }
             }
